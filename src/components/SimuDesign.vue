@@ -21,10 +21,10 @@
             </div>
             <div class="row mt-3">
                 <b-button-group class="col-12">
-                    <b-button variant="outline-dark" class="col-md-6 border py-3" :class="{ active: select_type == 0 }"
-                        @click="changeSelectType(0)">一覧から選択</b-button>
                     <b-button variant="outline-dark" class="col-md-6 border py-3" :class="{ active: select_type == 1 }"
                         @click="changeSelectType(1)">コードから選択</b-button>
+                    <b-button variant="outline-dark" class="col-md-6 border py-3" :class="{ active: select_type == 0 }"
+                        @click="changeSelectType(0)">一覧から選択</b-button>
                 </b-button-group>
             </div>
         </div>
@@ -154,12 +154,13 @@
                 </div>
                 <div class="simu-selectcode">
                     <div class="simu-selectcode-item d-flex align-items-center">
-                        <span class="simu-selectcode-name">スタイル選択</span>
-                        <select class="form-control form-control-inline">
+                        <span class="simu-selectcode-name">サイズ選択</span>
+                        <input type="text" class="form-control form-control-inline" v-model="size_code"/>
+                        <!-- <select class="form-control form-control-inline">
                             <option>選択してください</option>
                             <option>テキスト</option>
                             <option>テキスト０１</option>
-                        </select>
+                        </select> -->
                         <span class="form-control-file-icon"
                             onclick="document.getElementById('selectCode-style').click();"><i
                                 class="fas fa-camera"></i></span>
@@ -167,7 +168,7 @@
                     </div>
                     <div class="simu-selectcode-item d-flex align-items-center">
                         <span class="simu-selectcode-name">生地</span>
-                        <input type="text" class="form-control form-control-inline" />
+                        <input type="text" class="form-control form-control-inline" v-model="fabric_code"/>
                         <span class="form-control-file-icon"
                             onclick="document.getElementById('selectCode-kiji').click();"><i
                                 class="fas fa-camera"></i></span>
@@ -175,7 +176,7 @@
                     </div>
                     <div class="simu-selectcode-item d-flex align-items-center">
                         <span class="simu-selectcode-name">ボタン</span>
-                        <input type="text" class="form-control form-control-inline" />
+                        <input type="text" class="form-control form-control-inline" v-model="button_code"/>
                         <span class="form-control-file-icon"
                             onclick="document.getElementById('selectCode-button').click();"><i
                                 class="fas fa-camera"></i></span>
@@ -183,7 +184,7 @@
                     </div>
                     <div class="simu-selectcode-item d-flex align-items-center">
                         <span class="simu-selectcode-name">ポケット</span>
-                        <input type="text" class="form-control form-control-inline" />
+                        <input type="text" class="form-control form-control-inline" v-model="pocket_code"/>
                         <span class="form-control-file-icon"
                             onclick="document.getElementById('selectCode-boket').click();"><i
                                 class="fas fa-camera"></i></span>
@@ -191,7 +192,7 @@
                     </div>
                     <div class="simu-selectcode-item d-flex align-items-center">
                         <span class="simu-selectcode-name">背裏</span>
-                        <input type="text" class="form-control form-control-inline" />
+                        <input type="text" class="form-control form-control-inline" v-model="ura_code"/>
                         <span class="form-control-file-icon"
                             onclick="document.getElementById('selectCode-back').click();"><i
                                 class="fas fa-camera"></i></span>
@@ -366,7 +367,7 @@
                 if (id) {
                     this.partsActive = [0, 1, 2, 3, 4, 5, 7];
                     this.stepActive = [1, 3]
-                    this.select_type = 0
+                    this.select_type = 1
                     this.measure_data[0].value = 2;
                     this.measure_data[1].value = 3;
                     this.measure_data[2].value = 4;
@@ -417,6 +418,9 @@
             fabric_id: function () {
                 this.fabric_selected = this.fabric_id;
             },
+            checkCompleteOrder: function(){
+                this.$emit("check-complete", this.checkCompleteOrder);
+            }
         },
         computed: {
             checkShowPartList: function () {
@@ -427,6 +431,45 @@
                 }
                 return false;
             },
+            checkCompleteOrder: function(){
+                if(this.partsActive.length == Object.keys(this.partsList).length && this.fabric_id != '' && this.stepActive.includes(3)){
+                    return true
+                }
+                return false;
+            },
+            fabric_code: function(){
+                if(this.fabric_id){
+                    return Object.keys(this.fabric_list)
+                    .map((key) => this.fabric_list[key])
+                    .filter((item) => item.product_id === this.fabric_id)[0].product_code;
+                }
+
+                return ''
+            },
+            button_code: function(){
+                if(this.partsActive.includes(1)){
+                    return "CODE-BUTON001"
+                }
+                return ''
+            },
+            pocket_code: function(){
+                if(this.partsActive.includes(0)){
+                    return "CODE-POCKET001"
+                }
+                return ''
+            },
+            ura_code: function(){
+                if(this.partsActive.includes(3)){
+                    return "CODE-URA001"
+                }
+                return ''
+            },
+            size_code: function(){
+                if(this.orderId){
+                    return "CODE-001"
+                }
+                return ''
+            }
         },
     };
 </script>

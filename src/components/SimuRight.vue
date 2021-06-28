@@ -6,7 +6,7 @@
           >一時保存</a
         >
       </p>
-      <p class="my-1">
+      <p class="my-1" v-if="completeOrder">
         <a href="/sample/test01/confirm.html" class="badge badge-primary px-4 py-2 border"
           >オーダー確定</a
         >
@@ -127,6 +127,7 @@ export default {
     "viewMode",
     "partNo",
     "partNo_zentai",
+    "completeOrder"
   ],
   methods: {
     defaultLoaded() {

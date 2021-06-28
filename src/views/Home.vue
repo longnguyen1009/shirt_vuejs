@@ -11,6 +11,7 @@
             :viewMode="viewMode"
             :partNo="partNo"
             :partNo_zentai="partNo_zentai"
+            :completeOrder="completeOrderCheck"
           />
         </div>
         <div class="col-md-6 mt-4">
@@ -29,6 +30,7 @@
             @showFabricDetail="showFabricDetail($event)"
             @changeStepNow="changeStepNow($event)"
             @submitFabric="submitFabric($event)"
+            @check-complete="checkComplete($event)"
           />
         </div>
       </div>
@@ -279,6 +281,7 @@ export default {
         "82": "vest6b_collar",
       },
       stepNowHome: 1,
+      completeOrderCheck: false
     };
   },
   methods: {
@@ -329,6 +332,9 @@ export default {
       this.partNo = this.c3CategoryList[cateId]["partId"];
       this.viewMode = "";
     },
+    checkComplete(complete){
+        this.completeOrderCheck = complete
+    }
   },
   watch: {
     order_id: function() {
