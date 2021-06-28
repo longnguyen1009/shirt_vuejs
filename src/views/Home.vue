@@ -82,8 +82,8 @@ export default {
   data() {
     return {
       order_id: "",
-      server_img_path: "/sample/images/", //image folder path
-      obj_bg_path: "/sample/images/simulator/default/default_tex.jpg", //svg backgroud url
+      server_img_path: "/src/assets/images/", //image folder path
+      obj_bg_path: "/src/assets/images/simulator/default/default_tex.jpg", //svg backgroud url
 
       //category
       c3CategoryId: "",
@@ -324,7 +324,7 @@ export default {
       } else {
         //reset default fabric
         this.obj_bg_path =
-          "/sample/images/simulator/default/default_tex.jpg";
+          "/src/assets/images/simulator/default/default_tex.jpg";
       }
     },
     changeCategory(cateId) {
