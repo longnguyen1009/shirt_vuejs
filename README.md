@@ -8,5 +8,4 @@ npm run start
 3. pro mode
 npm run build
 
-test
 
