@@ -44,8 +44,7 @@
     <div class="row simu_price">
       <div class="container py-2">
         <p class="simu_price_txt">
-          商品価格：{{ product_price }}円 + カスタマイズ価格：4,500円
-          お支払い価格：{{ product_price + 4500 }}円　　納期: 12/30
+          商品価格：{{ product_price }}円 + カスタマイズ価格：4,500円　　お支払い価格：{{ product_price + 4500 }}円
         </p>
       </div>
     </div>

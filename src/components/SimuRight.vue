@@ -6,10 +6,8 @@
           >一時保存</a
         >
       </p>
-      <p class="my-1" v-if="completeOrder">
-        <a href="/sample/test01/confirm.html" class="badge badge-primary px-4 py-2 border"
-          >オーダー確定</a
-        >
+      <p class="my-1">
+        <button @click="completeOrderCheck" class="badge badge-primary px-4 py-2 border">オーダー内容確認</button>
       </p>
     </div>
     <div class="row">
@@ -176,15 +174,23 @@ export default {
       }, 300);
     },
     modalFullviewShow: function() {
-      this.cloneData01 = $(".simu_price").html();
-      $(".simu-modal-fullview").addClass("active");
+      this.cloneData01 = $(".simu_price").html()
+      $(".simu-modal-fullview").addClass("active")
     },
     modalFullviewHide: function() {
-      $(".simu-modal-fullview").removeClass("active");
+      $(".simu-modal-fullview").removeClass("active")
     },
     notfounder: function(e) {
-      e.target.src = this.server_img_path + "notfounder.png";
+      e.target.src = this.server_img_path + "notfounder.png"
     },
+    completeOrderCheck:function(){
+      if(this.completeOrder){
+        window.location.replace("/sample/test01/confirm.html")
+      } else{
+        alert('選択されていない項目があります。ご確認ください。')
+        return false
+      }
+    }
   },
   watch: {
     model_path_change: function() {
