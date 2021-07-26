@@ -29,13 +29,21 @@
             </div>
         </div>
         <div class="select-type-basic" v-if="select_type == 0">
-            <div class="row my-4" v-if="stepNow == '1'">
+            <div class="row my-4" v-if="stepNow == 1">
                 <div class="col-12 d-flex justify-content-between">
                     <div class="stepBtn" v-for="step in stepList" :key="step.id"
                         :class="{ active: stepActive.includes(step.id) }" @click="changeStep(step.id)">
                         {{ step.name }}
                     </div>
                 </div>
+            </div>
+            <div class="selector_list_parts border border-3 border-info" v-if="showPartCheck">
+                <ul class="parts_list d-flex justify-content-start">
+                    <li class="parts_item" v-for="part in partLists" :key="part.id"
+                        :class="{ active: partsActive[part.id] }" @click="partSelect(part.id)">
+                        {{ part.name }}
+                    </li>
+                </ul>
             </div>
             <div class="selector_list_parts border border-3 border-info mt-4" v-if="stepNow == 2">
                 <div class="row d-flex justify-content-between align-items-center p-4">
@@ -84,14 +92,6 @@
                     </li>
                 </ul>
             </div>
-            <div class="selector_list_parts border border-3 border-info" v-if="checkShowPartList">
-                <ul class="parts_list d-flex justify-content-start">
-                    <li class="parts_item" v-for="part in partsList" :key="part.id"
-                        :class="{ active: partsActive.includes(part.id) }" @click="partSelect(part.id)">
-                        {{ part.name }}
-                    </li>
-                </ul>
-            </div>
             <div class="selector_list_parts border border-3 border-info mt-4" v-if="stepNow == 3">
                 <div class="row d-flex justify-content-between align-items-center p-4">
                     <div class="common-btn-return" @click="returnStep(1)">
@@ -120,28 +120,55 @@
                                 " id="exampleFormControlFile1" />
                         </div>
                         <div class="measure_size_input mt-4">
-                            <div class="d-flex justify-content-start align-items-center mb-4" 
-                            v-for="sizeItem in measure_data" :key="sizeItem.id">
-                                <div class="measure-size">
-                                    <span class="measureInputLabel">{{
-                                        sizeItem.name
-                                        }}</span>
-                                    <input type="text" v-model="sizeItem.value" />
-                                </div>
+                            <div class="measure_size_row" v-for="sizeItem in measure_data" :key="sizeItem.id">
                                 <div :id="'measure-ruler-' + sizeItem.id" class="measure-ruler">
-                                    <div id="example" class="range">
-                                        <input id="input-example" type="range" min="1" max="6" steps="1" v-model="measure_data[sizeItem.id].value"/>
+                                    <span class="measure-ruler-label">{{sizeItem.name}}</span>
+                                    <input type="text" class="measure-ruler-inputText" v-model="sizeItem.value" />
+                                    <span v-if="sizeItem.id == 0" class="measure-ruler-label">なで肩</span>
+                                    <button type="button" class="btn btn-outline-dark"
+                                    @mousedown="mousedownMinus(sizeItem.id)"
+                                    @mouseup="mouseup"
+                                    >-</button>
+                                    <div class="range-ruler">
+                                        <input type="range" class="custom-range" :min="sizeItem.min" :max="sizeItem.max" :step="sizeItem.step" v-model="sizeItem.value">
+                                        <ul class="range-labels">
+                                            <li v-for="i in even(sizeItem.min, sizeItem.max, sizeItem.step)" :key="i" :class="{selected : (i == sizeItem.value)}"
+                                            @click="(sizeItem.value = i)"><span class="range-num">
+                                                <span v-if="i % 2 == 0">{{i}}</span></span>
+                                            </li>
+                                        </ul>
                                     </div>
-                                    <ul id="labels-example" class="range-labels">
-                                        <li v-for="i in 6" :key="i"
-                                        :class="{selected: i == measure_data[sizeItem.id].value}"
-                                        @click="(measure_data[sizeItem.id].value = i)">{{i}}</li>
-                                    </ul>
+                                    <button type="button" class="btn btn-outline-dark"
+                                    @mouseup="mouseup"
+                                    @mousedown="mousedownAdd(sizeItem.id)">+</button>
+                                    <span v-if="sizeItem.id == 0" class="measure-ruler-label">いかり肩</span>
                                 </div>
-                                <!-- <span class="ml-4" v-if="sizeItem.id == 0">いかり肩</span> -->
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+            
+            <!-- PART DETAIL -->
+            <div class="selector_list_parts border border-3 border-info" v-if="showPartDetailCheck">
+                <!-- PART DETAIL ITEM -->
+                <div class="part-detail__comp">
+                    <div class="row d-flex justify-content-between align-items-center p-4">
+                        <div class="common-btn-return" @click="returnStep(1)">
+                            <i class="fas fa-chevron-circle-left"></i>&nbsp;&nbsp;戻る
+                        </div>
+                        <div class="part-detail__confirm">
+                            <button type="button" class="btn btn-outline-dark mx-2"
+                            @click="partItemDetailConfirm(partDetailNow, partDetailIdTemp)">決定する</button>
+                        </div>
+                    </div>
+                    <ul class="part-detail__list" v-if="partDetailNow !=='' ">
+                        <li v-for="(partItem, partId) in partLists[partDetailNow].option" :key="partId" :partId="partItem.id"
+                            @click="partItemDetailSelect(partItem.id)"
+                            :class="{active: partDetailIdTemp == partItem.id}">
+                            {{partItem.name}}
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -207,9 +234,7 @@
                     選択したスタイルを変更しますか？
                 </p>
                 <ul class="simu-popup-btn">
-                    <button type="button" class="btn btn-outline-secondary" @click="popupCancel">
-                        キャンセル
-                    </button>
+                    <button type="button" class="btn btn-outline-secondary" @click="popupCancel">キャンセル</button>
                     <span class="btn btn-warning"><a href="./test01/style.html">変更する</a></span>
                 </ul>
             </div>
@@ -252,32 +277,63 @@
                     {id: 3,name: "サイズ補正"},
                 ],
                 measure_data: {
-                    0: {id: 0,name: "なで肩",value: 0},
-                    1: {id: 1,name: "補正2",value: 0},
-                    2: {id: 2,name: "補正3",value: 0},
-                    3: {id: 3,name: "補正4",value: 0},
+                    0: {id: 0,name: "補正1",value: 0, min : -10, max : 10, step : 0.5},
+                    1: {id: 1,name: "補正2",value: 0, min : -10, max : 10, step : 0.5},
+                    2: {id: 2,name: "補正3",value: 0, min : -10, max : 10, step : 0.5},
+                    3: {id: 3,name: "補正4",value: 0, min : -10, max : 10, step : 0.5}
                 },
-                partsList: {
-                    0: {id: 0,name: "ポケット"},
-                    1: {id: 1,name: "ボタン"},
-                    2: {id: 2,name: "補正1"},
-                    3: {id: 3,name: "背裏"},
-                    4: {id: 4,name: "胴裏地"},
-                    5: {id: 5,name: "○ ○ ○"},
-                    6: {id: 6,name: "○ ○ ○"},
-                    7: {id: 7,name: "○ ○ ○"},
+                partLists: {
+                    0: {id: 0,name: "ポケット", option: {
+                        0: {id: 15, name: '船形(直線)'},
+                        1: {id: 16, name: 'バルカ(曲線)'},
+                        2: {id: 17, name: 'パッチポケット'},
+                        3: {id: 18, name: '両玉縁フラップ 有り'},
+                        4: {id: 19, name: 'スラント両玉縁フラップ 有り'}
+                    }},
+                    1: {id: 1,name: "ボタン", option: {
+                        0: {id: 20, name: '5B'},
+                        1: {id: 21, name: '6B'}
+                    }},
+                    2: {id: 2,name: "補正1", option:{
+                        0: {id: 21, name: 'テキスト'},
+                        1: {id: 22, name: 'テキスト'},
+                    }},
+                    3: {id: 3,name: "背裏", option: {
+                        0: {id: 23, name: '総裏'},
+                        1: {id: 24, name: '背抜き'},
+                        2: {id: 25, name: '裏無し'},
+                    }},
+                    4: {id: 4,name: "胴裏地", option:{
+                        0: {id: 26, name: 'テキスト'},
+                        1: {id: 27, name: 'テキスト'},
+                    }},
+                    5: {id: 5,name: "○ ○ ○", option:{
+                        0: {id: 28, name: 'テキスト'},
+                        1: {id: 29, name: 'テキスト'},
+                    }},
+                    6: {id: 6,name: "○ ○ ○", option:{
+                        0: {id: 30, name: 'テキスト'},
+                        1: {id: 31, name: 'テキスト'},
+                    }},
+                    7: {id: 7,name: "○ ○ ○", option:{
+                        0: {id: 32, name: 'テキスト'},
+                        1: {id: 33, name: 'テキスト'},
+                    }},
                 },
                 stepActive: [1],
+                partsActive: [null,null,null,null,null,null,null,null], //{partID: 0, partDetailId: [15, 16, 17]}
                 stepNow: 1,
-                c3StyleId: "",
-                c3PartId: "",
-                fabric_selected: "",
-                partsActive: [],
+                partDetailNow: '',
+                partDetailIdTemp: '',
                 select_type: 1, // select_type:　0:一覧から選択　/ 1: コードから選択
+                fabric_selected: "",
+                checkCompleteOrder: false,
+
                 //QR Code
                 camera: "auto",
                 result: null,
                 showScanConfirmation: false,
+                interval: false
             };
         },
         props: ["viewMode","orderId","c3CategoryList","c3CategoryId","server_img_path","gender","fabric_id","fabric_list"],
@@ -297,23 +353,13 @@
                 this.stepActive.push(2)
                 this.changeStep(1)
                 this.popupCancel(event)
-                if(this.partsActive.includes(0)){
-                    this.partsActive.splice(this.partsActive.indexOf(0),1)
-                }
-                if(this.partsActive.includes(1)){
-                    this.partsActive.splice(this.partsActive.indexOf(1),1)
-                }
-                if(this.partsActive.includes(2)){
-                    this.partsActive.splice(this.partsActive.indexOf(2),1)
-                }
+                this.partsActive[0] = null 
+                this.partsActive[1] = null 
+                this.partsActive[2] = null
             },
             partSelect(partId) {
-                if (this.partsActive.includes(partId)) {
-                    var index = this.partsActive.indexOf(partId);
-                    this.partsActive.splice(index, 1);
-                } else {
-                    this.partsActive.push(partId);
-                }
+                this.partDetailNow = partId
+                this.partDetailIdTemp = this.partsActive[partId]
             },
             submitFabric: function () {
                 if (this.fabric_selected != "") {
@@ -350,6 +396,8 @@
             },
             returnStep(step) {
                 this.stepNow = 1;
+                this.partDetailNow = ''
+                this.partDetailIdTemp = ''
             },
             decreaseSize(id) {
                 this.measure_data[id].value = this.measure_data[id].value - 1;
@@ -365,45 +413,89 @@
             },
             getOrderDetail(id) {
                 if (id) {
-                    this.partsActive = [0, 1, 2, 3, 4, 5, 7];
+                    this.partsActive[0] = 19
+                    this.partsActive[1] = 21
+                    this.partsActive[2] = 22
+                    this.partsActive[3] = 24
+                    this.partsActive[4] = 27
+                    this.partsActive[5] = 29
+                    this.partsActive[6] = 31
+                    this.partsActive[7] = 33
+
                     this.stepActive = [1, 3]
                     this.select_type = 1
                     this.measure_data[0].value = 2;
                     this.measure_data[1].value = 3;
                     this.measure_data[2].value = 4;
                     this.measure_data[3].value = 5;
+                } else{
+                    this.partsActive[0] = null
+                    this.partsActive[1] = null
+                    this.partsActive[2] = null
+                    this.partsActive[3] = null
+                    this.partsActive[4] = null
+                    this.partsActive[5] = null
+                    this.partsActive[6] = null
+                    this.partsActive[7] = null
                 }
             },
             changeSelectType(type) {
                 this.select_type = type;
             },
-            //QRCode
-            async onInit(promise) {
-                try {
-                    await promise;
-                } catch (e) {
-                    alert(e);
-                    console.error(e);
-                } finally {
-                    this.showScanConfirmation = this.camera === "off";
+            partItemDetailSelect(part_id){
+                if(this.partDetailIdTemp == part_id){
+                    this.partDetailIdTemp = ''
+                } else{
+                    this.partDetailIdTemp = part_id
                 }
             },
-            async onDecode(content) {
-                this.result = content;
-                this.pause();
-                await this.timeout(500);
-                this.unpause();
+            partItemDetailConfirm(partId, partDetailId){
+                if(partDetailId){
+                    this.partsActive[partId] = partDetailId
+                    this.returnStep(1)
+                } else{
+                    alert(this.partLists[partId].name+'を選択していません。')
+                }
+                this.checkCompleteOrderUpdate();
             },
-            unpause() {
-                this.camera = "auto";
+            checkCompleteOrderUpdate(){
+                if(this.partsActive.every(function(i) { return i !== null; }) && this.fabric_id != '' && this.stepActive.includes(3)){
+                    this.checkCompleteOrder = true
+                } else{
+                    this.checkCompleteOrder = false
+                }
             },
-            pause() {
-                this.camera = "off";
+            even: function(min, max, step){
+                var length = (max - min) / step + 1;
+                return new Array(length).fill(min).map((_, i) => min + i * step)
             },
-            timeout(ms) {
-                return new Promise((resolve) => {
-                    window.setTimeout(resolve, ms);
-                });
+            mousedownMinus(i){
+                if(this.measure_data[i].value > this.measure_data[i].min){
+                    this.measure_data[i].value = parseFloat(this.measure_data[i].value) - parseFloat(this.measure_data[i].step)
+                    if(!this.interval){
+                        this.interval = setInterval(() => this.sizeChange('down', i), 150)	
+                    }
+                }
+            },
+            mousedownAdd(i){
+                if(this.measure_data[i].value < this.measure_data[i].max){
+                    this.measure_data[i].value = parseFloat(this.measure_data[i].value) + parseFloat(this.measure_data[i].step)
+                    if(!this.interval){
+                        this.interval = setInterval(() => this.sizeChange('up', i), 150)	
+                    }
+                }
+            },
+            sizeChange(change, i){
+                if(change == 'up' && this.measure_data[i].value < this.measure_data[i].max){
+                    this.measure_data[i].value = parseFloat(this.measure_data[i].value) + parseFloat(this.measure_data[i].step)
+                }
+                if(change == 'down' && this.measure_data[i].value > this.measure_data[i].min){
+                    this.measure_data[i].value = parseFloat(this.measure_data[i].value) - parseFloat(this.measure_data[i].step)
+                }
+            },
+            mouseup() {
+                clearInterval(this.interval)
+                this.interval = false
             },
         },
         mounted() { },
@@ -420,20 +512,16 @@
             },
             checkCompleteOrder: function(){
                 this.$emit("check-complete", this.checkCompleteOrder);
+            },
+            stepActive: function(){
+                this.checkCompleteOrderUpdate()
             }
+
         },
         computed: {
-            checkShowPartList: function () {
-                if (this.stepNow == 1) {
-                    if (this.stepActive.includes(2) || this.orderId) {
+            showPartCheck: function () {
+                if (this.stepNow == 1 && (this.stepActive.includes(2) || this.orderId) && this.partDetailNow === '') {
                         return true;
-                    }
-                }
-                return false;
-            },
-            checkCompleteOrder: function(){
-                if(this.partsActive.length == Object.keys(this.partsList).length && this.fabric_id != '' && this.stepActive.includes(3)){
-                    return true
                 }
                 return false;
             },
@@ -447,19 +535,19 @@
                 return ''
             },
             button_code: function(){
-                if(this.partsActive.includes(1)){
+                if(this.partsActive[1] !== null){
                     return "CODE-BUTON001"
                 }
                 return ''
             },
             pocket_code: function(){
-                if(this.partsActive.includes(0)){
+                if(this.partsActive[0] !== null){
                     return "CODE-POCKET001"
                 }
                 return ''
             },
             ura_code: function(){
-                if(this.partsActive.includes(3)){
+                if(this.partsActive[3] !== null){
                     return "CODE-URA001"
                 }
                 return ''
@@ -469,6 +557,13 @@
                     return "CODE-001"
                 }
                 return ''
+            },
+            showPartDetailCheck: function(){
+                if(this.partDetailNow !== '' && this.stepNow == 1){
+                    return true
+                } else{
+                    return false
+                }
             }
         },
     };

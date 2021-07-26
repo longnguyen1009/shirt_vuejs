@@ -3,7 +3,7 @@
     <!-- <Header /> -->
     <div class="container">
       <div class="row">
-        <div class="col-md-6 mt-4">
+        <div class="col-md-5 mt-4">
           <SimuRight
             :server_img_path="server_img_path"
             :gender="gender"
@@ -14,7 +14,7 @@
             :completeOrder="completeOrderCheck"
           />
         </div>
-        <div class="col-md-6 mt-4">
+        <div class="col-md-7 mt-4">
           <SimuDesign
             :viewMode="viewMode"
             :server_img_path="server_img_path"
@@ -81,8 +81,8 @@ export default {
   data() {
     return {
       order_id: "",
-      server_img_path: "/src/assets/images/", //image folder path
-      obj_bg_path: "/src/assets/images/simulator/default/default_tex.jpg", //svg backgroud url
+      server_img_path: "/sample/images/", //image folder path
+      obj_bg_path: "/sample/images/simulator/default/default_tex.jpg", //svg backgroud url
 
       //category
       c3CategoryId: "",
@@ -323,7 +323,7 @@ export default {
       } else {
         //reset default fabric
         this.obj_bg_path =
-          "/src/assets/images/simulator/default/default_tex.jpg";
+          "/sample/images/simulator/default/default_tex.jpg";
       }
     },
     changeCategory(cateId) {

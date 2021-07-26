@@ -2,12 +2,13 @@
   <div class="container-simu_right">
     <div class="mt-2 mb-3">
       <p>
-        <a href="#" class="badge badge badge-light px-4 py-2 border border-info"
+        <a href="" class="badge badge badge-light px-4 py-2 border border-info"
           >一時保存</a
         >
       </p>
       <p class="my-1">
-        <button @click="completeOrderCheck" class="badge badge-primary px-4 py-2 border">オーダー内容確認</button>
+        <button @click="completeOrderCheck" class="badge px-4 py-2 border order_confirm_btn"
+        :class="{completed: completeOrder}">オーダー内容確認</button>
       </p>
     </div>
     <div class="row">
@@ -185,7 +186,7 @@ export default {
     },
     completeOrderCheck:function(){
       if(this.completeOrder){
-        window.location.replace("/sample/test01/confirm.html")
+        window.location.replace("/sample/test01/cart.html")
       } else{
         alert('選択されていない項目があります。ご確認ください。')
         return false
