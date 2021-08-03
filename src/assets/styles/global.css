@@ -655,9 +655,19 @@
     box-sizing: border-box;
     background: #fff;
     margin-bottom: 10px;
-    padding: 25px 0;
+    padding: 10px 0;
     text-align: center;
 }
+
+.parts_list .parts_item .parts_item_img img{
+    width: 85%;
+}
+.parts_list .parts_item .parts_item_name{
+   font-size: 14px;
+   margin-top: 10px; 
+}
+
+
 
 .parts_item.active {
     border: 2px solid #4f150c;
@@ -1264,5 +1274,7 @@
     color: #fff;
     background-color: #007bff;
 }
+
+
 
 

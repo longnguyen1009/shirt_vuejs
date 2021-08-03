@@ -41,7 +41,8 @@
                 <ul class="parts_list d-flex justify-content-start">
                     <li class="parts_item" v-for="part in partLists" :key="part.id"
                         :class="{ active: partsActive[part.id] }" @click="partSelect(part.id)">
-                        {{ part.name }}
+                        <p class="parts_item_img"><img :src="server_img_path + 'save_images/' + part.img" alt=""></p>
+                        <p class="parts_item_name">{{ part.name }}</p>
                     </li>
                 </ul>
             </div>
@@ -283,39 +284,39 @@
                     3: {id: 3,name: "補正4",value: 0, min : -10, max : 10, step : 0.5}
                 },
                 partLists: {
-                    0: {id: 0,name: "ポケット", option: {
+                    0: {id: 0,name: "ポケット",img: "08021549_5d43dcefd3791.jpg",option: {
                         0: {id: 15, name: '船形(直線)'},
                         1: {id: 16, name: 'バルカ(曲線)'},
                         2: {id: 17, name: 'パッチポケット'},
                         3: {id: 18, name: '両玉縁フラップ 有り'},
                         4: {id: 19, name: 'スラント両玉縁フラップ 有り'}
                     }},
-                    1: {id: 1,name: "ボタン", option: {
+                    1: {id: 1,name: "ボタン",img: "07291208_5d3e63493b8ca.jpg",option: {
                         0: {id: 20, name: '5B'},
                         1: {id: 21, name: '6B'}
                     }},
-                    2: {id: 2,name: "補正1", option:{
+                    2: {id: 2,name: "補正1",img: "07291331_5d3e7686bfd43.jpg",option:{
                         0: {id: 21, name: 'テキスト'},
                         1: {id: 22, name: 'テキスト'},
                     }},
-                    3: {id: 3,name: "背裏", option: {
+                    3: {id: 3,name: "背裏", img: "07291207_5d3e62efc5a64.jpg",option: {
                         0: {id: 23, name: '総裏'},
                         1: {id: 24, name: '背抜き'},
                         2: {id: 25, name: '裏無し'},
                     }},
-                    4: {id: 4,name: "胴裏地", option:{
+                    4: {id: 4,name: "胴裏地", img: "07291114_5d3e5676161a2.jpg",option:{
                         0: {id: 26, name: 'テキスト'},
                         1: {id: 27, name: 'テキスト'},
                     }},
-                    5: {id: 5,name: "○ ○ ○", option:{
+                    5: {id: 5,name: "○ ○ ○", img: "07291103_5d3e540a01264.jpg",option:{
                         0: {id: 28, name: 'テキスト'},
                         1: {id: 29, name: 'テキスト'},
                     }},
-                    6: {id: 6,name: "○ ○ ○", option:{
+                    6: {id: 6,name: "○ ○ ○", img: "07291157_5d3e60aa4d877.jpg",option:{
                         0: {id: 30, name: 'テキスト'},
                         1: {id: 31, name: 'テキスト'},
                     }},
-                    7: {id: 7,name: "○ ○ ○", option:{
+                    7: {id: 7,name: "○ ○ ○", img: "07291157_5d3e60aa4d877.jpg",option:{
                         0: {id: 32, name: 'テキスト'},
                         1: {id: 33, name: 'テキスト'},
                     }},
