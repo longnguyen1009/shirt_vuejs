@@ -2,6 +2,12 @@
     01.HEADER css 
 ===========================*/
 
+#simupage_container{
+    width: 100%;
+    height: 100%;
+    max-width: 1024px;
+    margin: auto;
+}
 
 /*===== NAVBAR =====*/
 
@@ -466,64 +472,308 @@
 
 
 /* SimuStep */
-
+.container-step .simu-stepgroup{
+    width: 100%;
+    height: 25px;
+}
 .stepBtn {
     width: 30%;
-    padding: 35px 0;
+    /* padding: 35px 0; */
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid #cdcdcd;
+    border-bottom: 2px solid #707070;
+    background-color: #373737;
+    color: #fff;
     position: relative;
+    font-size: 11px;
 }
-
 .stepBtn.active {
-    border: 1px solid #000;
-    background-color: #d6d8db;
+  border-bottom: 2px solid #fff;
 }
 
-.stepBtn.active::before {
+/* .stepBtn.active::before {
     content: "\f058";
     position: absolute;
     top: 0px;
     left: 5px;
     font-size: 33px;
     font-family: "Font Awesome 5 Free";
-}
+} */
 
-.common-btn-return {
+/* .common-btn-return {
     padding: 5px 10px;
     cursor: pointer;
     border: 1px solid #333;
     border-radius: 5px;
     width: 85px;
-}
-.fabric-select-btn{
+} */
+/* .fabric-select-btn{
     width: auto;
+} */
+
+/* Style Select */
+
+/* slick */
+.simu-styleList .slick-prev{
+  display: none !important;
 }
+.simu-styleList .slick-next{
+  right: 0px;
+  width: 64px;
+  top: 0;
+  height: 100%;
+  transform: none;
+}
+.simu-styleList .slick-next:after{
+  position: absolute;
+  content: "";
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-color: #cdcdcd;
+  opacity: .4;
+}
+.simu-styleList .slick-next:before{
+  z-index: 1;
+  opacity: 1;
+}
+.simu-styleList .slick-prev.slick-disabled:before, .slick-next.slick-disabled:before{
+  opacity: 1;
+}
+
+/* styleItem */
+.container-selectstyle{
+  position: relative;
+}
+.simu-styleItem{
+ display: block !important;
+ position: relative;
+}
+.simu-styleItem-front{
+  position: relative;
+  height: 100%;
+  width: auto;
+  cursor: pointer;
+}
+.simu-styleItem-front:hover{
+  opacity: .8;
+}
+
+.simu-styleItem-front img{
+  width: 100%;
+  height: 100%;
+}
+.simu-styleItem-label{
+  position: absolute;
+  z-index: 1;
+  bottom: 30px;
+  left: 30px;
+}
+.simu-styleItem-name{
+  font-size: 20px;
+  color: #fff;
+}
+.simu-styleItem-productname{
+  font-size: 15px;
+  color: #fff;
+}
+.simu-styleItem-btn{
+  font-size: 15px;
+  position: absolute;
+  right: 32px;
+  bottom: 30px;
+  border: none;
+  background-color: transparent;
+  color: #fff;
+  border-bottom: 1px solid #fff;
+}
+.simu-styleItem-detail{
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  background-color: rgba(58, 58, 58, .9);
+  width: 100%;
+  height: 100%;
+  padding: 32px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-left: .5px solid #C8C7C6;
+  visibility: hidden;
+}
+.simu-styleItem-detail.active{
+  visibility: visible;
+}
+
+.simu-styleItem-detailTop{
+  flex-grow: 1;
+}
+.simu-styleItem-detail .simu-styleItem-description{
+  margin: 20px 0;
+  font-size: 13px;
+}
+.simu-styleItem-detail .simu-styleItem-completeTime{
+  font-size: 13px;
+}
+.simu-styleItem-modelList li{
+  padding: 10px 0;
+  width: 100%;
+  border: 1px solid #C8C7C6;
+  text-align: center;
+  margin-top: 17px;
+  font-size: 14px;
+}
+.simu-styleItem-detail .closeBtn{
+  position: absolute;
+  top: 32px;
+  right: 32px;
+  font-size: 24px;
+  line-height: 1;
+  padding: 0 5px;
+  cursor: pointer;
+}
+
+/* simu Model Page */
+.container-selectmodel{
+  width: 100%;
+  background-color: #333;
+  color: #fff;
+  position: absolute;
+  top: 0;
+  z-index: 2;
+}
+.simuModelPage-enter-active, .simuModelPage-leave-active {
+  transform: translateX(0);
+  transition: all .4s ease;
+}
+.simuModelPage-enter, .simuModelPage-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
+  transform: translateX(100%);
+}
+/* slick */
+.simu-model-left{
+  position: relative;
+  width: 50%;
+}
+.simu-model-left .slick-arrow{
+  z-index: 1;
+}
+.simu-model-left .slick-prev{
+  left: 32px;
+}
+.simu-model-left .slick-next{
+  right: 32px;
+}
+.slick-prev:before, .slick-next:before{
+  font-size: 20px;
+}
+.simu-model-img{
+ display: block !important;
+}
+.simu-model-intro{
+  position: absolute;
+  left: 32px;
+  bottom: 32px;
+  z-index: 1;
+}
+.simu-model-intro h3{
+  font-size: 19px;
+  color: #fff;
+}
+.simu-model-intro p{
+  font-size: 13px;
+  padding-top: 5px;
+}
+.simu-model-right{
+  padding: 30px;
+  color: #fff;
+  width: 50%;
+}
+.simu-model-rightTop{
+  flex-grow: 1;
+}
+.simu-model-right h3, 
+.simu-model-right h4{
+  color: #fff;
+}
+.simu-model-right h3{
+  font-size: 20px;
+}
+.simu-model-right h4{
+  font-size: 15px;
+  padding: 8px 0;
+}
+.simu-model-description{
+  margin-top: 35px;
+  width: 400px;
+  font-size: 13px;
+}
+.simu-model-itemList{
+  margin-bottom: 30px;
+}
+.simu-model-itemList li{
+  padding: 15px 5px;
+  border-bottom: 1px solid #676665;
+  margin-left: -5px;
+  margin-right: -5px;
+  font-size: 13px;
+}
+.simu-model-itemList li:first-child{
+  border-top: 1px solid #676665;
+}
+.simu-model-itemList li label{
+  padding-left: 5px;
+}
+.simu-model-itemType{
+  width: 125px;
+}
+.simu-model-order button{
+  width: 220px;
+  border-radius: 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /* SimuGender */
-
 .selector__gender_selector button {
     width: 48%;
 }
-
-
 /* SimuRight */
 
 .fabric_item img {
     width: 100%;
     height: 100%;
 }
-
 .simulator__image_view {
     position: relative;
     background: #fff;
-    /* height: calc(650px + 185 * ((100vw - 768px) / 256)); */
     height: 496px;
-    /* max-height: 835px; */
     overflow: hidden;
 }
 

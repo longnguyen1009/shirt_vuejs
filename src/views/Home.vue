@@ -1,7 +1,13 @@
 <template>
-  <div class="simupage_container">
+  <div id="simupage_container" class="d-flex flex-column">
+    <Step :step="step"/>
+    <SelectStyle v-if="step == 1"
+    :img_path="server_img_path"
+    @changeModel="changeModel($event)"/>
+
+
     <!-- <Header /> -->
-    <div class="container">
+    <div class="container" v-if="step == 2">
       <div class="row">
         <div class="col-md-5 mt-4">
           <SimuRight
@@ -41,7 +47,7 @@
         @submitFabric="submitFabric($event)"
       />
     </div>
-    <div class="row simu_price">
+    <div class="row simu_price"  v-if="step == 2">
       <div class="container py-2">
         <p class="simu_price_txt">
           商品価格：{{ product_price }}円 + カスタマイズ価格：4,500円　　お支払い価格：{{ product_price + 4500 }}円
@@ -55,7 +61,8 @@
 <script>
 import Header from "../components/Header.vue";
 import Footer from "../components/Footer.vue";
-import SimuStep from "../components/SimuStep.vue";
+import Step from "../components/Step.vue";
+import SelectStyle from "../components/SelectStyle.vue";
 import SimuLeft from "../components/SimuLeft.vue";
 import SimuGender from "../components/SimuGender.vue";
 import SimuRight from "../components/SimuRight.vue";
@@ -67,9 +74,10 @@ import SimuModal from "../components/SimuModal.vue";
 export default {
   name: "Home",
   components: {
+    Step,
+    SelectStyle,
     Header,
     Footer,
-    SimuStep,
     SimuLeft,
     SimuGender,
     SimuRight,
@@ -80,15 +88,17 @@ export default {
   },
   data() {
     return {
+      step: 1,
       order_id: "",
-      server_img_path: "/src/assets/images/", //image folder path
-      obj_bg_path: "/src/assets/images/simulator/default/default_tex.jpg", //svg backgroud url
+      server_img_path: "/sample/images/", //image folder path
+      obj_bg_path: "/sample/images/simulator/default/default_tex.jpg", //svg backgroud url
 
       //category
       c3CategoryId: "",
       c3CategoryList: {
         1: { id: 1, name: "ジャケット", partId: "" },
         2: { id: 2, name: "パンツ", partId: "" },
+        3: { id: 3, name: "シャツ", partId: "" },
       },
 
       gender: "men", //current gender
@@ -114,8 +124,8 @@ export default {
         {
           product_id: "2547",
           name: "WOOL&POLYESTER SUCKER",
-          main_image: "iphone12check.jpg",
-          kiji_image: "iphone12check.jpg",
+          main_image: "iphone12muji_.jpg",
+          kiji_image: "iphone12muji_.jpg",
           product_code: "138129A",
         },
         {
@@ -284,7 +294,9 @@ export default {
     };
   },
   methods: {
-      
+    changeModel(modeldata){
+      this.step = 2
+    },
     //change fabic in step 1
     changeFabric(fabric_id) {
       var items = this.fabric_list;
@@ -323,7 +335,7 @@ export default {
       } else {
         //reset default fabric
         this.obj_bg_path =
-          "/src/assets/images/simulator/default/default_tex.jpg";
+          "/sample/images/simulator/default/default_tex.jpg";
       }
     },
     changeCategory(cateId) {
@@ -341,10 +353,13 @@ export default {
         this.partNo_zentai = "6_all";
         this.c3CategoryList[1].partId = 6;
         this.c3CategoryList[2].partId = 46;
+        this.c3CategoryList[3].partId = 40;
       } else {
         this.partNo_zentai = "41_all";
         this.c3CategoryList[1].partId = 41;
         this.c3CategoryList[2].partId = 10;
+        //シャツ　テスト
+        this.c3CategoryList[3].partId = 40;
       }
     },
   },
