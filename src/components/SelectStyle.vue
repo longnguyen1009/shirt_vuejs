@@ -32,7 +32,7 @@
     </div>
     <transition name="simuModelPage">
       <SelectModel 
-      :img_path="img_path"
+        :img_path="img_path"
         v-if="modelActive != 0"
         :modelId="modelActive"
         @modelSelected="modelSelected($event)"

@@ -23,7 +23,7 @@ import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 Vue.use(BootstrapVue)
 
-import './assets/js/common.js'
+// import './assets/js/common.js'
 
 new Vue({
   router,

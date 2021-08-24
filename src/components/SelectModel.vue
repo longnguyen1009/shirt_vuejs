@@ -103,7 +103,6 @@ export default {
   },
   methods: {
     doOrder(){
-      console.log("aaaaaa");
       const modelData = {id: this.modelId}
       this.$emit("modelSelected", modelData);
     }
