@@ -1,13 +1,13 @@
 <template>
   <div class="container-selectstyle">
-    <div class="simu-styleList">
+    <div class="simu-styleList" v-if="styleItems.length > 0">
       <VueSlickCarousel v-bind="settings">
         <div class="simu-styleItem" v-for="Item in styleItems" :key="Item.id">
           <div class="simu-styleItem-front">
-            <img :src="img_path+'/style/'+Item.mainImg" alt="" @click="styleClick(Item.id)">
+            <img :src="style_img_path + Item.image" alt="" @click="styleClick(Item.id)">
             <div class="simu-styleItem-label" @click="styleClick(Item.id)">
               <h2 class="simu-styleItem-name">{{Item.name}}</h2>
-              <h3 class="simu-styleItem-productname">{{Item.product_name}}&nbsp;&nbsp;￥{{Item.product_price}}</h3>
+              <h3 class="simu-styleItem-productname">{{Item.category}}&nbsp;&nbsp;￥{{Item.product_price}}</h3>
             </div>
             <button class="simu-styleItem-btn" @click="">MORE DETAILS</button>
           </div>
@@ -16,8 +16,8 @@
             <div class="simu-styleItem-detailTop">
               <h2 class="simu-styleItem-name">{{Item.name}}</h2>
               <h3 class="simu-styleItem-productname">{{Item.product_name}}&nbsp;&nbsp;￥{{Item.product_price}}</h3>
-              <p class="simu-styleItem-description">{{Item.description}}</p>
-              <p class="simu-styleItem-completeTime">{{Item.completeTime}}～</p>
+              <p class="simu-styleItem-description">{{Item.detail}}</p>
+              <p class="simu-styleItem-completeTime">{{Item.detail}}～</p>
             </div>
             <div class="simu-styleItem-model">
               <ul class="simu-styleItem-modelList">
@@ -32,7 +32,7 @@
     </div>
     <transition name="simuModelPage">
       <SelectModel 
-        :img_path="img_path"
+        :model_img_path="model_img_path"
         v-if="modelActive != 0"
         :modelId="modelActive"
         @modelSelected="modelSelected($event)"
@@ -55,98 +55,7 @@ export default {
   components: { VueSlickCarousel, SelectModel},
   data() {
     return {
-      styleItems: [
-        {
-          id: 1,
-          name: 'CLASSIC',
-          product_name: 'Suit',
-          product_price: 58300,
-          mainImg: 'style01.png',
-          description: 'スポーティなスタイルにも対応する快適さと機能性を重視したオールラウンドモデル',
-          completeTime: '3週間',
-          model: [
-            {id: 1, name: 'REGULAR MODEL 1'},
-            {id: 2, name: 'REGULAR MODEL 2'},
-            {id: 3, name: 'REGULAR MODEL 3'},
-            {id: 4, name: 'REGULAR MODEL 4'},
-          ]
-        },
-        {
-          id: 2,
-          name: 'STANDARD',
-          product_name: 'Suit',
-          product_price: 58300,
-          mainImg: 'style02.png',
-          description: 'スポーティなスタイルにも対応する快適さと機能性を重視したオールラウンドモデル',
-          completeTime: '3週間',
-          model: [
-            {id: 5, name: 'REGULAR MODEL 5'},
-            {id: 6, name: 'REGULAR MODEL 6'},
-            {id: 7, name: 'REGULAR MODEL 7'},
-            {id: 8, name: 'REGULAR MODEL 8'},
-          ]
-        },
-        {
-          id: 3,
-          name: 'COMFORT',
-          product_name: 'Suit',
-          product_price: 58300,
-          mainImg: 'style03.png',
-          description: 'スポーティなスタイルにも対応する快適さと機能性を重視したオールラウンドモデル',
-          completeTime: '3週間',
-          model: [
-            {id: 9, name: 'REGULAR MODEL 9'},
-            {id: 10, name: 'REGULAR MODEL 10'},
-            {id: 11, name: 'REGULAR MODEL 11'},
-            {id: 12, name: 'REGULAR MODEL 12'},
-          ]
-        },
-        {
-          id: 4,
-          name: 'CLASSIC',
-          product_name: 'Suit',
-          product_price: 58300,
-          mainImg: 'style04.png',
-          description: 'スポーティなスタイルにも対応する快適さと機能性を重視したオールラウンドモデル',
-          completeTime: '3週間',
-          model: [
-            {id: 13, name: 'REGULAR MODEL 13'},
-            {id: 14, name: 'REGULAR MODEL 14'},
-            {id: 15, name: 'REGULAR MODEL 15'},
-            {id: 16, name: 'REGULAR MODEL 16'},
-          ]
-        },
-        {
-          id: 5,
-          name: 'CLASSIC',
-          product_name: 'Suit',
-          product_price: 58300,
-          mainImg: 'style01.png',
-          description: 'スポーティなスタイルにも対応する快適さと機能性を重視したオールラウンドモデル',
-          completeTime: '3週間',
-          model: [
-            {id: 13, name: 'REGULAR MODEL 13'},
-            {id: 14, name: 'REGULAR MODEL 14'},
-            {id: 15, name: 'REGULAR MODEL 15'},
-            {id: 16, name: 'REGULAR MODEL 16'},
-          ]
-        },
-        {
-          id: 6,
-          name: 'CLASSIC',
-          product_name: 'Suit',
-          product_price: 58300,
-          mainImg: 'style02.png',
-          description: 'スポーティなスタイルにも対応する快適さと機能性を重視したオールラウンドモデル',
-          completeTime: '3週間',
-          model: [
-            {id: 13, name: 'REGULAR MODEL 13'},
-            {id: 14, name: 'REGULAR MODEL 14'},
-            {id: 15, name: 'REGULAR MODEL 15'},
-            {id: 16, name: 'REGULAR MODEL 16'},
-          ]
-        }
-      ],
+      styleItems: [],
       settings: {
         "dots": false,
         "infinite": false,
@@ -174,8 +83,13 @@ export default {
       this.$emit("changeModel", modeldata);
     }
   },
-  props: ["img_path"],
+  props: ["style_img_path", "model_img_path"],
   mounted() {
+    this.axios.get('http://54.248.46.255/myshop/getstyle/1')
+    .then(response => {
+      this.styleItems = response.data.data
+    })
+    .catch(error => console.log(error))
   },
 };
 </script>

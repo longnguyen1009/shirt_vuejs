@@ -23,7 +23,9 @@ import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 Vue.use(BootstrapVue)
 
-// import './assets/js/common.js'
+// session
+import VueSession from 'vue-session'
+Vue.use(VueSession)
 
 new Vue({
   router,

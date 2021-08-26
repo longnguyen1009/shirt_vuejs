@@ -2,9 +2,9 @@
   <div id="simupage_container" class="d-flex flex-column">
     <Step :step="step"/>
     <SelectStyle v-if="step == 1"
-    :img_path="server_img_path"
+    :style_img_path="style_img_path"
+    :model_img_path="model_img_path"
     @changeModel="changeModel($event)"/>
-
 
     <!-- <Header /> -->
     <div class="container" v-if="step == 2">
@@ -89,8 +89,11 @@ export default {
   data() {
     return {
       step: 1,
-      order_id: "",
       server_img_path: "/sample/images/", //image folder path
+      style_img_path: "/html/upload/save_image/",
+      model_img_path: "/html/upload/save_image/",
+      
+      order_id: "",
       obj_bg_path: "/sample/images/simulator/default/default_tex.jpg", //svg backgroud url
 
       //category
@@ -364,7 +367,8 @@ export default {
     },
   },
   mounted() {
-    this.order_id = this.$route.query.id;
+    // this.order_id = this.$route.query.id;
+    // console.log(this.$session.getAll())
   },
   computed: {},
 };
