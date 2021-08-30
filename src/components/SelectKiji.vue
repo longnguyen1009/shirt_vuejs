@@ -15,10 +15,13 @@
           </div>
         </div>
         <div class="simuright-kiji-list d-flex flex-wrap">
-          <div v-for="(Kiji, id) in kijiList" :key="id">
-            <img :src="kiji_img_path + Kiji.img" alt="">
-            <span><i class="fas fa-info-circle"></i></span>
-            <div class="simuright-kiji-name">
+          <div v-for="(Kiji, id) in kijiList" :key="id" class="kijiItem"
+            :class="{active: (Kiji.id == kijiSelected)}">
+            <img :src="kiji_img_path + Kiji.img" alt=""
+              @click="kijiChange(Kiji.id, Kiji.img)">
+            <span class="simuright-kiji-icon" @click="showKijiDetail()"><i class="fas fa-info-circle"></i></span>
+            <div class="simuright-kiji-name"
+              @click="kijiChange(Kiji.id, Kiji.img)">
               <span class="kiji-code">{{Kiji.code}}</span><br>
               <span class="kiji-name">{{Kiji.name}}</span>
             </div>
@@ -27,8 +30,8 @@
       </div>
     </div>
     <div class="simuright-sub-navi d-flex align-items-center">
-      <button class="simu-common-btn">戻る</button>
-      <button class="simu-common-btn">決定</button>
+      <button class="simu-common-btn" @click="closeOption">戻る</button>
+      <button class="simu-common-btn" @click="kijiConfirm">決定</button>
     </div>
   </div>
 </template>
@@ -40,28 +43,44 @@ export default {
   components: {},
   data() {
     return {
-     kijiList: [
-       {id: 1, name: "TECH PLUSH WOOL", code: "138103A", img: "0730151611_6103992bd5250.jpeg"},
-       {id: 2, name: "TECH PLUSH WOOL", code: "138103A", img: "0730151510_610398ee19b7d.jpeg"},
-       {id: 3, name: "TECH PLUSH WOOL", code: "138103A", img: "0730151444_610398d4a58ff.jpeg"},
-       {id: 4, name: "TECH PLUSH WOOL", code: "138103A", img: "0730151400_610398a8d28a9.jpeg"},
-       {id: 5, name: "TECH PLUSH WOOL", code: "138103A", img: "0730151400_610398a8d28a9.jpeg"}
-     ]
+      kijiSelected: 0,
+    //  kijiList: [
+    //    {id: 1, name: "TECH PLUSH WOOL", code: "138103A", img: "0730151611_6103992bd5250.jpeg"},
+    //    {id: 2, name: "TECH PLUSH WOOL", code: "138103A", img: "0730151510_610398ee19b7d.jpeg"},
+    //    {id: 3, name: "TECH PLUSH WOOL", code: "138103A", img: "0730151444_610398d4a58ff.jpeg"},
+    //    {id: 4, name: "TECH PLUSH WOOL", code: "138103A", img: "0730151400_610398a8d28a9.jpeg"},
+    //    {id: 5, name: "TECH PLUSH WOOL", code: "138103A", img: "0730151400_610398a8d28a9.jpeg"}
+    //  ],
     };
   },
   methods: {
-    
+    closeOption: function(){
+      this.$emit("closeOption")
+    },
+    kijiChange: function(id, img){
+      this.kijiSelected = id
+      $('.kiji_preloader img').attr('src', this.kiji_img_path + img)
+    },
+    kijiConfirm: function(){
+      if(this.kijiSelected == 0){
+        alert('生地を選択してください')
+      } else{
+        this.$emit("kiji-confirm", this.kijiSelected)
+        this.closeOption()
+      }
+    }
   },
-  props: ['kiji_img_path'],
+  props: ['kiji_img_path', 'kijiList', 'kijiActive'],
   mounted() {
-    //  this.axios.get('http://54.248.46.255/myshop/getmodel/'+this.modelId)
-    //   .then(response => {
-    //     this.modelDetail = response.data.data
-    //     // this.modelDetail.itemlist.map(function(value, key) {
-    //     //   this.itemSelected.push({"type": value.item_type_id, "itemid": ""})
-    //     // })
-    //   })
-    //   .catch(error => console.log(error))
+    console.log(this.kijiList)
+    this.kijiSelected = this.kijiActive
+    if(this.kijiList.length == 0){
+      this.axios.get('http://54.248.46.255/myshop/getkijilist/')
+      .then(response => {
+        this.$emit('set-kiji', response.data.data)
+      })
+      .catch(error => console.log(error))
+    }
   },
 };
 </script>

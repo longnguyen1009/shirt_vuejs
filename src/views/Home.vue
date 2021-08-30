@@ -11,8 +11,9 @@
       <div class="container-order-main">
           <SimuLeft
             :simu_img_path="simu_img_path"
+            :itemData="itemData"
             :itemActive="itemActive"
-            :designActive="designActive"
+            
 
             :obj_bg_path="obj_bg_path"
             :viewMode="viewMode"
@@ -22,6 +23,8 @@
           />
           <SimuRight
             :kiji_img_path="kiji_img_path"
+            :itemData="itemData"
+            @change-item="changeItemActive"
 
             :viewMode="viewMode"
             :c3CategoryList="c3CategoryList"
@@ -84,14 +87,12 @@ export default {
       kiji_img_path: "/html/upload/save_image/",
 
       //step2
-      itemSelectedData: [4,6],
+      itemSelectedData: [10,6,9],
       itemActive: 4,
       designActive: "01",
       kijiActive: 0,
 
-
       //step3
-      
       order_id: "",
       obj_bg_path: "/sample/images/simulator/default/default_tex.jpg", //svg backgroud url
 
@@ -301,6 +302,10 @@ export default {
       this.itemSelectedData = itemData
       console.log(this.itemSelectedData)
     },
+    changeItemActive(item_id){
+      this.itemActive = item_id
+      console.log(this.itemActive)
+    },
     //change fabic in step 1
     changeFabric(fabric_id) {
       var items = this.fabric_list;
@@ -374,6 +379,14 @@ export default {
   computed: {
     showSimuPage: function(){
       return (this.step == 2 && this.itemSelectedData.length > 0)
+    },
+    itemData: function(){
+      //input: itemSelectedData, output: itemData
+      return [
+        {id: 10, label: 'ジャケット', design_id: "10"},
+        {id: 6, label: 'パンツ', design_id: "06"},
+        {id: 9, label: 'ベスト', design_id: "09"}
+      ]
     }
   },
 };

@@ -5,17 +5,17 @@
           <button class="simuright-modeBtn" :class="{active: optionMode == 1}">コードスキャン</button>
           <button class="simuright-modeBtn" :class="{active: optionMode == 2}">リストから選択</button>
         </div>
-        <select class="form-select" aria-label="select-item">
-          <option value="1">ジャケット</option>
-          <option value="2">トラウザーズ</option>
-          <option value="3">ベスト</option>
+        <select aria-label="select-item" class="form-control" v-model="itemActive" @change="changeItem($event)">
+          <option v-for="(item, id) in itemData" :key="id" :value="item.id">{{item.label}}</option>
         </select>
       </div>
       <div class="simuright-options">
         <div class="simuright-options-row">
-          <div class="simuright-options-rowTop d-flex justify-content-between">
+          <div class="simuright-options-rowTop d-flex justify-content-between"
+            @click="openDetailOption(1)">
             <span class="simuright-options-label">生地</span>
-            <div class="simuright-options-name">NAME NAME NAME NAME</div>
+            <div class="simuright-options-name"
+            v-if="kijiActive != 0">{{kijiObjectActive.name}}</div>
             <span class="simuright-options-arraw"><i class="fas fa-chevron-right"></i></span>
           </div>
         </div>
@@ -52,10 +52,19 @@
           </div>
       </div>
 
-      <div class="simuright-sub">
-        <SelectKiji 
-        :kiji_img_path="kiji_img_path"/>
-      </div>
+      <transition name="simurightSubPage">
+        <div class="simuright-sub" 
+        v-if="detailOptionActive != 0">
+          <SelectKiji 
+          :kiji_img_path="kiji_img_path"
+          :kijiList="kijiData"
+          :kijiActive="kijiActive"
+          @closeOption="closeDetailOption($event)"
+          @set-kiji="setKiji($event)"
+          @kiji-confirm="kijiConfirm($event)"
+          />
+        </div>
+      </transition>
     </div>
 </template>
 
@@ -68,6 +77,14 @@
       data() {
           return {
               optionMode: 2,
+              detailOption: {
+                1: 'kiji',
+              },
+              detailOptionActive: 0,
+              kijiData: [],
+              kijiActive: 0,
+              itemActive: 0,
+
               stepList: [
                   {id: 1,name: "スタイル"}, 
                   {id: 2,name: "生地"}, 
@@ -133,8 +150,27 @@
               interval: false
           };
       },
-      props: ["kiji_img_path", "viewMode","orderId","c3CategoryList","c3CategoryId","gender","fabric_id","fabric_list"],
+      props: ["kiji_img_path","viewMode","itemData", "orderId","c3CategoryList","c3CategoryId","gender","fabric_id","fabric_list"],
       methods: {
+        openDetailOption: function(optionid){
+          this.detailOptionActive = optionid
+        },
+        closeDetailOption: function(){
+          this.detailOptionActive = 0
+        },
+        setKiji: function(data){
+          this.kijiData = data
+        },
+        kijiConfirm: function(kiji_id){
+          this.kijiActive = kiji_id
+        },
+        changeItem: function(){
+          //console.log(this.itemActive)
+        },
+
+
+        
+
           c3CateChange: function (c3CateId) {
               this.$emit("changeCategory", c3CateId);
           },
@@ -295,10 +331,12 @@
               this.interval = false
           },
       },
-      mounted() { },
+      mounted() {
+        this.itemActive = this.itemData[0].id
+      },
       watch: {
-          orderId: function () {
-              this.getOrderDetail(this.orderId);
+          itemActive: function () {
+            this.$emit('change-item', this.itemActive)
           },
           stepNow: function () {
               this.$emit("changeStepNow", this.stepNow);
@@ -316,6 +354,11 @@
 
       },
       computed: {
+          kijiObjectActive: function(){
+            return Object.keys(this.kijiData)
+                  .map((key) => this.kijiData[key])
+                  .filter((item) => item.id === this.kijiActive)[0]
+          },
           showPartCheck: function () {
               if (this.stepNow == 1 && (this.stepActive.includes(2) || this.orderId) && this.partDetailNow === '') {
                       return true;

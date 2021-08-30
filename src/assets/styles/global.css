@@ -290,6 +290,7 @@ body{
   bottom: 30px;
   left: 30px;
   font-size: 13px;
+  z-index: 1;
 }
 .sumi-left-downbtn{
   position: absolute;
@@ -298,6 +299,7 @@ body{
   font-size: 13px;
   padding: 10px 12.5px;
   border: 1px solid #fff;
+  z-index: 1;
 }
 .simuleft-sample img,
 .simuleft-sample object{
@@ -405,8 +407,10 @@ body{
 }
 .simuright-sub-content{
   flex-grow: 1;
+  position: relative;
 }
 /* SimuKiji */
+
 .simuright-sub-searchTop{
   padding: 0 32px;
   height: 40px;
@@ -430,11 +434,61 @@ body{
 .container-kiji{
   height: 100%;
 }
-.simuright-kiji-list{
-  height: 420px;
-  flex-grow: 1;
-  overflow: auto;
+.simuright-sub-kiji{
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
 }
+.simuright-kiji-list{
+  flex-grow: 1;
+  overflow-y: auto;
+  height: 100%;
+  justify-content: start;
+  align-content: flex-start;
+}
+.simuright-kiji-list .kijiItem{
+  width: 33.3%;
+  height: 171px;
+  position: relative;
+}
+.simuright-kiji-list .kijiItem img{
+  width: 100%;
+  height: 100%;
+}
+.simuright-kiji-list .simuright-kiji-name{
+  position: absolute;
+  width: 70%;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: bold;
+}
+.simuright-kiji-icon{
+  position: absolute;
+  top: 15px;
+  right: 30px
+}
+.kijiItem.active{
+  border: 2px solid #333;
+}
+.kijiItem.active::before{
+  content: "\f058";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  font-size: 20px;
+  color: #333;
+  font-family: "Font Awesome 5 Free";
+}
+
+
+
+
 
 
 
@@ -856,7 +910,7 @@ body{
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, 1);
+    background: #cdcdcd;
     display: none;
 }
 

@@ -16,7 +16,7 @@
               type="image/svg+xml"
               v-bind:data="design.design_path"
               @load="svgLoaded02"
-              class="suitmodel"
+              class="svgModel"
               style="image-rendering: pixelated"
             ></object>
             <img :src="design.shadow_path" class="img_shadow" />
@@ -43,8 +43,8 @@ export default {
   },
   props: [
     "simu_img_path",
+    "itemData",
     "itemActive",
-    "designActive",
 
     "step",
     "obj_bg_path",
@@ -61,21 +61,20 @@ export default {
       }, 700);
     },
     kijiLoaded() {
-      var target = document.querySelector(".suitmodel").contentDocument;
-      var tex = $(".simulator__preloader").find("img");
-      // $(target)
-      //   .find("pattern")
-      //   .not("#buttons")
-      //   .find("image")
-      //   .attr("xlink:href", tex[0].currentSrc)
-      //   .attr("width", tex[0].naturalWidth)
-      //   .attr("height", tex[0].naturalHeight);
-      // $(target)
-      //   .find("pattern")
-      //   .not("#buttons")
-      //   .attr("width", tex[0].naturalWidth)
-      //   .attr("height", tex[0].naturalHeight);
-      // this.modalSvgLoad();
+      var target = document.querySelector(".svgModel").contentDocument;
+      var kiji = $(".kiji_preloader").find("img");
+      $(target)
+        .find("pattern")
+        .not("#buttons")
+        .find("image")
+        .attr("xlink:href", kiji[0].currentSrc)
+        .attr("width", kiji[0].naturalWidth)
+        .attr("height", kiji[0].naturalHeight);
+      $(target)
+        .find("pattern")
+        .not("#buttons")
+        .attr("width", kiji[0].naturalWidth)
+        .attr("height", kiji[0].naturalHeight);
     },
     //test change erigata 衿型
     changeEriGata() {
@@ -122,7 +121,7 @@ export default {
       this.kijiLoaded();
       setTimeout(function() {
         $(".loadding_bl").removeClass("on");
-      }, 300);
+      }, 500);
     },
     modalFullviewShow: function() {
       this.cloneData01 = $(".simu_price").html();
@@ -154,6 +153,7 @@ export default {
   computed: {
     //design path
     design: function() {
+       $(".loadding_bl").addClass("on")
       return {
         sample_path: this.simu_img_path + 'designs/' + this.designActive + "/sample.png",
         design_path: this.simu_img_path + 'designs/' + this.designActive + "/design.svg",
@@ -164,6 +164,15 @@ export default {
     kiji_img_src: function(){
       return "/html/upload/save_image/0730151143_6103981fcfa43.jpeg"
     },
+    designActive: function(){
+      var itemObjectActive = Object.keys(this.itemData)
+                  .map((key) => this.itemData[key])
+                  .filter((item) => item.id === this.itemActive)[0]
+      if(itemObjectActive){
+        return itemObjectActive.design_id
+      }
+    },
+
     model_path_change: function() {
       //return this.design_path.model_path;
     },
