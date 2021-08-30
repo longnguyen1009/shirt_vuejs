@@ -4,26 +4,26 @@
     <SelectStyle v-if="step == 1"
     :style_img_path="style_img_path"
     :model_img_path="model_img_path"
-    @changeModel="changeModel($event)"/>
+    @item-selected="itemSelected($event)"/>
 
     <!-- <Header /> -->
-    <div class="container" v-if="step == 2">
-      <div class="row">
-        <div class="col-md-5 mt-4">
-          <SimuRight
-            :server_img_path="server_img_path"
-            :gender="gender"
+    <div class="container-ordersimu" v-if="showSimuPage">
+      <div class="container-order-main">
+          <SimuLeft
+            :simu_img_path="simu_img_path"
+            :itemActive="itemActive"
+            :designActive="designActive"
+
             :obj_bg_path="obj_bg_path"
             :viewMode="viewMode"
             :partNo="partNo"
             :partNo_zentai="partNo_zentai"
             :completeOrder="completeOrderCheck"
           />
-        </div>
-        <div class="col-md-7 mt-4">
-          <SimuDesign
+          <SimuRight
+            :kiji_img_path="kiji_img_path"
+
             :viewMode="viewMode"
-            :server_img_path="server_img_path"
             :c3CategoryList="c3CategoryList"
             :c3CategoryId="c3CategoryId"
             :orderId="order_id"
@@ -38,23 +38,14 @@
             @submitFabric="submitFabric($event)"
             @check-complete="checkComplete($event)"
           />
-        </div>
       </div>
       <SimuModal
         :modal_data="modal_data"
         :fabricDetail="fabricDetail"
-        :server_img_path="server_img_path"
+        :simu_img_path="simu_img_path"
         @submitFabric="submitFabric($event)"
       />
     </div>
-    <div class="row simu_price"  v-if="step == 2">
-      <div class="container py-2">
-        <p class="simu_price_txt">
-          商品価格：{{ product_price }}円 + カスタマイズ価格：4,500円　　お支払い価格：{{ product_price + 4500 }}円
-        </p>
-      </div>
-    </div>
-    <!-- <Footer /> -->
   </div>
 </template>
 
@@ -65,10 +56,9 @@ import Step from "../components/Step.vue";
 import SelectStyle from "../components/SelectStyle.vue";
 import SimuLeft from "../components/SimuLeft.vue";
 import SimuGender from "../components/SimuGender.vue";
-import SimuRight from "../components/SimuRight.vue";
 import SimuNav from "../components/SimuNav.vue";
 import SimuCourse from "../components/SimuCourse.vue";
-import SimuDesign from "../components/SimuDesign.vue";
+import SimuRight from "../components/SimuRight.vue";
 import SimuModal from "../components/SimuModal.vue";
 
 export default {
@@ -80,18 +70,27 @@ export default {
     Footer,
     SimuLeft,
     SimuGender,
-    SimuRight,
     SimuNav,
     SimuCourse,
-    SimuDesign,
+    SimuRight,
     SimuModal,
   },
   data() {
     return {
       step: 1,
-      server_img_path: "/sample/images/", //image folder path
+      simu_img_path: "/html/upload/simu_model/", //image folder path
       style_img_path: "/html/upload/save_image/",
       model_img_path: "/html/upload/save_image/",
+      kiji_img_path: "/html/upload/save_image/",
+
+      //step2
+      itemSelectedData: [4,6],
+      itemActive: 4,
+      designActive: "01",
+      kijiActive: 0,
+
+
+      //step3
       
       order_id: "",
       obj_bg_path: "/sample/images/simulator/default/default_tex.jpg", //svg backgroud url
@@ -297,8 +296,10 @@ export default {
     };
   },
   methods: {
-    changeModel(modeldata){
+    itemSelected(itemData){
       this.step = 2
+      this.itemSelectedData = itemData
+      console.log(this.itemSelectedData)
     },
     //change fabic in step 1
     changeFabric(fabric_id) {
@@ -306,7 +307,7 @@ export default {
       var kiji_img = Object.keys(items)
         .map((key) => items[key]) // turn an array of keys into array of items.
         .filter((item) => item.product_id === fabric_id)[0].kiji_image;
-      var obj_bg_path = this.server_img_path + "product/" + kiji_img;
+      var obj_bg_path = this.simu_img_path + "product/" + kiji_img;
       this.obj_bg_path = obj_bg_path;
     },
     submitFabric(fabric_id) {
@@ -370,6 +371,10 @@ export default {
     // this.order_id = this.$route.query.id;
     // console.log(this.$session.getAll())
   },
-  computed: {},
+  computed: {
+    showSimuPage: function(){
+      return (this.step == 2 && this.itemSelectedData.length > 0)
+    }
+  },
 };
 </script>

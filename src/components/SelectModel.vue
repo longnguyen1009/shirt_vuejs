@@ -6,11 +6,17 @@
         <p>着丈を短くすることで、軽快な印象を強調</p>
       </div>
       <div class="simu-model-imgList">
-        <VueSlickCarousel v-bind="settings">
+        <carousel v-bind="settings">
+          <slide v-if="modelDetail.images.img1">
             <div class="simu-model-img"><img :src="model_img_path + modelDetail.images.img1" alt=""></div>
+          </slide>
+          <slide v-if="modelDetail.images.sub_images1">
             <div class="simu-model-img"><img :src="model_img_path + modelDetail.images.sub_images1" alt=""></div>
+          </slide>
+          <slide v-if="modelDetail.images.sub_images2">
             <div class="simu-model-img"><img :src="model_img_path + modelDetail.images.sub_images2" alt=""></div>
-        </VueSlickCarousel>
+          </slide>
+        </carousel>
       </div>
     </div>
     <div class="simu-model-right d-flex flex-column justify-content-between">
@@ -23,14 +29,14 @@
         <ul class="simu-model-itemList">
           <li v-for="(Items, id) in modelDetail.itemlist" :key="id"
             class="d-flex justify-content-start">
-            <div class="simu-model-itemType">
-              <input type="checkbox" :id="'itemType-'+Items.item_type_id" value="option1">
+            <div class="simu-model-itemType" v-if="Items.items.length > 1">
+              <input type="checkbox" :id="'itemType-'+Items.item_type_id">
               <label class="form-check-label" :for="'itemType-'+Items.item_type_id">{{Items.item_type_name}}</label>
             </div>
-            <div class="simu-model-item d-flex justify-content-around flex-grow-1">
+            <div class="simu-model-item d-flex justify-content-between flex-grow-1">
               <div class="form-check form-check-inline" 
                 v-for="item in Items.items" :key="item.id">
-                <input type="checkbox" :id="'itemId-' + item.id" value="option1">
+                <input type="radio" :id="'itemId-' + item.id" v-model="itemSelected[Items.item_type_id]" :value="item.id">
                 <label class="form-check-label" :for="'itemId-' + item.id">{{item.name}}</label>
               </div>  
             </div>
@@ -48,30 +54,89 @@
 
 <script>
 
-//vue-slick
-import VueSlickCarousel from 'vue-slick-carousel'
-import 'vue-slick-carousel/dist/vue-slick-carousel.css'
-import 'vue-slick-carousel/dist/vue-slick-carousel-theme.css'
+//Carousel
+import { Carousel, Slide } from 'vue-carousel';
 
 export default {
   name: "SelectModel",
-  components: {VueSlickCarousel},
+  components: {Carousel,Slide},
   data() {
     return {
       modelDetail: [],
+      // modelDetail: {
+      //   "id": 6,
+      //   "name": "REGULAR",
+      //   "price": 60000,
+      //   "style_id": 6,
+      //   "style_name": "CLASSIC",
+      //   "images": {
+      //   "img1": "0825151657_6125e059d9a0e.jpg",
+      //   "sub_images1": "0825151704_6125e0603229e.jpg",
+      //   "sub_images2": "0825151713_6125e069579d6.jpg"
+      //   },
+      //   "detail": "オーセンティックで洗練されたフォルムが特徴のREGULARモデル。",
+      //   "itemlist": {
+      //   "1": {
+      //   "item_type_id": 1,
+      //   "item_type_name": "Suit",
+      //   "items": [
+      //     {
+      //     "id": 4,
+      //     "name": "スーツ（シングル）"
+      //     }
+      //   ]
+      //   },
+      //     "2": {
+      //     "item_type_id": 2,
+      //     "item_type_name": "Jacket",
+      //     "items": [
+      //     {
+      //     "id": 1,
+      //     "name": "ジャケット（シングル）"
+      //     }
+      //     ]
+      //   },
+      //   "4": {
+      //   "item_type_id": 4,
+      //   "item_type_name": "Pants",
+      //   "items": [
+      //   {
+      //   "id": 3,
+      //   "name": "パンツ"
+      //   }
+      //   ]
+      //   },
+      //   "5": {
+      //   "item_type_id": 5,
+      //   "item_type_name": "Vest",
+      //   "items": [
+      //   {
+      //   "id": 5,
+      //   "name": "ヴェスト"
+      //   }
+      //   ]
+      //   }
+      //   }
+      // },
       settings: {
-        "dots": false,
-        "arrows" : true,
-        "infinite": true,
-        "slidesToShow": 1,
-        "slidesToScroll": 1,
+        "perPage": 1,
+        "scrollPerPage": false,
+        "paginationEnabled": false,
+        "navigationEnabled": true,
+        "loop": true
       },
+      itemSelected: []
     };
   },
   methods: {
     doOrder(){
-      const modelData = {id: this.modelId}
-      this.$emit("modelSelected", modelData);
+      var selectedData = this.itemSelected.filter(val => (val!==undefined) && (val!==null));
+      if(selectedData.length > 0){
+        this.$emit("item-selected", selectedData)
+      } else{
+        alert("アイテムを選択していません。")
+        return false
+      }
     }
   },
   props: ["model_img_path", "modelId"],
@@ -79,7 +144,9 @@ export default {
      this.axios.get('http://54.248.46.255/myshop/getmodel/'+this.modelId)
       .then(response => {
         this.modelDetail = response.data.data
-        console.log(this.modelDetail.images.img1)
+        // this.modelDetail.itemlist.map(function(value, key) {
+        //   this.itemSelected.push({"type": value.item_type_id, "itemid": ""})
+        // })
       })
       .catch(error => console.log(error))
   },

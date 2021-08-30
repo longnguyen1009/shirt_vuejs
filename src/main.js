@@ -17,7 +17,7 @@ global.jquery = jQuery
 global.$ = jQuery
 window.$ = window.jQuery = require('jquery')
 
-//bootstrap-vue
+// //bootstrap-vue
 import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
@@ -26,6 +26,10 @@ Vue.use(BootstrapVue)
 // session
 import VueSession from 'vue-session'
 Vue.use(VueSession)
+
+// vue carousel
+import VueCarousel from 'vue-carousel';
+Vue.use(VueCarousel);
 
 new Vue({
   router,

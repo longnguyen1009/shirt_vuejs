@@ -18,6 +18,5 @@ export default {
 </script>
 
 <style>
-@import "./assets/styles/common.css";
 @import "./assets/styles/global.css";
 </style>
