@@ -42,9 +42,18 @@ body{
 }
 
 /* VueCarousel */
+.VueCarousel{
+  width: 100%;
+  height: 100%;
+}
 .VueCarousel-slide
 {
     height: inherit !important;
+    cursor: -webkit-grabbing;
+    cursor: grabbing;
+}
+.VueCarousel-slide>div{
+  height: 100% !important;
 }
 .VueCarousel-slide img
 {
@@ -79,6 +88,18 @@ body{
 .container-selectstyle{
   position: relative;
   height: 610px;
+}
+.simu-styleNone{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.simu-styleNone p{
+  font-size: 18px;
+}
+.simu-styleNone i{
+  margin-right: 10px;
 }
 .simu-styleItem{
   display: block !important;
@@ -203,6 +224,11 @@ body{
   font-size: 13px;
   padding-top: 5px;
 }
+.simu-model-imgList{
+  height: 100%;
+  width: 100%;
+}
+
 .simu-model-right{
   padding: 30px;
   color: #fff;
@@ -250,6 +276,9 @@ body{
   width: 220px;
   border-radius: 0;
 }
+.item_select_off{
+  display: none;
+}
 
 /* SimuOrder */
 .container-ordersimu{
@@ -260,6 +289,7 @@ body{
   justify-content: space-between;
   align-items: stretch;
   height: 100%;
+  position: relative;
 }
 /* SimuLeft */
 .container-simuleft{
@@ -313,7 +343,6 @@ body{
 }
 
 
-
 /*  SimuRight */
 .container-simuright{
   width: 50%;
@@ -347,13 +376,45 @@ body{
   flex-grow: 1;
   height: 100%;
   overflow: auto;
-  padding: 2.5px 26px;
   font-size: 13px;
 }
-.simuright-options-rowTop{
-  padding: 15px;
+.simuright-optionLists{
+  background-color: #3A3A3A;
+  margin: 0;
+  padding: 0;
+}
+
+.optionLv1, .optionLv2{
+  margin: 0 24px;
+  padding: 15px 8px;
+  position: relative;
+}
+.optionLv1{
   border-bottom: 1px solid #676665;
 }
+.optionLv2{
+  border-bottom: 1px solid #707070;
+}
+.simuright-options-label{
+  width: 148px;
+}
+.optionLv1::before, .optionLv2::before{
+  position: absolute;
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content: "\f054";
+  top: 50%;
+  transform: translateY(-50%);
+  right: 10px;
+}
+.optionLv1.show::before{
+  content: "\f078";
+}
+
+
+
+
+
 
 .simuright-top .simuright-modeBtn{
   color: #fff;
@@ -380,7 +441,21 @@ body{
   background-color: #676665;
 }
 
+
+
+
+
 /* simuright-sub */
+.simu-subpage{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #444444;
+  z-index: 1;
+}
+
 .simuright-sub{
   position: absolute;
   top: 0;
@@ -390,31 +465,32 @@ body{
   background-color: #444444;
   z-index: 2;
 }
-.simuright-sub-name{
-  height: 50px;
-  border-bottom: 1px solid #676665;
-  font-size: 13px;
-  text-align: center;
+
+/* transiton */
+.transitionRightToLeft-enter-active, .transitionRightToLeft-leave-active {
+  position: absolute;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  transition: all .4s ease;
 }
-.simuright-sub-navi{
-  height: 104px;
-  border-top: 1px solid #676665;
-  justify-content: space-evenly;
+.transitionRightToLeft-enter, .transitionRightToLeft-leave-to {
+  position: absolute;
+  opacity: 0;
+  width: 30%;
+  height: 100%;
+  left: 70%;
+  transition: all .2s cubic-bezier(1.0, 0.5, 0.8, 1.0); 
 }
-.simuright-sub-navi .simu-common-btn{
-  width: 40%;
-  max-width: 220px;
-}
-.simuright-sub-content{
-  flex-grow: 1;
-  position: relative;
-}
+
 /* SimuKiji */
 
-.simuright-sub-searchTop{
+.simuright-sub-nav{
   padding: 0 32px;
-  height: 40px;
   border-bottom: 1px solid #676665;
+}
+.simuright-sub-searchTop{
+  height: 40px;
 }
 .simuright-sub-searchTop input{
   background-color: transparent;
@@ -431,7 +507,7 @@ body{
 .simuright-sub-searchSelect{
   font-size: 13px;
 }
-.container-kiji{
+.simuright-sub>div{
   height: 100%;
 }
 .simuright-sub-kiji{
@@ -443,13 +519,18 @@ body{
   top: 0;
   left: 0;
 }
-.simuright-kiji-list{
+.simuright-sub-result{
   flex-grow: 1;
   overflow-y: auto;
   height: 100%;
   justify-content: start;
   align-content: flex-start;
 }
+.simuright-sub-result .optionItem{
+  width: 33.3%;
+  position: relative;
+}
+
 .simuright-kiji-list .kijiItem{
   width: 33.3%;
   height: 171px;
@@ -485,6 +566,138 @@ body{
   color: #333;
   font-family: "Font Awesome 5 Free";
 }
+
+/* OPTION */
+.simuright-sub-name{
+  height: 50px;
+  border-bottom: 1px solid #676665;
+  font-size: 13px;
+  text-align: center;
+}
+.simuright-sub-navi{
+  height: 104px;
+  border-top: 1px solid #676665;
+  justify-content: space-evenly;
+}
+.simuright-sub-navi .simu-common-btn{
+  width: 40%;
+  max-width: 220px;
+}
+.simuright-sub-content{
+  flex-grow: 1;
+  position: relative;
+}
+.simuright-sub-contentBox{
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  position: absolute;
+  height: 100%;
+}
+.optionParentList{
+  width: 100%;
+  list-style: none;
+  height: 40px;
+  padding: 0;
+  margin: 0;
+}
+.optionParentList .optionParent{
+  flex-grow: 1;
+  text-align: center;
+  margin: 0 5px;
+  line-height: 40px;
+}
+.optionParentList .optionParent.active{
+  border-bottom: 1px solid #fff;
+}
+.optionParentCurrent{
+  height: 70px;
+}
+
+
+
+.simuright-sub-result .optionItem img{
+  width: 100%;
+  height: 100%;
+}
+.simuright-sub-result .simuright-option-name{
+  position: absolute;
+  width: 70%;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: bold;
+}
+.simuright-option-icon{
+  position: absolute;
+  top: 15px;
+  right: 30px
+}
+.optionItem.active{
+  border: 2px solid #333;
+}
+.optionItem.active::before{
+  content: "\f058";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  font-size: 20px;
+  color: #333;
+  font-family: "Font Awesome 5 Free";
+}
+
+/* KijiDetail */
+.container-kiji-detail{
+  width: 100%;
+  height: 100%;
+}
+.kiji-detail-bottom{
+  height: 220px;
+  background-color: rgba(48, 48, 48, .9);
+  padding: 30px;
+
+}
+.kiji-detail-top{
+  width: 100%;
+  height: calc(100% - 220px);
+  position: relative;
+}
+.kiji-detail-top img{
+  width: 100%;
+  height: 100%;
+}
+.kiji-detail-top .kiji-detail-info{
+  position: absolute;
+  bottom: 30px;
+  left: 30px;
+}
+.kiji-detail-code{
+  font-size: 17px;
+}
+.kiji-detail-name{
+  font-size: 15px;
+}
+.kiji-detail-closeBtn{
+  position: absolute;
+  top: 15px;
+  right: 30px;
+  font-size: 26px;
+  padding: 5px 7.5px;
+  line-height: 1;
+}
+.kiji-detail-description, .kiji-detail-price{
+  font-size: 13px;
+}
+.kiji-detail-confirm .simu-common-btn{
+  width: 50%;
+  background-color: #676665;
+}
+
+
+
+
+
 
 
 

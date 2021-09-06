@@ -14,6 +14,8 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
   name: "Step",
   data() {
@@ -50,10 +52,11 @@ export default {
     };
   },
   methods: {
-    // changestep(id) {
-    //   this.$emit("changeStep", id);
-    // },
+    
   },
-  props: ["step"],
+  props: [],
+  computed: {
+    ...mapGetters(['step'])
+  }
 };
 </script>

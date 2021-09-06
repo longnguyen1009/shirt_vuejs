@@ -1,6 +1,7 @@
 import Vue from "vue";
 import App from "./App.vue";
 import router from "./router";
+import store from './store';
 
 // import vue-panzoom
 import panZoom from 'vue-panzoom'
@@ -31,7 +32,11 @@ Vue.use(VueSession)
 import VueCarousel from 'vue-carousel';
 Vue.use(VueCarousel);
 
+//CORS
+import Cors from 'cors'
+Vue.use(Cors);
+
 new Vue({
-  router,
+  router,store,
   render: (h) => h(App),
 }).$mount("#app");

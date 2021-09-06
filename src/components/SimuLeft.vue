@@ -3,11 +3,11 @@
     <div class="simuleft-top">
       <h3 class="simuleft-top-style">CLASS</h3>
       <h4 class="simuleft-top-model">Regular Model</h4>
-      <p class="simuleft-top-itemcombine">シングル2ピース</p>
+      <p class="simuleft-top-itemcombine" v-if="itemCombineActive">{{itemCombineActive.name}}</p>
     </div>
     <div class="simuleft-main">
       <div style="display: none" class="kiji_preloader">
-          <img v-bind:src="kiji_img_src" @load="kijiLoaded" alt="" />
+          <img v-bind:src="kiji_img_src" @load="kijiLoaded" alt="" kiji-id=""/>
       </div>
       <div class="simuleft-sample">
             <img :src="design.sample_path" class="img_sample" />
@@ -35,24 +35,16 @@
 </template>
 
 <script>
+
+import { mapGetters } from 'vuex'
+
 export default {
   name: "SimuLeft",
   data() {
     return {
     };
   },
-  props: [
-    "simu_img_path",
-    "itemData",
-    "itemActive",
-
-    "step",
-    "obj_bg_path",
-    "viewMode",
-    "partNo",
-    "partNo_zentai",
-    "completeOrder",
-  ],
+  props: ["itemData"],
   methods: {
     defaultLoaded() {
       $(".loadding_bl").addClass("on");
@@ -76,159 +68,98 @@ export default {
         .attr("width", kiji[0].naturalWidth)
         .attr("height", kiji[0].naturalHeight);
     },
-    //test change erigata 衿型
-    changeEriGata() {
-      var target = document.querySelector(".suitmodel").contentDocument;
-      if (
-        $(target)
-          .find("pattern#img1")
-          .attr("style")
-      ) {
-        $(target)
-          .find("pattern")
-          .not("#img1")
-          .attr("style", "display: none;");
-        $(target)
-          .find("pattern#img1")
-          .removeAttr("style");
-      } else {
-        $(target)
-          .find("pattern")
-          .not("#img2")
-          .attr("style", "display: none;");
-        $(target)
-          .find("pattern#img2")
-          .removeAttr("style");
-      }
-    },
-    modalSvgLoad() {
-      var target = document.querySelector(".suitmodel02").contentDocument;
-      var tex = $(".simulator__preloader").find("img");
-      $(target)
-        .find("pattern")
-        .not("#buttons")
-        .find("image")
-        .attr("xlink:href", tex[0].currentSrc)
-        .attr("width", tex[0].naturalWidth)
-        .attr("height", tex[0].naturalHeight);
-      $(target)
-        .find("pattern")
-        .not("#buttons")
-        .attr("width", tex[0].naturalWidth)
-        .attr("height", tex[0].naturalHeight);
-    },
     svgLoaded02() {
       this.kijiLoaded();
       setTimeout(function() {
         $(".loadding_bl").removeClass("on");
       }, 500);
     },
-    modalFullviewShow: function() {
-      this.cloneData01 = $(".simu_price").html();
-      $(".simu-modal-fullview").addClass("active");
-    },
-    modalFullviewHide: function() {
-      $(".simu-modal-fullview").removeClass("active");
-    },
+
+    // modalSvgLoad() {
+    //   var target = document.querySelector(".suitmodel02").contentDocument;
+    //   var tex = $(".simulator__preloader").find("img");
+    //   $(target)
+    //     .find("pattern")
+    //     .not("#buttons")
+    //     .find("image")
+    //     .attr("xlink:href", tex[0].currentSrc)
+    //     .attr("width", tex[0].naturalWidth)
+    //     .attr("height", tex[0].naturalHeight);
+    //   $(target)
+    //     .find("pattern")
+    //     .not("#buttons")
+    //     .attr("width", tex[0].naturalWidth)
+    //     .attr("height", tex[0].naturalHeight);
+    // },
+    // modalFullviewShow: function() {
+    //   this.cloneData01 = $(".simu_price").html();
+    //   $(".simu-modal-fullview").addClass("active");
+    // },
+    // modalFullviewHide: function() {
+    //   $(".simu-modal-fullview").removeClass("active");
+    // },
     notfounder: function(e) {
       e.target.src = this.simu_img_path + "notfounder.png";
-    },
-    completeOrderCheck: function() {
-      if (this.completeOrder) {
-        window.location.replace("/sample/test01/cart.html");
-      } else {
-        alert("選択されていない項目があります。ご確認ください。");
-        return false;
-      }
-    },
+    }
   },
   watch: {
-    model_path_change: function() {
-      $(".loadding_bl").addClass("on");
-    },
+
   },
   mounted() {
-    this.defaultLoaded();
+    // this.defaultLoaded();
   },
   computed: {
+    ...mapGetters([
+        'kiji_img_path',
+        'simu_img_path',
+        'option_img_path',
+        'optionMode',
+        'styleSelected',
+        'modeSelected',
+        'itemSelected',
+        'designActive',
+        'kijiActive'
+      ]),
     //design path
     design: function() {
-       $(".loadding_bl").addClass("on")
-      return {
-        sample_path: this.simu_img_path + 'designs/' + this.designActive + "/sample.png",
-        design_path: this.simu_img_path + 'designs/' + this.designActive + "/design.svg",
-        shadow_path: this.simu_img_path + 'designs/' + this.designActive + "/shadow.png",
+      $(".loadding_bl").addClass("on")
+      if(this.designActive_path){
+        return {
+          sample_path: this.simu_img_path + 'designs/' + this.designActive_path + "/sample.png",
+          design_path: this.simu_img_path + 'designs/' + this.designActive_path + "/design.svg",
+          shadow_path: this.simu_img_path + 'designs/' + this.designActive_path + "/shadow.png",
+        }
+      } else{
+        return {}
       }
     },
     //kiji path
     kiji_img_src: function(){
       return "/html/upload/save_image/0730151143_6103981fcfa43.jpeg"
     },
-    designActive: function(){
-      var itemObjectActive = Object.keys(this.itemData)
-                  .map((key) => this.itemData[key])
-                  .filter((item) => item.id === this.itemActive)[0]
-      if(itemObjectActive){
-        return itemObjectActive.design_id
+    designActive_path: function(){
+      if(this.itemData && this.designActive){
+        return this.designActive
+      } else{
+        return null
       }
     },
-
-    model_path_change: function() {
-      //return this.design_path.model_path;
-    },
-    //option path
-    option_main_path: function() {
-      var option_main_src = "";
-      if (this.viewMode != "") {
-        option_main_src =
-          this.simu_img_path +
-          "simulator/options/" +
-          this.partNo_zentai.split("_all")[0] +
-          "/";
-      } else {
-        if (this.partNo != "") {
-          option_main_src =
-            this.simu_img_path + "simulator/options/" + this.partNo + "/";
-        } else {
-          option_main_src = this.simu_img_path + "simulator/options/" + "3/";
+    itemCombineActive: function(){
+      console.log(this.designActive)
+      if(this.itemData){
+        var item_combine_id = Object.keys(this.itemData.design)
+                  .map((key) => this.itemData.design[key])
+                  .filter((item) => item.design_id === this.designActive)[0].item_id
+        var itemObjectActive = Object.keys(this.itemData.items)
+                  .map((key) => this.itemData.items[key])
+                  .filter((item) => item.id === item_combine_id)[0]
+        if(itemObjectActive){
+          return itemObjectActive
         }
+      } else{
+        return null
       }
-      return option_main_src;
-    },
-    option_target: function() {
-      //step 3
-      var option_target_temp = "";
-      if (this.viewMode == "all" || this.partNo == "") {
-        option_target_temp = "all";
-      } else {
-        option_target_temp = "up";
-      }
-      return option_target_temp;
-    },
-    buttons: function() {
-      return "19";
-    },
-    flowers: function() {
-      return "05";
-    },
-    option_button_path: function() {
-      return (
-        this.option_main_path +
-        this.option_target +
-        "/button/" +
-        this.buttons +
-        ".png"
-      );
-    },
-    option_flower_path: function() {
-      return (
-        this.option_main_path +
-        this.option_target +
-        "/flower/" +
-        this.flowers +
-        ".png"
-      );
-    },
+    }
   },
 };
 </script>

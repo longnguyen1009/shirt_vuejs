@@ -1,13 +1,13 @@
 <template>
   <div class="container-selectstyle">
-    <div class="simu-styleList" v-if="styleItems.length > 0">
+    <div class="simu-styleList" v-if="styleItems != null && styleItems.length > 0">
       <carousel v-bind="settings">
           <slide class="simu-styleItem" v-for="Item in styleItems" :key="Item.id">
             <div class="simu-styleItem-front">
-              <img :src="style_img_path + Item.image" alt="" @click="styleClick(Item.id)">
-              <div class="simu-styleItem-label" @click="styleClick(Item.id)">
+              <img :src="style_img_path + Item.image" alt="" @click="styleClick(Item.id)" @touchstart="styleClick(Item.id)">
+              <div class="simu-styleItem-label" @click="styleClick(Item.id)" @touchstart="styleClick(Item.id)">
                 <h2 class="simu-styleItem-name">{{Item.name}}</h2>
-                <h3 class="simu-styleItem-productname">{{Item.category}}&nbsp;&nbsp;￥{{Item.product_price}}</h3>
+                <h3 class="simu-styleItem-productname">{{Item.category}}&nbsp;&nbsp;</h3>
               </div>
               <button class="simu-styleItem-btn" @click="">MORE DETAILS</button>
             </div>
@@ -15,9 +15,7 @@
               <span class="closeBtn" @click="styleClose(Item.id)"><i class="fas fa-times"></i></span>
               <div class="simu-styleItem-detailTop">
                 <h2 class="simu-styleItem-name">{{Item.name}}</h2>
-                <h3 class="simu-styleItem-productname">{{Item.product_name}}&nbsp;&nbsp;￥{{Item.product_price}}</h3>
                 <p class="simu-styleItem-description">{{Item.detail}}</p>
-                <p class="simu-styleItem-completeTime">{{Item.detail}}～</p>
               </div>
               <div class="simu-styleItem-model">
                 <ul class="simu-styleItem-modelList">
@@ -30,12 +28,17 @@
           </slide>
       </carousel>
     </div>
+    <div class="simu-styleNone" v-if="styleItems != null && styleItems.length == 0">
+      <p><i class="fas fa-exclamation-triangle"></i><span>スタイルはありませんでした。</span></p>
+    </div>
+    <div class="loadding_bl simu-style-loading">
+      <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+    </div>
     <transition name="simuModelPage">
       <SelectModel 
-        :model_img_path="model_img_path"
         v-if="modelActive != 0"
+        :styleId="styleActive"
         :modelId="modelActive"
-        @item-selected="itemSelected($event)"
       />
     </transition>
   </div>
@@ -45,15 +48,16 @@
 
 //vue-carousel
 import { Carousel, Slide } from 'vue-carousel';
-
 import SelectModel from './SelectModel.vue'
+import { mapGetters } from 'vuex'
+
 
 export default {
   name: "SelectStyle",
   components: { Carousel,Slide,SelectModel},
   data() {
     return {
-      styleItems: [],
+      styleItems: null,
       // styleItems: [
       //   {
       //   "id": 9,
@@ -152,23 +156,35 @@ export default {
     modelSelect(id){
       this.modelActive = id
     },
-    itemSelected(itemData){
-      this.$emit("item-selected", itemData);
+    getStyleFromAPI: async function(){
+      let ret = null
+      await this.axios.get('http://54.248.46.255/myshop/getstyle/')
+        .then(response => {
+          ret = response.data.data
+        })
+        .catch(error => console.log(error))
+      return ret
+    },
+    setStyleData: async function(){
+      this.styleItems = await this.getStyleFromAPI()
+      console.log(this.styleItems)
     }
   },
-  props: ["style_img_path", "model_img_path"],
+  props: [],
   mounted() {
-    this.axios.get('http://54.248.46.255/myshop/getstyle/1')
-    .then(response => {
-      this.styleItems = response.data.data
-    })
-    .catch(error => console.log(error))
+    $('.simu-style-loading').addClass("on")
+    this.setStyleData()
+    setTimeout(function() {
+      $(".simu-style-loading").removeClass("on")
+    }, 300);
   },
+  computed: {
+    ...mapGetters(['style_img_path'])
+  }
 };
 </script>
 
 <style scoped>
-	
 </style>
 
 
