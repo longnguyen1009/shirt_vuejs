@@ -10,17 +10,21 @@ export default new Vuex.Store({
     style_img_path: "/html/upload/save_image/",
     model_img_path: "/html/upload/save_image/",
     kiji_img_path: "/html/upload/save_image/",
-    option_img_path: "/html/upload/simu_model/options/",
+    option_img_path: "/html/upload/save_image/",
 
     styleSelected: 0,
-    modeSelected: 0,
+    modelSelected: 0,
     itemSelected: [],
 
     optionMode: 2,
 
-    designActive: 0,
-    kijiActive: null
+    designActive: {},
+    kijiActive: null,
 
+    styleData: {},
+    modelData: {},
+
+    optionSelectedData:[]
   },
   getters: {
     //step
@@ -35,13 +39,18 @@ export default new Vuex.Store({
 
     //
     styleSelected: state => state.styleSelected,
-    modeSelected: state => state.modeSelected,
+    modelSelected: state => state.modelSelected,
     itemSelected: state => state.itemSelected,
 
     optionMode: state => state.optionMode,
     designActive: state => state.designActive,
-    kijiActive: state => state.kijiActive
+    kijiActive: state => state.kijiActive,
 
+    //save data from api
+    styleData: state => state.styleData,
+    modelData: state => state.modelData,
+
+    optionSelectedData: state => state.optionSelectedData
   },
   mutations: {
     changeStep(state, newStep){
@@ -49,7 +58,7 @@ export default new Vuex.Store({
     },
     changeStyleModelItem(state, style_model_item_data){
       state.styleSelected = style_model_item_data.style,
-      state.modeSelected = style_model_item_data.model,
+      state.modelSelected = style_model_item_data.model,
       state.itemSelected = style_model_item_data.item
     },
     changeDesign(state, designId){
@@ -57,6 +66,25 @@ export default new Vuex.Store({
     },
     changeKiji(state, kiji){
       state.kijiActive = kiji
+    },
+    changeStyleData(state, styleData){
+      state.styleData = styleData
+    },
+    changeModelData(state, modelData){
+      state.modelData = modelData
+    },
+    changeOptionData(state, optionData){
+      const existOptionIndex = state.optionSelectedData.findIndex(
+        (item) => (
+          item.design_id == optionData.design_id,
+          item.parent_id == optionData.parent_id,
+          item.option_id == optionData.option_id
+        ))
+      if(existOptionIndex !== -1){
+        state.optionSelectedData[existOptionIndex] = optionData
+      } else{
+        state.optionSelectedData.push(optionData)
+      }
     }
   },
   actions: {
@@ -71,7 +99,15 @@ export default new Vuex.Store({
     },
     handleChangeKiji(context, kiji){
       context.commit('changeKiji', kiji)
+    },
+    handleChangeStyleData(context, styleData){
+      context.commit('changeStyleData', styleData)
+    },
+    handleChangeModelData(context, modelData){
+      context.commit('changeModelData', modelData)
+    },
+    handleChangeOption(context, optionData){
+      context.commit('changeOptionData', optionData)
     }
-
   }
 })

@@ -97,9 +97,7 @@ export default {
     ]),
     kijiDetailData: function(){
       if(this.kijiDetailId != 0){
-        return Object.keys(this.kijiList)
-                  .map((key) => this.kijiList[key])
-                  .filter((item) => item.id === this.kijiDetailId)[0];
+        return this.kijiList.filter((item) => item.id === this.kijiDetailId)[0];
       }
     }
   }

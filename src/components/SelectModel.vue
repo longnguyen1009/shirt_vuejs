@@ -82,6 +82,7 @@ export default {
       if(selectedData.length > 0){
         this.$store.dispatch('handleChangeItem', {style: this.styleId, model: this.modelId, item: selectedData})
         this.$store.dispatch('handleChangeStep', 2)
+        this.$store.dispatch('handleChangeModelData', this.modelDetail)
       } else{
         alert("アイテムを選択していません。")
         return false

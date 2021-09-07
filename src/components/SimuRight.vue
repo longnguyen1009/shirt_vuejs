@@ -6,14 +6,14 @@
           <button class="simuright-modeBtn" :class="{active: optionMode == 2}">リストから選択</button>
         </div>
         <select aria-label="select-item" class="form-control" v-model="designActiveId" @change="changeItem($event)">
-            <option v-for="design in designData" :key="design.design_id" :value="design.design_id">
-              {{design.label}}
+            <option v-for="(design, id) in designData" :key="id" :value="id">
+              {{design.design_label}}
             </option>
         </select>
       </div>
       <div class="simuright-options">
         <div class="simuright-options-row">
-          <div class="simuright-options-rowTop d-flex optionLv1"
+          <div class="simuright-options-rowTop d-flex optionLv1 align-items-center"
             @click="openDetailOption('kiji')">
             <span class="simuright-options-label">生地</span>
             <div class="simuright-options-name"
@@ -21,18 +21,18 @@
           </div>
         </div>
         <div class="simuright-options-row" 
-          v-for="OptionCate in optionCateData" :key="OptionCate.genre">
-          <div class="simuright-options-rowTop d-flex optionLv1">
-            <span class="simuright-options-label">{{OptionCate.genre_name}}</span>
+          v-for="OptionParents in optionParentData" :key="OptionParents.genre_id">
+          <div class="simuright-options-rowTop optionLv1 d-flex align-items-center">
+            <span class="simuright-options-label">{{OptionParents.genre_name}}</span>
             <div class="simuright-options-name"></div>
           </div>
           <div class="simuright-options-rowDown">
             <ul class="simuright-optionLists">
-              <li class="optionLv2 d-flex" 
-              v-for="Option in OptionCate.option_list"
-              :key="Option.id"
-              @click="openDetailOption(Option.id)">
-                <span class="simuright-options-label">{{Option.name}}</span>
+              <li class="optionLv2 d-flex align-items-center"
+              v-for="Options in OptionParents.options" :key="Options.parent_id"
+              @click="openDetailOption(Options.parent_id)">
+                <span class="simuright-options-img"><img :src="option_img_path+Options.img" alt=""></span>
+                <span class="simuright-options-label">{{Options.name}}</span>
                 <div class="simuright-options-name"></div>
               </li>
             </ul>
@@ -52,15 +52,14 @@
 
       <transition name="transitionRightToLeft">
         <div class="simuright-sub" 
-        v-if="detailOptionActive != 0">
+          v-if="detailOptionActive != 0">
           <SelectKiji
             v-if="detailOptionActive == 'kiji'"
             :kijiList="kijiData"
             @closeOption="closeDetailOption($event)"
           />
-          <SelectButton
-            v-if="detailOptionActive == 1"
-            :button_img_path="option_img_path"
+          <SelectOption
+            v-if="detailOptionActive && detailOptionActive != 'kiji'"
             @closeOption="closeDetailOption($event)"
           />
         </div>
@@ -71,16 +70,17 @@
 <script>
 
 import SelectKiji from "../components/SelectKiji.vue"
-import SelectButton from "../components/SelectButton.vue"
+import SelectOption from "../components/SelectOption.vue"
 import { mapGetters } from 'vuex';
 
 export default {
     name: "SimuRight",
-    components: {SelectKiji, SelectButton},
+    components: {SelectKiji, SelectOption},
     data() {
         return {
-          designActiveId: null,
+          designActiveId: 0,
           itemData: null,
+          optionParentData: {},
           detailOption: {
             1: 'kiji',
           },
@@ -100,6 +100,7 @@ export default {
     methods: {
       openDetailOption: function(optionid){
         this.detailOptionActive = optionid
+
       },
       closeDetailOption: function(){
         this.detailOptionActive = 0
@@ -110,18 +111,17 @@ export default {
           $('.kiji_preloader img').attr('src', this.kiji_img_path + this.kijiObjectActive.img)
           $('.kiji_preloader img').attr('kiji-id', this.kijiActive)
         }
-
       },
       changeItem: function(){
-        this.$store.dispatch('handleChangeDesign', this.designActiveId)
+        // this.$store.dispatch('handleChangeDesign', this.designActiveSplit())
       },
-
+      
       //Promise to fetch Kiji
       getKijiFromAPI: async function(){
         let ret = null
         await this.axios.get('http://54.248.46.255/myshop/getkijilist/')
           .then(response => {
-            console.log(response)
+            // console.log(response)
             ret = response.data.data
           })
           .catch(error => console.log(error))
@@ -147,21 +147,44 @@ export default {
       setItemData: async function(){
         this.itemData = await this.getItemData()
       },
+      getOptionParentData: async function(){
+        var data = new FormData();
+        data.append('design_id', this.designActive.design_id);
+        let ret = null
+        if(this.designActive.design_id){
+          await this.axios.post('http://54.248.46.255/myshop/getoptionparent/', data)
+            .then(response => {
+              console.log(response.data.data)
+              ret = response.data.data
+            })
+            .catch(error => console.log(error))
+        } 
+        return ret
+      },
+      updateOptionParent: async function(){
+        this.optionParentData = await this.getOptionParentData()
+      }
     },
     mounted() {
       this.setItemData()
       this.setKijiData()
-      console.log(this.styleSelected)
-      console.log(this.modeSelected)
-      console.log(this.itemSelected)
+      console.log({
+        styleId: this.styleSelected,
+        modelId: this.modelSelected,
+        itemId: this.itemSelected
+      })
     },
     watch: {
-      designDefaultActive: function(){
-        this.designActiveId = this.designDefaultActive
-        this.$store.dispatch('handleChangeDesign', this.designDefaultActive)
-      },
       itemData: function(){
         this.$emit('sendItemData', this.itemData)
+      },
+      designActiveSplit: function(){
+        this.$store.dispatch('handleChangeDesign', this.designActiveSplit)
+      },
+      designActive: function(){
+        console.log(this.designActive)
+
+        this.updateOptionParent()
       }
     },
     computed: {
@@ -170,28 +193,30 @@ export default {
         'option_img_path',
         'optionMode',
         'styleSelected',
-        'modeSelected',
+        'modelSelected',
         'itemSelected',
         'designActive',
         'kijiActive'
       ]),
       kijiObjectActive: function(){
-        return Object.keys(this.kijiData)
-              .map((key) => this.kijiData[key])
-              .filter((item) => item.id === this.kijiActive)[0]
+        return this.kijiData.filter((item) => item.id === this.kijiActive)[0]
       },
       designData: function(){
-        if(this.itemData){
-          return this.itemData.design
-        } else {
-          return null
+        return (this.itemData) ? this.itemData.design : null
+      },
+      designActiveSplit: function(){
+        if(this.designData){
+          return {
+            combine_id: this.designData[this.designActiveId].combine_id,
+            item_id: this.designData[this.designActiveId].item_id,
+            design_id: this.designData[this.designActiveId].design_id
+          }
+        } else{
+          return {}
         }
       },
-      designDefaultActive(){
-        if(this.designData){
-          return this.designData[0].design_id
-        }
-      }
+      
+
 
     },
 };

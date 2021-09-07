@@ -1,8 +1,8 @@
 <template>
   <div class="container-simuleft">
     <div class="simuleft-top">
-      <h3 class="simuleft-top-style">CLASS</h3>
-      <h4 class="simuleft-top-model">Regular Model</h4>
+      <h3 class="simuleft-top-style">{{styleObject.name}}</h3>
+      <h4 class="simuleft-top-model">{{modelData.name}}</h4>
       <p class="simuleft-top-itemcombine" v-if="itemCombineActive">{{itemCombineActive.name}}</p>
     </div>
     <div class="simuleft-main">
@@ -115,10 +115,12 @@ export default {
         'option_img_path',
         'optionMode',
         'styleSelected',
-        'modeSelected',
+        'modelSelected',
         'itemSelected',
         'designActive',
-        'kijiActive'
+        'styleData',
+        'modelData'
+
       ]),
     //design path
     design: function() {
@@ -138,28 +140,23 @@ export default {
       return "/html/upload/save_image/0730151143_6103981fcfa43.jpeg"
     },
     designActive_path: function(){
-      if(this.itemData && this.designActive){
-        return this.designActive
+      return (this.itemData && this.designActive) ? this.designActive.design_id : null
+    },
+    itemCombineActive: function(){
+      if(this.itemData){
+        var itemObjectActive = this.itemData.items.filter((item) => item.id === this.designActive.combine_id)[0]
+        return itemObjectActive
       } else{
         return null
       }
     },
-    itemCombineActive: function(){
-      console.log(this.designActive)
-      if(this.itemData){
-        var item_combine_id = Object.keys(this.itemData.design)
-                  .map((key) => this.itemData.design[key])
-                  .filter((item) => item.design_id === this.designActive)[0].item_id
-        var itemObjectActive = Object.keys(this.itemData.items)
-                  .map((key) => this.itemData.items[key])
-                  .filter((item) => item.id === item_combine_id)[0]
-        if(itemObjectActive){
-          return itemObjectActive
-        }
+    styleObject: function(){
+      if(this.styleData){
+        return this.styleData.filter((item) => item.id === this.styleSelected)[0]
       } else{
-        return null
+        return {}
       }
-    }
+    },
   },
 };
 </script>

@@ -88,6 +88,8 @@ body{
 .container-selectstyle{
   position: relative;
   height: 610px;
+  width: 100%;
+  overflow: hidden;
 }
 .simu-styleNone{
   position: absolute;
@@ -209,6 +211,7 @@ body{
 .simu-model-left{
   position: relative;
   width: 50%;
+  background-color: #cdcdcd;
 }
 .simu-model-intro{
   position: absolute;
@@ -349,6 +352,7 @@ body{
   position: relative;
   background-color: #444444;
   color: #fff;
+  overflow: hidden;
 }
 .simuright-top{
   padding: 24px;
@@ -386,14 +390,24 @@ body{
 
 .optionLv1, .optionLv2{
   margin: 0 24px;
-  padding: 15px 8px;
+  /* padding: 15px 8px; */
   position: relative;
+  height: 50px;
 }
 .optionLv1{
   border-bottom: 1px solid #676665;
 }
 .optionLv2{
   border-bottom: 1px solid #707070;
+}
+.simuright-options-img{
+  height: 85%;
+  width: auto;
+  margin-right: 15px;
+}
+.simuright-options-img img{
+  height: 100%;
+  width: auto;
 }
 .simuright-options-label{
   width: 148px;
@@ -469,18 +483,15 @@ body{
 /* transiton */
 .transitionRightToLeft-enter-active, .transitionRightToLeft-leave-active {
   position: absolute;
-  left: 0;
-  height: 100%;
-  width: 100%;
+  transform: translateX(0);
+  opacity: 1;
   transition: all .4s ease;
 }
 .transitionRightToLeft-enter, .transitionRightToLeft-leave-to {
   position: absolute;
-  opacity: 0;
-  width: 30%;
-  height: 100%;
-  left: 70%;
-  transition: all .2s cubic-bezier(1.0, 0.5, 0.8, 1.0); 
+  opacity: 1;
+  transform: translateX(100%);
+  transition: all .4s ease;
 }
 
 /* SimuKiji */

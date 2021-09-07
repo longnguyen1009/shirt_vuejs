@@ -34,7 +34,7 @@
     <div class="loadding_bl simu-style-loading">
       <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
     </div>
-    <transition name="simuModelPage">
+    <transition name="transitionRightToLeft">
       <SelectModel 
         v-if="modelActive != 0"
         :styleId="styleActive"
@@ -167,6 +167,7 @@ export default {
     },
     setStyleData: async function(){
       this.styleItems = await this.getStyleFromAPI()
+      this.$store.dispatch('handleChangeStyleData', this.styleItems)
       console.log(this.styleItems)
     }
   },

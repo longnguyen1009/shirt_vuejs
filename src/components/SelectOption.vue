@@ -54,7 +54,7 @@
 // import ButtonDetail from './ButtonDetail.vue';
 
 export default {
-  name: "SelectButton",
+  name: "SelectOption",
   // components: {ButtonDetail},
   data() {
     return {
