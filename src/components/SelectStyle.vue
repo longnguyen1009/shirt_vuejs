@@ -2,14 +2,15 @@
   <div class="container-selectstyle">
     <div class="simu-styleList" v-if="styleItems != null && styleItems.length > 0">
       <carousel v-bind="settings">
-          <slide class="simu-styleItem" v-for="Item in styleItems" :key="Item.id">
+          <slide class="simu-styleItem" v-for="Item in styleItems" :key="Item.id"
+          @slideclick="styleClick(Item.id)">
             <div class="simu-styleItem-front">
-              <img :src="style_img_path + Item.image" alt="" @click="styleClick(Item.id)" @touchstart="styleClick(Item.id)">
-              <div class="simu-styleItem-label" @click="styleClick(Item.id)" @touchstart="styleClick(Item.id)">
+              <img :src="style_img_path + Item.image" alt="">
+              <div class="simu-styleItem-label">
                 <h2 class="simu-styleItem-name">{{Item.name}}</h2>
                 <h3 class="simu-styleItem-productname">{{Item.category}}&nbsp;&nbsp;</h3>
               </div>
-              <button class="simu-styleItem-btn" @click="">MORE DETAILS</button>
+              <button class="simu-styleItem-btn">MORE DETAILS</button>
             </div>
             <div class="simu-styleItem-detail" :class="{active: styleActive == Item.id}">
               <span class="closeBtn" @click="styleClose(Item.id)"><i class="fas fa-times"></i></span>

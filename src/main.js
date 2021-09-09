@@ -4,8 +4,8 @@ import router from "./router";
 import store from './store';
 
 // import vue-panzoom
-import panZoom from 'vue-panzoom'
-Vue.use(panZoom);
+// import panZoom from 'vue-panzoom'
+// Vue.use(panZoom);
 
 //axios
 import axios from 'axios'
@@ -19,10 +19,10 @@ global.$ = jQuery
 window.$ = window.jQuery = require('jquery')
 
 // //bootstrap-vue
-import BootstrapVue from 'bootstrap-vue'
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
-Vue.use(BootstrapVue)
+// import BootstrapVue from 'bootstrap-vue'
+// import 'bootstrap/dist/css/bootstrap.css'
+// import 'bootstrap-vue/dist/bootstrap-vue.css'
+// Vue.use(BootstrapVue)
 
 // session
 import VueSession from 'vue-session'
@@ -33,8 +33,8 @@ import VueCarousel from 'vue-carousel';
 Vue.use(VueCarousel);
 
 //CORS
-import Cors from 'cors'
-Vue.use(Cors);
+// import Cors from 'cors'
+// Vue.use(Cors);
 
 new Vue({
   router,store,

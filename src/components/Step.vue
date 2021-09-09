@@ -1,6 +1,6 @@
 <template>
   <div class="container-step">
-    <b-button-group class="simu-stepgroup">
+    <div class="simu-stepgroup btn-group" role="group">
       <div
         variant="outline-dark"
         class="stepBtn col-md-3"
@@ -9,7 +9,7 @@
         v-bind:class="[step == stepItem.id ? 'active' : '']"
       >
       {{ stepItem.name }}</div>
-    </b-button-group>
+    </div>
   </div>
 </template>
 

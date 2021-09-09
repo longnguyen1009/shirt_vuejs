@@ -1,18 +1,18 @@
 <template>
-  <div class="container-kiji-detail d-flex justify-content-between flex-column">
-    <div class="kiji-detail-top flex-grow-1">
-        <img class="kiji-detail-img" alt="" :src="kiji_img_path + kijiDetailData.img">
-        <span class="kiji-detail-closeBtn" @click="closeKijiDetail"><i class="fas fa-times"></i></span>
-        <div class="kiji-detail-info">
-          <span class="kiji-detail-code">{{kijiDetailData.code}}</span><br><span class="kiji-detail-name">{{kijiDetailData.name}}<br>STANDARD (ALL SEASON)</span>
+  <div class="container-option-detail d-flex justify-content-between flex-column">
+    <div class="option-detail-top flex-grow-1">
+        <img class="option-detail-img" alt="" :src="kiji_img_path + kijiDetailData.img">
+        <span class="option-detail-closeBtn" @click="closeKijiDetail"><i class="fas fa-times"></i></span>
+        <div class="option-detail-info">
+          <span class="option-detail-code">{{kijiDetailData.code}}</span><br><span class="option-detail-name">{{kijiDetailData.name}}<br>STANDARD (ALL SEASON)</span>
         </div>
     </div>
-    <div class="kiji-detail-bottom d-flex flex-column justify-content-between">
-      <div class="kiji-detail-description">
+    <div class="option-detail-bottom d-flex flex-column justify-content-between">
+      <div class="option-detail-description">
         {{kijiDetailData.description}}
       </div>
-      <div class="kiji-detail-confirm d-flex justify-content-between align-items-end">
-        <span class="kiji-detail-price">標準 ¥{{kijiDetailData.price}} (税込)</span>
+      <div class="option-detail-confirm d-flex justify-content-between align-items-end">
+        <span class="option-detail-price">標準 ¥{{kijiDetailData.price}} (税込)</span>
         <button class="simu-common-btn" @click="kijiConfirmDetail">決定</button>
       </div>
     </div>

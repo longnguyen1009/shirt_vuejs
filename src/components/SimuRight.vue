@@ -22,7 +22,7 @@
         </div>
         <div class="simuright-options-row" 
           v-for="OptionParents in optionParentData" :key="OptionParents.genre_id">
-          <div class="simuright-options-rowTop optionLv1 d-flex align-items-center">
+          <div class="simuright-options-rowTop optionLv1 d-flex align-items-center" @click="showOptionParent($event)">
             <span class="simuright-options-label">{{OptionParents.genre_name}}</span>
             <div class="simuright-options-name"></div>
           </div>
@@ -52,14 +52,14 @@
 
       <transition name="transitionRightToLeft">
         <div class="simuright-sub" 
-          v-if="detailOptionActive != 0">
+          v-if="optionDetailActive">
           <SelectKiji
-            v-if="detailOptionActive == 'kiji'"
+            v-if="optionDetailActive == 'kiji'"
             :kijiList="kijiData"
             @closeOption="closeDetailOption($event)"
           />
           <SelectOption
-            v-if="detailOptionActive && detailOptionActive != 'kiji'"
+            v-if="optionDetailActive != 'kiji'"
             @closeOption="closeDetailOption($event)"
           />
         </div>
@@ -81,33 +81,22 @@ export default {
           designActiveId: 0,
           itemData: null,
           optionParentData: {},
-          detailOption: {
-            1: 'kiji',
-          },
-          detailOptionActive: 0,
           kijiData: [],
-          optionCateData: [
-            {genre: 1, genre_name:"付属", option_list:[
-              {id: 1, name: 'ボタン'},{id: 2, name:'裏地'}
-            ]},
-            {genre: 2, genre_name:"ディティール", option_list:[
-              {id: 3, name: 'ベント'},{id: 2, name:'ラペル'}
-            ]},
-          ]
         }
     },
     props: [],
     methods: {
       openDetailOption: function(optionid){
-        this.detailOptionActive = optionid
-
+        this.$store.dispatch('handleChangeOptionDetailActive', optionid)
       },
       closeDetailOption: function(){
-        this.detailOptionActive = 0
-
+        this.$store.dispatch('handleChangeOptionDetailActive', null)
         //update simulator model
+        //option
+        this.$store.dispatch('handleChangeOptionTemp', null)
+
         //kiji
-        if(this.kijiActive != $('.kiji_preloader img').attr('kiji-id')){
+        if(this.kijiActive && this.kijiActive != $('.kiji_preloader img').attr('kiji-id')){
           $('.kiji_preloader img').attr('src', this.kiji_img_path + this.kijiObjectActive.img)
           $('.kiji_preloader img').attr('kiji-id', this.kijiActive)
         }
@@ -163,16 +152,14 @@ export default {
       },
       updateOptionParent: async function(){
         this.optionParentData = await this.getOptionParentData()
+      },
+      showOptionParent(event){
+        $(event.target).parents('.simuright-options-row').toggleClass('show')
       }
     },
     mounted() {
       this.setItemData()
       this.setKijiData()
-      console.log({
-        styleId: this.styleSelected,
-        modelId: this.modelSelected,
-        itemId: this.itemSelected
-      })
     },
     watch: {
       itemData: function(){
@@ -182,10 +169,8 @@ export default {
         this.$store.dispatch('handleChangeDesign', this.designActiveSplit)
       },
       designActive: function(){
-        console.log(this.designActive)
-
         this.updateOptionParent()
-      }
+      },
     },
     computed: {
       ...mapGetters([
@@ -196,7 +181,8 @@ export default {
         'modelSelected',
         'itemSelected',
         'designActive',
-        'kijiActive'
+        'kijiActive',
+        'optionDetailActive'
       ]),
       kijiObjectActive: function(){
         return this.kijiData.filter((item) => item.id === this.kijiActive)[0]

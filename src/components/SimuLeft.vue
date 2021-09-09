@@ -21,12 +21,15 @@
             ></object>
             <img :src="design.shadow_path" class="img_shadow" />
       </div>
+      <div class="simuleft-options">
+        <img
+        v-for="(Option,id) in optionSaved" :key="id"
+        :id="createIdForOption(Option)"
+        :src="option_img_path + Option.option_img" class="img_option" v-on:error="notfounder"/>
+        <span v-html="optionTempHtml"></span>
+      </div>
       <div class="sumi-left-zoombtn">+ZOOM</div>
       <div class="sumi-left-downbtn"><i class="fas fa-download"></i></div>
-      <!-- <div class="options">
-        <img :src="option_button_path" class="img_option" v-on:error="notfounder"/>
-        <img :src="option_flower_path" class="img_option" v-on:error="notfounder"/>
-      </div> -->
       <div class="loadding_bl">
         <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
       </div>
@@ -74,36 +77,15 @@ export default {
         $(".loadding_bl").removeClass("on");
       }, 500);
     },
-
-    // modalSvgLoad() {
-    //   var target = document.querySelector(".suitmodel02").contentDocument;
-    //   var tex = $(".simulator__preloader").find("img");
-    //   $(target)
-    //     .find("pattern")
-    //     .not("#buttons")
-    //     .find("image")
-    //     .attr("xlink:href", tex[0].currentSrc)
-    //     .attr("width", tex[0].naturalWidth)
-    //     .attr("height", tex[0].naturalHeight);
-    //   $(target)
-    //     .find("pattern")
-    //     .not("#buttons")
-    //     .attr("width", tex[0].naturalWidth)
-    //     .attr("height", tex[0].naturalHeight);
-    // },
-    // modalFullviewShow: function() {
-    //   this.cloneData01 = $(".simu_price").html();
-    //   $(".simu-modal-fullview").addClass("active");
-    // },
-    // modalFullviewHide: function() {
-    //   $(".simu-modal-fullview").removeClass("active");
-    // },
     notfounder: function(e) {
-      e.target.src = this.simu_img_path + "notfounder.png";
+      e.target.src = this.option_img_path + "notfounder.png";
+    },
+    createIdForOption(Option){
+      return 'option-'+Option.combine_id+'-'+Option.item_id+'-'+Option.design_id+'-'+Option.parent_id
     }
   },
   watch: {
-
+    
   },
   mounted() {
     // this.defaultLoaded();
@@ -119,8 +101,10 @@ export default {
         'itemSelected',
         'designActive',
         'styleData',
-        'modelData'
-
+        'modelData',
+        'optionDetailActive',
+        'optionSelectedData',
+        'optionTemp'
       ]),
     //design path
     design: function() {
@@ -157,6 +141,30 @@ export default {
         return {}
       }
     },
+    optionSaved: function(){
+      var optionSavedList = this.optionSelectedData.filter(
+        (item) => (item.combine_id == this.designActive.combine_id && 
+            item.item_id == this.designActive.item_id &&
+            item.design_id == this.designActive.design_id)
+      )
+      if(this.optionTemp){
+        var existOptionSelected = optionSavedList.findIndex(
+          (item) => (
+            item.parent_id == this.optionDetailActive
+          ))
+        if(existOptionSelected !== -1){
+          optionSavedList.splice(existOptionSelected, 1)
+        } 
+      }
+      return optionSavedList
+    },
+    optionTempHtml: function(){
+      if(this.optionTemp){
+        return '<img id="option_temp" src="'+this.option_img_path + this.optionTemp.option_img+'" class="img_option">'
+      } else{
+        return ''
+      }
+    }
   },
 };
 </script>

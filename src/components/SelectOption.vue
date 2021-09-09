@@ -3,31 +3,32 @@
     <div class="simuright-sub-name d-flex justify-content-center align-items-center">ボタン選択</div>
     <div class="simuright-sub-content">
       <div class="simuright-sub-contentBox">
-        <div class="simuright-sub-nav">
+        <div class="simuright-sub-nav" v-if="cateLists.length > 0">
           <div class="simuright-sub-searchTop d-flex justify-content- align-items-center">
             <!-- Button Category -->
             <ul class="optionParentList d-flex justify-content-around align-items-center">
               <li class="optionParent"
-              v-for="optionParent in optionLists" :key="optionParent.parent_id"
-              :class="{active: optionCurrParent == optionParent.parent_id}"
-              @click="changeOptionParent(optionParent.parent_id)"
-              >{{optionParent.parent_name}}</li>
+              v-for="Cate in cateLists" :key="Cate.cate_id"
+              :class="{active: cateCurr == Cate.cate_id}"
+              @click="changeOptionCategory(Cate.cate_id)"
+              >{{Cate.cate_name}}</li>
             </ul>
           </div>
         </div>
-        <div class="optionParentCurrent d-flex justify-content-center align-items-center">
-            <span>{{optionParentCurrObj.parent_name}}</span>
-          </div>
+        <div class="optionParentCurrent d-flex justify-content-center align-items-center"
+          v-if="cateCurrObj">
+          <span>{{cateCurrObj.cate_name}}</span>
+        </div>
         <div class="simuright-sub-result d-flex flex-wrap">
           <div v-for="Option in optionCurrLists" :key="Option.id" class="optionItem"
             :class="{active: (Option.id == optionSelected)}">
-            <img :src="button_img_path + Option.img" alt=""
+            <img :src="option_img_path + Option.img" alt=""
               @click="optionChange(Option.id, Option.img)">
             <span class="simuright-option-icon" @click="showOptionDetail(Option.id)"><i class="fas fa-info-circle"></i></span>
             <div class="simuright-option-name"
               @click="optionChange(Option.id, Option.img)">
-              <span class="option-code">{{Option.code}}</span><br>
-              <span class="option-name">{{Option.name}}</span>
+              <span class="option-code">{{Option.name}}</span><br>
+              <span class="option-name">{{Option.ua_code_jp}}</span>
             </div>
           </div>
         </div>
@@ -37,143 +38,160 @@
       <button class="simu-common-btn" @click="closeOption">戻る</button>
       <button class="simu-common-btn" @click="buttonConfirm">決定</button>
     </div>
-    <!-- <transition name="transitionRightToLeft">
-      <div class="simu-subpage" v-if="buttonDetailId != 0">
-        <ButtonDetail 
-        :buttonDetailData="buttonDetailData"
-        :button_img_path="button_img_path"
-        @close-detail="closeButtonDetail($event)"
-        @button-confirm="confirmButtonDetail($event)"
+    <transition name="transitionRightToLeft">
+      <div class="simu-subpage" v-if="optionDetailId">
+        <OptionDetail 
+        :OptionDetailData="OptionDetailData"
+        @close-detail="closeOptionDetail($event)"
+        @option-confirm="confirmOptionDetail($event)"
         />
       </div>
-    </transition> -->
+    </transition>
   </div>
 </template>
 
 <script>
-// import ButtonDetail from './ButtonDetail.vue';
+import { mapGetters } from 'vuex';
+import OptionDetail from './OptionDetail.vue';
 
 export default {
   name: "SelectOption",
-  // components: {ButtonDetail},
+  components: {OptionDetail},
   data() {
     return {
       optionSelected: 0,
-      optionDetailId: 0,
-
-      optionCurrParent: 1,
-
-      optionLists: [
-        {parent_id: 1, parent_name: 'NUT', option_list: [
-          {id: 1, name: "ART SOV", code: "0 (WHITE)", img: "08281216_5d65f21c28dde.jpg"},
-          {id: 2, name: "ART SOV", code: "04 (GREY)", img: "08281216_5d65f207e6bb2.jpg"},
-          {id: 3, name: "ART SOV", code: "06 (DARK GREY)", img: "08281216_5d65f2284f9d5.jpg"},
-          {id: 4, name: "ART SOV", code: "0 (WHITE)", img: "08281217_5d65f239b1408.jpg"},
-          {id: 5, name: "ART SOV", code: "04 (GREY)", img: "08281217_5d65f2463daf7.jpg"},
-          {id: 6, name: "ART SOV", code: "06 (DARK GREY)", img: "08281217_5d65f2598806a.jpg"},
-          {id: 7, name: "ART SOV", code: "06 (DARK GREY)", img: "08281217_5d65f2598806a.jpg"},
-          {id: 8, name: "ART SOV", code: "06 (DARK GREY)", img: "08281217_5d65f2598806a.jpg"},
-          {id: 9, name: "ART SOV", code: "06 (DARK GREY)", img: "08281217_5d65f2598806a.jpg"},
-        ]},
-        {parent_id: 2, parent_name: 'HORN', option_list: [
-          {id: 1, name: "ART SOV", code: "0 (WHITE)", img: "08281216_5d65f21c28dde.jpg"},
-          {id: 2, name: "ART SOV", code: "04 (GREY)", img: "08281216_5d65f207e6bb2.jpg"},
-          {id: 3, name: "ART SOV", code: "06 (DARK GREY)", img: "08281216_5d65f2284f9d5.jpg"},
-          {id: 4, name: "ART SOV", code: "0 (WHITE)", img: "08281217_5d65f239b1408.jpg"},
-          {id: 5, name: "ART SOV", code: "04 (GREY)", img: "08281217_5d65f2463daf7.jpg"},
-          {id: 6, name: "ART SOV", code: "06 (DARK GREY)", img: "08281217_5d65f2598806a.jpg"}
-        ]},
-        {parent_id: 3, parent_name: 'METAL', option_list: [
-          {id: 1, name: "ART SOV", code: "0 (WHITE)", img: "08281216_5d65f21c28dde.jpg"},
-          {id: 2, name: "ART SOV", code: "04 (GREY)", img: "08281216_5d65f207e6bb2.jpg"},
-          {id: 3, name: "ART SOV", code: "06 (DARK GREY)", img: "08281216_5d65f2284f9d5.jpg"},
-          {id: 4, name: "ART SOV", code: "0 (WHITE)", img: "08281217_5d65f239b1408.jpg"},
-          {id: 5, name: "ART SOV", code: "04 (GREY)", img: "08281217_5d65f2463daf7.jpg"},
-          {id: 6, name: "ART SOV", code: "06 (DARK GREY)", img: "08281217_5d65f2598806a.jpg"}
-        ]},
-        {parent_id: 4, parent_name: 'SHELL', option_list: [
-          {id: 1, name: "ART SOV", code: "0 (WHITE)", img: "08281216_5d65f21c28dde.jpg"},
-          {id: 2, name: "ART SOV", code: "04 (GREY)", img: "08281216_5d65f207e6bb2.jpg"},
-          {id: 3, name: "ART SOV", code: "06 (DARK GREY)", img: "08281216_5d65f2284f9d5.jpg"},
-          {id: 4, name: "ART SOV", code: "0 (WHITE)", img: "08281217_5d65f239b1408.jpg"},
-          {id: 5, name: "ART SOV", code: "04 (GREY)", img: "08281217_5d65f2463daf7.jpg"},
-          {id: 6, name: "ART SOV", code: "06 (DARK GREY)", img: "08281217_5d65f2598806a.jpg"}
-        ]},
-        {parent_id: 5, parent_name: 'くるみ釦', option_list: [
-          {id: 1, name: "ART SOV", code: "0 (WHITE)", img: "08281216_5d65f21c28dde.jpg"},
-          {id: 2, name: "ART SOV", code: "04 (GREY)", img: "08281216_5d65f207e6bb2.jpg"},
-          {id: 3, name: "ART SOV", code: "06 (DARK GREY)", img: "08281216_5d65f2284f9d5.jpg"},
-          {id: 4, name: "ART SOV", code: "0 (WHITE)", img: "08281217_5d65f239b1408.jpg"},
-          {id: 5, name: "ART SOV", code: "04 (GREY)", img: "08281217_5d65f2463daf7.jpg"},
-          {id: 6, name: "ART SOV", code: "06 (DARK GREY)", img: "08281217_5d65f2598806a.jpg"}
-        ]},
-        {parent_id: 6, parent_name: 'PE', option_list: [
-          {id: 1, name: "ART SOV", code: "0 (WHITE)", img: "08281216_5d65f21c28dde.jpg"},
-          {id: 2, name: "ART SOV", code: "04 (GREY)", img: "08281216_5d65f207e6bb2.jpg"},
-          {id: 3, name: "ART SOV", code: "06 (DARK GREY)", img: "08281216_5d65f2284f9d5.jpg"},
-          {id: 4, name: "ART SOV", code: "0 (WHITE)", img: "08281217_5d65f239b1408.jpg"},
-          {id: 5, name: "ART SOV", code: "04 (GREY)", img: "08281217_5d65f2463daf7.jpg"},
-          {id: 6, name: "ART SOV", code: "06 (DARK GREY)", img: "08281217_5d65f2598806a.jpg"}
-        ]},
-      ],
-
+      optionDetailId: null,
+      cateCurr: null,
+      cateLists: [],
+      optionLists: {}
     };
   },
   methods: {
     closeOption: function(){
       this.$emit("closeOption")
     },
-    closeButtonDetail:function(){
-      this.buttonDetailId = 0
+    closeOptionDetail:function(){
+      this.optionDetailId = null
     },
     optionChange: function(id, img){
-      this.optionSelected = id
-      // $('.button_preloader img').attr('src', this.button_img_path + img)
-    },
-    changeOptionParent(parent_id){
-      if(this.optionCurrParent == parent_id){
+      if(this.optionSelected == id){
         return false
       } else{
-        this.optionCurrParent = parent_id
+        this.optionSelected = id
+        this.$store.dispatch('handleChangeOptionTemp', {option_id: id, option_img: img})
+      }
+    },
+    changeOptionCategory(cate_id){
+      if(this.cateCurr == cate_id){
+        return false
+      } else{
+        this.cateCurr = cate_id
       }
     },
     buttonConfirm: function(){
-      if(this.optionSelected == 0){
+      if(!this.optionSelected){
         alert('ボタンを選択してください')
       } else{
-        // this.$emit("option-confirm", this.buttonSelected)
+        this.$store.dispatch('handleChangeOption', {
+          combine_id: this.designActive.combine_id,
+          item_id: this.designActive.item_id,
+          design_id: this.designActive.design_id,
+          parent_id: this.optionDetailActive,
+          option_id: this.optionSelected,
+          cate_id: this.cateCurr,
+          option_img: this.optionCurrLists.filter((item) => item.id == this.optionSelected)[0].img
+        })
         this.closeOption()
       }
     },
     showOptionDetail(id){
       this.optionDetailId = id
     },
-    confirmButtonDetail(data){
+    confirmOptionDetail(data){
       this.optionChange(data.id, data.img)
       this.buttonConfirm()
+    },
+    getOptionData: async function(){
+      var data = new FormData()
+      data.append('model', this.modelSelected)
+      data.append('design', this.designActive.design_id)
+      data.append('parent', this.optionDetailActive)
+      let ret = null
+      if(this.modelSelected && this.designActive.design_id && this.optionDetailActive){
+        await this.axios.post('http://54.248.46.255/myshop/getoptionlist/', data)
+          .then(response => {
+            ret = response.data.data
+          })
+          .catch(error => console.log(error))
+      } 
+      return ret
+    },
+    setOptionData: async function(){
+       const optionDataReceived = await this.getOptionData()
+       this.optionLists = optionDataReceived.options
+       this.cateLists = optionDataReceived.cates
+    },
+    setOptionSelected: function(){
+      const optionSelectedIndex = this.optionSelectedData.findIndex(
+        (item) => (
+            item.combine_id == this.designActive.combine_id && 
+            item.item_id == this.designActive.item_id &&
+            item.design_id == this.designActive.design_id &&
+            item.parent_id == this.optionDetailActive
+      ))
+      if(optionSelectedIndex !== -1){
+        this.optionSelected = this.optionSelectedData[optionSelectedIndex].option_id
+        this.cateCurr = this.optionSelectedData[optionSelectedIndex].cate_id
+      }
     }
   },
-  props: ['button_img_path', 'buttonActive'],
+  watch: {
+    cateLists: function(){
+      if(this.cateLists.length > 0){
+        const cateCurrTemp = this.cateLists.findIndex(
+          (item) => (item.cate_id == this.cateCurr)
+        )
+        if(cateCurrTemp == -1){
+          this.cateCurr = this.cateLists[0].cate_id
+        }
+      } else{
+        this.cateCurr = null
+      }
+    }
+  },
+  props: [],
   mounted() {
-    console.log("aaaaaaaa");
+    this.setOptionData()
+    this.setOptionSelected()
   },
   computed: {
-    optionParentCurrObj: function(){
-      if(this.optionLists != 0){
-        return Object.keys(this.optionLists)
-                  .map((key) => this.optionLists[key])
-                  .filter((option_parent) => option_parent.parent_id === this.optionCurrParent)[0];
+    ...mapGetters([
+      'option_img_path',
+      'modelSelected',
+      'designActive',
+      'optionSelectedData',
+      'optionDetailActive'
+    ]),
+    cateCurrObj: function(){
+      if(this.cateLists && this.cateCurr){
+        return this.cateLists.filter((item) => item.cate_id === this.cateCurr)[0];
       } else{
-        return []
+        return null
       }
     },
     optionCurrLists: function(){
-      if(this.optionParentCurrObj){
-        return this.optionParentCurrObj.option_list;
+      if(this.optionLists && this.cateCurr){
+        return this.optionLists[this.cateCurr];
       } else{
-        return []
+        return this.optionLists[this.optionDetailActive];
       }
-    }
+    },
+    OptionDetailData: function(){
+      return this.optionCurrLists.filter((item) => item.id == this.optionDetailId)[0]
+    },
+    // idOfOption: function(){
+    //   return "option-"+this.designActive.combine_id+'-'+this.designActive.item_id+'-'+this.designActive.design_id+'-'+this.optionDetailActive
+    // }
   }
 };
 </script>

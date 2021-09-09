@@ -18,13 +18,17 @@ export default new Vuex.Store({
 
     optionMode: 2,
 
-    designActive: {},
+    designActive: {}, //{combine_id, design_id, item_id}
     kijiActive: null,
 
     styleData: {},
     modelData: {},
 
-    optionSelectedData:[]
+    optionSelectedData:[], // list of {design_id, parent_id, option_id, cate_id, img}
+    optionDetailActive: null,
+
+    //raw html for option change img temp
+    optionTemp: ''
   },
   getters: {
     //step
@@ -50,7 +54,10 @@ export default new Vuex.Store({
     styleData: state => state.styleData,
     modelData: state => state.modelData,
 
-    optionSelectedData: state => state.optionSelectedData
+    optionSelectedData: state => state.optionSelectedData,
+    optionDetailActive: state => state.optionDetailActive,
+
+    optionTemp: state => state.optionTemp
   },
   mutations: {
     changeStep(state, newStep){
@@ -76,15 +83,21 @@ export default new Vuex.Store({
     changeOptionData(state, optionData){
       const existOptionIndex = state.optionSelectedData.findIndex(
         (item) => (
-          item.design_id == optionData.design_id,
-          item.parent_id == optionData.parent_id,
-          item.option_id == optionData.option_id
+          item.combine_id == optionData.combine_id && item.item_id == optionData.item_id && item.design_id == optionData.design_id && item.parent_id == optionData.parent_id
         ))
       if(existOptionIndex !== -1){
         state.optionSelectedData[existOptionIndex] = optionData
       } else{
         state.optionSelectedData.push(optionData)
       }
+      //Clone the array to trigger a UI update.
+      state.optionSelectedData = [...state.optionSelectedData]
+    },
+    changeOptionDetail(state, optionDetailId){
+      state.optionDetailActive = optionDetailId
+    },
+    changeOptionTemp(state, optionTemp){
+      state.optionTemp = optionTemp
     }
   },
   actions: {
@@ -108,6 +121,12 @@ export default new Vuex.Store({
     },
     handleChangeOption(context, optionData){
       context.commit('changeOptionData', optionData)
+    },
+    handleChangeOptionDetailActive(context, optionDetailId){
+      context.commit('changeOptionDetail', optionDetailId)
+    },
+    handleChangeOptionTemp(context, optionTemp){
+      context.commit('changeOptionTemp', optionTemp)
     }
   }
 })
