@@ -40,6 +40,7 @@
         @close-detail="closeKijiDetail($event)"
         @kiji-confirm="confirmKijiDetail($event)"
         />
+
       </div>
     </transition>
   </div>
@@ -86,19 +87,23 @@ export default {
       this.kijiConfirm()
     }
   },
-  props: ['kijiList'],
+  props: [],
   mounted() {
     this.kijiSelected = this.kijiActive
   },
   computed: {
     ...mapGetters([
       'kiji_img_path',
-      'kijiActive'
+      'kijiActive',
+      'kijiData'
     ]),
     kijiDetailData: function(){
       if(this.kijiDetailId != 0){
         return this.kijiList.filter((item) => item.id === this.kijiDetailId)[0];
       }
+    },
+    kijiList: function(){
+      return this.kijiData
     }
   }
 };

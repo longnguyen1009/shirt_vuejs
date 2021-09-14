@@ -24,11 +24,18 @@ export default new Vuex.Store({
     styleData: {},
     modelData: {},
 
-    optionSelectedData:[], // list of {design_id, parent_id, option_id, cate_id, img}
+    optionSelectedData:[], // list of {combine_id, item_id, design_id, parent_id, option_id, cate_id, option_img: simu_img, name}
     optionDetailActive: null,
 
     //raw html for option change img temp
-    optionTemp: ''
+    optionTemp: '',
+
+    //save optionData Loaded from api
+    optionDataLoaded: [], //{model_id, design_id, parent_id, cateLists, optionLists }
+
+    //kijiData Loaded from api
+    kijiData: [],
+    optionParentData: [] //{design_id, data}
   },
   getters: {
     //step
@@ -57,7 +64,10 @@ export default new Vuex.Store({
     optionSelectedData: state => state.optionSelectedData,
     optionDetailActive: state => state.optionDetailActive,
 
-    optionTemp: state => state.optionTemp
+    optionTemp: state => state.optionTemp,
+    optionDataLoaded: state => state.optionDataLoaded,
+    kijiData: state => state.kijiData,
+    optionParentData: state => state.optionParentData // {design_id, genreData, parentData}
   },
   mutations: {
     changeStep(state, newStep){
@@ -98,6 +108,25 @@ export default new Vuex.Store({
     },
     changeOptionTemp(state, optionTemp){
       state.optionTemp = optionTemp
+    },
+    changeOptionDataLoaded(state, loadedData){
+      const existLoadedIndex = state.optionDataLoaded.findIndex(
+        (item) => (
+          item.model_id == loadedData.model_id && item.design_id == loadedData.design_id && item.parent_id == loadedData.parent_id
+        ))
+      if(existLoadedIndex !== -1){
+        state.optionDataLoaded[existLoadedIndex] = loadedData
+      } else{
+        state.optionDataLoaded.push(loadedData)
+      }
+      //Clone the array to trigger a UI update.
+      state.optionDataLoaded = [...state.optionDataLoaded]
+    },
+    changeKijiData(state, kijiData){
+      state.kijiData = kijiData
+    },
+    changeOptionParentData(state, parentData){
+      state.optionParentData.push(parentData)
     }
   },
   actions: {
@@ -127,6 +156,15 @@ export default new Vuex.Store({
     },
     handleChangeOptionTemp(context, optionTemp){
       context.commit('changeOptionTemp', optionTemp)
+    },
+    handleSaveOptionDataLoaded(context, loadedData){
+      context.commit('changeOptionDataLoaded', loadedData)
+    },
+    handleChangeKijiData(context, kijiData){
+      context.commit('changeKijiData', kijiData)
+    },
+    handleChangeOptionParentData(context, parentData){
+      context.commit('changeOptionParentData', parentData)
     }
   }
 })

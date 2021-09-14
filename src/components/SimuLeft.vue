@@ -22,13 +22,24 @@
             <img :src="design.shadow_path" class="img_shadow" />
       </div>
       <div class="simuleft-options">
-        <img
-        v-for="(Option,id) in optionSaved" :key="id"
-        :id="createIdForOption(Option)"
-        :src="option_img_path + Option.option_img" class="img_option" v-on:error="notfounder"/>
-        <span v-html="optionTempHtml"></span>
+        <span v-for="(Option,id) in optionSaved" :key="id">
+          <img v-if="Option.option_img"
+          :id="createIdForOption(Option)"
+          :src="option_img_path + Option.option_img"
+          :cate="Option.type" 
+          class="img_option" v-on:error="loadImgError"
+          @load="loadOption($event, Option.option_img)"/>
+        </span>
+        <span v-if="optionTemp">
+         <img id="option_temp"
+         :src="option_img_path + optionTemp.option_img" 
+         class="img_option" 
+         :cate="optionTemp.type"
+          @load="loadOption($event, optionTemp.option_img)"
+         v-on:error="loadImgError">
+        </span>
       </div>
-      <div class="sumi-left-zoombtn">+ZOOM</div>
+      <!-- <div class="sumi-left-zoombtn">+ZOOM</div> -->
       <div class="sumi-left-downbtn"><i class="fas fa-download"></i></div>
       <div class="loadding_bl">
         <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
@@ -59,25 +70,59 @@ export default {
       var target = document.querySelector(".svgModel").contentDocument;
       var kiji = $(".kiji_preloader").find("img");
       $(target)
-        .find("pattern")
-        .not("#buttons")
+        .find("pattern[type='kiji']")
+        // .not("#button")
         .find("image")
         .attr("xlink:href", kiji[0].currentSrc)
         .attr("width", kiji[0].naturalWidth)
         .attr("height", kiji[0].naturalHeight);
       $(target)
-        .find("pattern")
-        .not("#buttons")
+        .find("pattern[type='kiji']")
+        // .not("#button")
         .attr("width", kiji[0].naturalWidth)
         .attr("height", kiji[0].naturalHeight);
     },
+    loadOption(event, img){
+      if(img){
+        var target = document.querySelector(".svgModel").contentDocument;
+        var cate = $(event.target).attr('cate')
+        if(cate && $(target).find("pattern[cate='"+cate+"']").length){
+          $(target)
+          .find("pattern[cate='"+cate+"']")
+          .find("image")
+          .attr("xlink:href", $(event.target).attr('src'))
+        }
+      }
+    },
+    loadAllOption(){
+      //if have type: load img to svg
+      var target = document.querySelector(".svgModel").contentDocument;
+      $(".img_option").each(function(index) {
+        var cate = $(this).attr('cate')
+        if(cate && $(target).find("pattern[cate='"+cate+"']").length){
+          $(target)
+          .find("pattern[cate='"+cate+"']")
+          .find("image")
+          .attr("xlink:href", $(this).attr('src'))
+        }
+      });
+    },
     svgLoaded02() {
-      this.kijiLoaded();
+      this.kijiLoaded()
+      this.loadAllOption()
       setTimeout(function() {
         $(".loadding_bl").removeClass("on");
       }, 500);
     },
-    notfounder: function(e) {
+    loadImgError: function(e) {
+      var target = document.querySelector(".svgModel").contentDocument;
+      var cate = $(e.target).attr('cate')
+      if(cate && $(target).find("pattern[cate='"+cate+"']").length){
+        $(target)
+        .find("pattern[cate='"+cate+"']")
+        .find("image")
+        .attr("xlink:href", this.option_img_path + "notfounder.png")
+      }
       e.target.src = this.option_img_path + "notfounder.png";
     },
     createIdForOption(Option){
@@ -104,7 +149,8 @@ export default {
         'modelData',
         'optionDetailActive',
         'optionSelectedData',
-        'optionTemp'
+        'optionTemp',
+        'kijiActive'
       ]),
     //design path
     design: function() {
@@ -121,7 +167,7 @@ export default {
     },
     //kiji path
     kiji_img_src: function(){
-      return "/html/upload/save_image/0730151143_6103981fcfa43.jpeg"
+        return "/html/upload/save_image/0730151143_6103981fcfa43.jpeg"
     },
     designActive_path: function(){
       return (this.itemData && this.designActive) ? this.designActive.design_id : null
@@ -142,6 +188,11 @@ export default {
       }
     },
     optionSaved: function(){
+      if($("#option_temp").length > 0 && !this.optionTemp){
+        var target = document.querySelector(".svgModel").contentDocument;
+        $(target).find("pattern[cate='"+$("#option_temp").attr('cate')+"']")
+        .find('image').attr("xlink:href", this.option_img_path + "notfounder.png")
+      }
       var optionSavedList = this.optionSelectedData.filter(
         (item) => (item.combine_id == this.designActive.combine_id && 
             item.item_id == this.designActive.item_id &&
@@ -158,13 +209,14 @@ export default {
       }
       return optionSavedList
     },
-    optionTempHtml: function(){
-      if(this.optionTemp){
-        return '<img id="option_temp" src="'+this.option_img_path + this.optionTemp.option_img+'" class="img_option">'
-      } else{
-        return ''
-      }
-    }
+
+    // optionTempHtml: function(){
+    //   if(this.optionTemp && this.optionTemp.option_img){
+    //     return '<img id="option_temp" src="'+this.option_img_path + this.optionTemp.option_img+'" class="img_option" type:"'+this.optionTemp.type+'">'
+    //   } else{
+    //     return ''
+    //   }
+    // }
   },
 };
 </script>

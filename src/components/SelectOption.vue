@@ -1,6 +1,6 @@
 <template>
   <div class="container-sub-page d-flex justify-content-between flex-column">
-    <div class="simuright-sub-name d-flex justify-content-center align-items-center">ボタン選択</div>
+    <div class="simuright-sub-name d-flex justify-content-center align-items-center">{{optionParent.name}}選択</div>
     <div class="simuright-sub-content">
       <div class="simuright-sub-contentBox">
         <div class="simuright-sub-nav" v-if="cateLists.length > 0">
@@ -23,10 +23,10 @@
           <div v-for="Option in optionCurrLists" :key="Option.id" class="optionItem"
             :class="{active: (Option.id == optionSelected)}">
             <img :src="option_img_path + Option.img" alt=""
-              @click="optionChange(Option.id, Option.img)">
+              @click="optionChange(Option.id, Option.simu_img, Option.type)">
             <span class="simuright-option-icon" @click="showOptionDetail(Option.id)"><i class="fas fa-info-circle"></i></span>
             <div class="simuright-option-name"
-              @click="optionChange(Option.id, Option.img)">
+              @click="optionChange(Option.id, Option.simu_img, Option.type)">
               <span class="option-code">{{Option.name}}</span><br>
               <span class="option-name">{{Option.ua_code_jp}}</span>
             </div>
@@ -73,12 +73,12 @@ export default {
     closeOptionDetail:function(){
       this.optionDetailId = null
     },
-    optionChange: function(id, img){
+    optionChange: function(id, img, type){
       if(this.optionSelected == id){
         return false
       } else{
         this.optionSelected = id
-        this.$store.dispatch('handleChangeOptionTemp', {option_id: id, option_img: img})
+        this.$store.dispatch('handleChangeOptionTemp', {option_id: id, option_img: img, type: type})
       }
     },
     changeOptionCategory(cate_id){
@@ -89,9 +89,8 @@ export default {
       }
     },
     buttonConfirm: function(){
-      if(!this.optionSelected){
-        alert('ボタンを選択してください')
-      } else{
+      if(this.optionSelected){
+        var selectedObj = this.optionCurrLists.filter((item) => item.id == this.optionSelected)[0]
         this.$store.dispatch('handleChangeOption', {
           combine_id: this.designActive.combine_id,
           item_id: this.designActive.item_id,
@@ -99,16 +98,24 @@ export default {
           parent_id: this.optionDetailActive,
           option_id: this.optionSelected,
           cate_id: this.cateCurr,
-          option_img: this.optionCurrLists.filter((item) => item.id == this.optionSelected)[0].img
+          option_img: selectedObj.simu_img,
+          name: selectedObj.name,
+          type: selectedObj.type,
+          cost: selectedObj.cost
         })
         this.closeOption()
+      } else{
+        if(this.optionCurrLists){
+          alert('オプションを選択してください')
+          return false
+        }
       }
     },
     showOptionDetail(id){
       this.optionDetailId = id
     },
     confirmOptionDetail(data){
-      this.optionChange(data.id, data.img)
+      this.optionChange(data.id, data.img, data.type)
       this.buttonConfirm()
     },
     getOptionData: async function(){
@@ -128,8 +135,17 @@ export default {
     },
     setOptionData: async function(){
        const optionDataReceived = await this.getOptionData()
-       this.optionLists = optionDataReceived.options
-       this.cateLists = optionDataReceived.cates
+       if(optionDataReceived){
+          this.optionLists = optionDataReceived.options
+          this.cateLists = optionDataReceived.cates
+          this.$store.dispatch('handleSaveOptionDataLoaded', {
+            model_id: this.modelSelected,
+            design_id: this.designActive.design_id,
+            parent_id: this.optionDetailActive,
+            cateLists: this.cateLists,
+            optionLists: this.optionLists
+          })
+       }
     },
     setOptionSelected: function(){
       const optionSelectedIndex = this.optionSelectedData.findIndex(
@@ -161,7 +177,20 @@ export default {
   },
   props: [],
   mounted() {
-    this.setOptionData()
+    //if save loaded data then no download data from api
+    if(this.optionDataLoaded){
+      const loadedDataIndex = this.optionDataLoaded.findIndex(
+        (item) => item.model_id == this.modelSelected && item.design_id == this.designActive.design_id && item.parent_id == this.optionDetailActive
+      )
+      if(loadedDataIndex !== -1) {
+        this.optionLists = this.optionDataLoaded[loadedDataIndex].optionLists
+        this.cateLists = this.optionDataLoaded[loadedDataIndex].cateLists
+      } else{
+        this.setOptionData()
+      }
+    } else{
+        this.setOptionData()
+    }
     this.setOptionSelected()
   },
   computed: {
@@ -170,7 +199,9 @@ export default {
       'modelSelected',
       'designActive',
       'optionSelectedData',
-      'optionDetailActive'
+      'optionDetailActive',
+      'optionDataLoaded',
+      'optionParentData'
     ]),
     cateCurrObj: function(){
       if(this.cateLists && this.cateCurr){
@@ -189,9 +220,15 @@ export default {
     OptionDetailData: function(){
       return this.optionCurrLists.filter((item) => item.id == this.optionDetailId)[0]
     },
-    // idOfOption: function(){
-    //   return "option-"+this.designActive.combine_id+'-'+this.designActive.item_id+'-'+this.designActive.design_id+'-'+this.optionDetailActive
-    // }
+    optionParent: function(){
+      var parentLists = this.optionParentData.filter((item) => item.design_id === this.designActive.design_id)[0];
+      var parentCurr = parentLists.parentData.filter((item) => item.parent_id === this.optionDetailActive);
+      if(parentCurr){
+        return parentCurr[0]
+      } else{
+        return {}
+      }
+    }
   }
 };
 </script>

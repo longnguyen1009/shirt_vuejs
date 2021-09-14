@@ -21,32 +21,32 @@
           </div>
         </div>
         <div class="simuright-options-row" 
-          v-for="OptionParents in optionParentData" :key="OptionParents.genre_id">
+          v-for="Genre in genreData" :key="Genre.genre_id">
           <div class="simuright-options-rowTop optionLv1 d-flex align-items-center" @click="showOptionParent($event)">
-            <span class="simuright-options-label">{{OptionParents.genre_name}}</span>
+            <span class="simuright-options-label">{{Genre.genre_name}}</span>
             <div class="simuright-options-name"></div>
           </div>
           <div class="simuright-options-rowDown">
             <ul class="simuright-optionLists">
               <li class="optionLv2 d-flex align-items-center"
-              v-for="Options in OptionParents.options" :key="Options.parent_id"
-              @click="openDetailOption(Options.parent_id)">
-                <span class="simuright-options-img"><img :src="option_img_path+Options.img" alt=""></span>
-                <span class="simuright-options-label">{{Options.name}}</span>
-                <div class="simuright-options-name"></div>
+              v-for="Option in optionParentSortData[Genre.genre_id]" :key="Option.parent_id"
+              @click="openDetailOption(Option.parent_id)">
+                <!-- <span class="simuright-options-img"><img :src="option_img_path+Option.img" alt=""></span> -->
+                <span class="simuright-options-label">{{Option.name}}</span>
+                <div class="simuright-options-name">{{optionSelectedValue(Option.parent_id)}}</div>
               </li>
             </ul>
           </div>
         </div>
       </div>
       <div class="simuright-price d-flex justify-content-between">
-          <div class="simuright-price-left">
-            <p>商品価格：39,000円<br>+ カスタマイズ価格：4,500円</p>
-            <p>お支払い金額: 43,500円</p>
+          <div class="simuright-price-left d-flex justify-content-between flex-column">
+            <p class="simuright-prices-basic">商品価格：{{moneyTypeShow01(itemPrice)}}<br>+ カスタマイズ価格：{{moneyTypeShow01(optionPrice)}}円</p>
+            <p class="simuright-prices-total">お支払い金額: <span class="totalPayment">{{moneyTypeShow01(sumPayment)}}円</span></p>
           </div>
-          <div class="simuright-price-right">
+          <div class="simuright-price-right d-flex justify-content-between flex-column">
             <p class="delivery-date">仕上がり予定日：12月12日</p>
-            <button class="btn btn-secondary">オーダー内容確認</button>
+            <button class="simu-common-btn">オーダー内容確認</button>
           </div>
       </div>
 
@@ -55,7 +55,6 @@
           v-if="optionDetailActive">
           <SelectKiji
             v-if="optionDetailActive == 'kiji'"
-            :kijiList="kijiData"
             @closeOption="closeDetailOption($event)"
           />
           <SelectOption
@@ -80,8 +79,8 @@ export default {
         return {
           designActiveId: 0,
           itemData: null,
-          optionParentData: {},
-          kijiData: [],
+          optionParentDataTemp: {},
+          genreData: {},
         }
     },
     props: [],
@@ -96,6 +95,10 @@ export default {
         this.$store.dispatch('handleChangeOptionTemp', null)
 
         //kiji
+        if(!this.kijiActive){
+          $('.kiji_preloader img').attr('src', '/html/upload/save_image/0730151143_6103981fcfa43.jpeg')
+          $('.kiji_preloader img').attr('kiji-id', '')
+        }
         if(this.kijiActive && this.kijiActive != $('.kiji_preloader img').attr('kiji-id')){
           $('.kiji_preloader img').attr('src', this.kiji_img_path + this.kijiObjectActive.img)
           $('.kiji_preloader img').attr('kiji-id', this.kijiActive)
@@ -117,7 +120,8 @@ export default {
         return ret
       },
       setKijiData: async function(){
-        this.kijiData = await this.getKijiFromAPI()
+        let kijiData = await this.getKijiFromAPI()
+        this.$store.dispatch('handleChangeKijiData', kijiData)
       },
       getItemData: async function(){
         var data = new FormData();
@@ -151,10 +155,35 @@ export default {
         return ret
       },
       updateOptionParent: async function(){
-        this.optionParentData = await this.getOptionParentData()
+        let parentDataReceived = await this.getOptionParentData()
+        this.genreData = parentDataReceived.genreData
+        this.optionParentDataTemp = parentDataReceived.optionData
+        this.$store.dispatch('handleChangeOptionParentData', 
+          {design_id: this.designActive.design_id, genreData: this.genreData, parentData: this.optionParentDataTemp}
+        )
       },
       showOptionParent(event){
         $(event.target).parents('.simuright-options-row').toggleClass('show')
+      },
+      optionSelectedValue(parent_id){
+        var option_selected_index = this.optionSelectedData.findIndex(
+            (item) => item.combine_id == this.designActive.combine_id &&
+                      item.item_id == this.designActive.item_id &&
+                      item.design_id == this.designActive.design_id &&
+                      item.parent_id == parent_id
+          )
+        if(option_selected_index !== -1){
+          return this.optionSelectedData[option_selected_index].name
+        }
+        return ''
+      },
+      //3500 -> 3,500
+      moneyTypeShow01(number){
+        return new Intl.NumberFormat().format(number)
+      },
+      //3500 -> ￥3,500
+      moneyTypeShow02(number){
+        new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(number)
       }
     },
     mounted() {
@@ -169,7 +198,15 @@ export default {
         this.$store.dispatch('handleChangeDesign', this.designActiveSplit)
       },
       designActive: function(){
-        this.updateOptionParent()
+        let optionParentIndex = this.optionParentData.findIndex(
+          (item) => item.design_id === this.designActive.design_id
+        )
+        if(optionParentIndex !== -1){
+          this.genreData = this.optionParentData[optionParentIndex].genreData
+          this.optionParentDataTemp = this.optionParentData[optionParentIndex].parentData
+        } else{
+          this.updateOptionParent()
+        }
       },
     },
     computed: {
@@ -182,7 +219,11 @@ export default {
         'itemSelected',
         'designActive',
         'kijiActive',
-        'optionDetailActive'
+        'optionDetailActive',
+        'optionSelectedData',
+        'optionDataLoaded',
+        'kijiData',
+        'optionParentData'
       ]),
       kijiObjectActive: function(){
         return this.kijiData.filter((item) => item.id === this.kijiActive)[0]
@@ -201,9 +242,32 @@ export default {
           return {}
         }
       },
-      
-
-
+      itemPrice: function(){
+        return 39000
+      },
+      optionPrice: function(){
+        let optionTotalprice = 0
+        this.optionSelectedData.forEach(val => {
+          optionTotalprice += Number(val.cost);
+        });
+        return optionTotalprice
+      },
+      sumPayment: function(){
+        return this.itemPrice + this.optionPrice
+      },
+      optionParentSortData: function(){
+        let parentSortData = []
+        if(this.genreData && this.optionParentDataTemp){
+          for (const genre_index in this.genreData){
+            parentSortData[this.genreData[genre_index].genre_id] = this.optionParentDataTemp.filter(
+              (item) => item.genre_id === this.genreData[genre_index].genre_id
+            )
+          }
+          return parentSortData
+        } else{
+          return []
+        }
+      }
     },
 };
 </script>
