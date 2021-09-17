@@ -37,9 +37,7 @@
     </div>
     <transition name="transitionRightToLeft">
       <SelectModel 
-        v-if="modelActive != 0"
-        :styleId="styleActive"
-        :modelId="modelActive"
+        v-if="page == 2"
       />
     </transition>
   </div>
@@ -59,92 +57,13 @@ export default {
   data() {
     return {
       styleItems: null,
-      // styleItems: [
-      //   {
-      //   "id": 9,
-      //   "name": "FORMAL",
-      //   "brand": 1,
-      //   "category": "スーツ",
-      //   "product_price": 58300,
-      //   "image": "0825154005_6125e5c5446cd.jpg",
-      //   "detail": null,
-      //   "model": []
-      //   },
-      //   {
-      //   "id": 6,
-      //   "name": "CLASSIC",
-      //   "brand": 1,
-      //   "category": "スーツ",
-      //   "product_price": 58300,
-      //   "image": "0825154005_6125e5c5446cd.jpg",
-      //   "detail": null,
-      //   "model": [
-      //   {
-      //   "id": 6,
-      //   "name": "REGULAR"
-      //   }
-      //   ]
-      //   },
-      //   {
-      //   "id": 1,
-      //   "name": "STANDARD",
-      //   "brand": 1,
-      //   "category": "スーツ",
-      //   "product_price": 58300,
-      //   "image": "0819022128_611d4198a9fd4.JPG",
-      //   "detail": "スタンダードスーツ",
-      //   "model": [
-      //   {
-      //   "id": 5,
-      //   "name": "S-MODEL"
-      //   }
-      //   ]
-      //   },
-      //   {
-      //   "id": 3,
-      //   "name": "COMFORT",
-      //   "brand": 1,
-      //   "category": "スーツ",
-      //   "product_price": 58300,
-      //   "image": "0819031015_611d4d07dee13.jpg",
-      //   "detail": "This is testing. This is testing. This is testing. This is testing. This is testing. This is testing.",
-      //   "model": [
-      //   {
-      //   "id": 2,
-      //   "name": "REDULER"
-      //   }
-      //   ]
-      //   },
-      //   {
-      //   "id": 7,
-      //   "name": "URPSP",
-      //   "brand": 1,
-      //   "category": "スーツ",
-      //   "product_price": 58300,
-      //   "image": "0825153836_6125e56c8215a.jpg",
-      //   "detail": null,
-      //   "model": []
-      //   },
-      //   {
-      //   "id": 8,
-      //   "name": "UNIFORM",
-      //   "brand": 1,
-      //   "category": "スーツ",
-      //   "product_price": 58300,
-      //   "image": "0825153915_6125e59368d3c.jpg",
-      //   "detail": null,
-      //   "model": []
-      //   },
-        
-      // ],
       settings: {
         "perPage": 3.2,
         "scrollPerPage": false,
         "paginationEnabled": false,
         "navigationEnabled": true
       },
-      styleActive: 0,
-      modelActive: 0
+      styleActive: 0
     };
   },
   methods: {
@@ -155,7 +74,8 @@ export default {
       this.styleActive = 0
     },
     modelSelect(id){
-      this.modelActive = id
+      this.$store.dispatch('handleChangePage', 2)
+      this.$store.dispatch('handleChangeModelTemp', {styleId: this.styleActive, modelId: id})
     },
     getStyleFromAPI: async function(){
       let ret = null
@@ -170,18 +90,37 @@ export default {
       this.styleItems = await this.getStyleFromAPI()
       this.$store.dispatch('handleChangeStyleData', this.styleItems)
       console.log(this.styleItems)
+    },
+    //refresh data when back button click
+    refreshData(){
+      this.$store.dispatch('handleRefreshApp', null)
+      return true
+    },
+    refreshStartData: async function(){
+      await this.refreshData()
     }
   },
   props: [],
   mounted() {
-    $('.simu-style-loading').addClass("on")
-    this.setStyleData()
-    setTimeout(function() {
-      $(".simu-style-loading").removeClass("on")
-    }, 300);
+    if(this.styleData){
+      this.styleItems = this.styleData
+    } else{
+      $('.simu-style-loading').addClass("on")
+      this.setStyleData()
+      setTimeout(function() {
+        $(".simu-style-loading").removeClass("on")
+      }, 300);
+    }
+
+    //refresh selected data
+    this.refreshStartData()
   },
   computed: {
-    ...mapGetters(['style_img_path'])
+    ...mapGetters([
+      'style_img_path',
+      'styleData',
+      'page'
+    ]),
   }
 };
 </script>

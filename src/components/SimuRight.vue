@@ -46,7 +46,7 @@
           </div>
           <div class="simuright-price-right d-flex justify-content-between flex-column">
             <p class="delivery-date">仕上がり予定日：12月12日</p>
-            <button class="simu-common-btn">オーダー内容確認</button>
+            <button class="simu-common-btn" @click="doOrderComfirm">オーダー内容確認</button>
           </div>
       </div>
 
@@ -77,8 +77,7 @@ export default {
     components: {SelectKiji, SelectOption},
     data() {
         return {
-          designActiveId: 0,
-          itemData: null,
+          designActiveId: null,
           optionParentDataTemp: {},
           genreData: {},
         }
@@ -134,11 +133,14 @@ export default {
               ret = response.data.data
             })
             .catch(error => console.log(error))
-        } 
+        }
         return ret
       },
       setItemData: async function(){
-        this.itemData = await this.getItemData()
+        let itemDataReceived = await this.getItemData()
+        if(itemDataReceived){
+          this.$store.dispatch('handleChangeItemData', itemDataReceived)
+        }
       },
       getOptionParentData: async function(){
         var data = new FormData();
@@ -184,16 +186,19 @@ export default {
       //3500 -> ￥3,500
       moneyTypeShow02(number){
         new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(number)
+      },
+      doOrderComfirm(){
+        this.$store.dispatch('handleChangeStep', 3)
       }
     },
     mounted() {
-      this.setItemData()
+      if(!this.itemData){
+        this.setItemData()
+      }
       this.setKijiData()
+      this.designActiveId = 0
     },
     watch: {
-      itemData: function(){
-        this.$emit('sendItemData', this.itemData)
-      },
       designActiveSplit: function(){
         this.$store.dispatch('handleChangeDesign', this.designActiveSplit)
       },
@@ -223,7 +228,8 @@ export default {
         'optionSelectedData',
         'optionDataLoaded',
         'kijiData',
-        'optionParentData'
+        'optionParentData',
+        'itemData'
       ]),
       kijiObjectActive: function(){
         return this.kijiData.filter((item) => item.id === this.kijiActive)[0]
@@ -232,7 +238,7 @@ export default {
         return (this.itemData) ? this.itemData.design : null
       },
       designActiveSplit: function(){
-        if(this.designData){
+        if(this.designData && this.designActiveId != null){
           return {
             combine_id: this.designData[this.designActiveId].combine_id,
             item_id: this.designData[this.designActiveId].item_id,

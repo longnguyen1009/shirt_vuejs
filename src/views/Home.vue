@@ -1,15 +1,18 @@
 <template>
   <div id="simupage_container" class="d-flex flex-column">
     <Step/>
-    <SelectStyle v-if="step == 1"/>
-    <!-- <Header /> -->
-    <div class="container-ordersimu" v-if="showSimuPage">
-      <div class="container-order-main">
-          <SimuLeft
-          :itemData="itemData"/>
-          <SimuRight
-          @sendItemData="sendItemData($event)"/>
-      </div>
+    <div class="simupage_main">
+      <SelectStyle v-if="step == 1"/>
+      <!-- <Header /> -->
+      <transition name="transitionRightToLeft">
+        <div class="container-ordersimu" v-if="step == 2">
+          <div class="container-order-main">
+              <SimuLeft/>
+              <SimuRight/>
+          </div>
+        </div>
+      </transition>
+      <SimuConfirm v-if="step == 3"/>
     </div>
   </div>
 </template>
@@ -25,6 +28,7 @@ import SimuNav from "../components/SimuNav.vue";
 import SimuCourse from "../components/SimuCourse.vue";
 import SimuRight from "../components/SimuRight.vue";
 import SimuModal from "../components/SimuModal.vue";
+import SimuConfirm from "../components/SimuConfirm.vue"
 
 import { mapGetters } from 'vuex'
 
@@ -41,26 +45,23 @@ export default {
     SimuCourse,
     SimuRight,
     SimuModal,
+    SimuConfirm
   },
   data() {
     return {
-      itemData: null
+
     };
   },
   methods: {
-    sendItemData(data){
-      this.itemData = data
-    }
+    
   },
   watch: {
   },
   mounted() {
+
   },
   computed: {
-    ...mapGetters(['step']),
-    showSimuPage: function(){
-      return (this.step == 2)
-    },
+    ...mapGetters(['step'])
   },
 };
 </script>

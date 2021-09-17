@@ -18,7 +18,7 @@ global.jquery = jQuery
 global.$ = jQuery
 window.$ = window.jQuery = require('jquery')
 
-// //bootstrap-vue
+//bootstrap-vue
 // import BootstrapVue from 'bootstrap-vue'
 // import 'bootstrap/dist/css/bootstrap.css'
 // import 'bootstrap-vue/dist/bootstrap-vue.css'

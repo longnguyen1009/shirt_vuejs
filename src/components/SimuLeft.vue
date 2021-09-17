@@ -1,13 +1,14 @@
 <template>
   <div class="container-simuleft">
     <div class="simuleft-top">
-      <h3 class="simuleft-top-style">{{styleObject.name}}</h3>
-      <h4 class="simuleft-top-model">{{modelData.name}}</h4>
+      <h3 class="simuleft-top-style">{{styleDataObj.name}}</h3>
+      <h4 class="simuleft-top-model">{{modelDataObj.name}}</h4>
       <p class="simuleft-top-itemcombine" v-if="itemCombineActive">{{itemCombineActive.name}}</p>
     </div>
+
     <div class="simuleft-main">
       <div style="display: none" class="kiji_preloader">
-          <img v-bind:src="kiji_img_src" @load="kijiLoaded" alt="" kiji-id=""/>
+          <img v-bind:src="kiji_img_path + kiji_img" @load="kijiLoaded" alt="" kiji-id=""/>
       </div>
       <div class="simuleft-sample">
             <img :src="design.sample_path" class="img_sample" />
@@ -40,7 +41,8 @@
         </span>
       </div>
       <!-- <div class="sumi-left-zoombtn">+ZOOM</div> -->
-      <div class="sumi-left-downbtn"><i class="fas fa-download"></i></div>
+      <button class="sumi-left-downbtn simu-common-btn"><i class="fas fa-download"></i></button>
+      <button class="sumi-left-allbody simu-common-btn" @click="changeViewMode" :class="{on : viewMode == 1}">全身ON/OFF</button>
       <div class="loadding_bl">
         <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
       </div>
@@ -56,9 +58,11 @@ export default {
   name: "SimuLeft",
   data() {
     return {
+      //全身ON/OFF
+      viewMode: 0
     };
   },
-  props: ["itemData"],
+  props: [],
   methods: {
     defaultLoaded() {
       $(".loadding_bl").addClass("on");
@@ -127,10 +131,15 @@ export default {
     },
     createIdForOption(Option){
       return 'option-'+Option.combine_id+'-'+Option.item_id+'-'+Option.design_id+'-'+Option.parent_id
+    },
+    changeViewMode: function(){
+      this.viewMode = this.viewMode ? 0 : 1
     }
   },
   watch: {
-    
+    designActive: function(){
+      this.viewMode = this.viewMode = 0
+    }
   },
   mounted() {
     // this.defaultLoaded();
@@ -150,7 +159,9 @@ export default {
         'optionDetailActive',
         'optionSelectedData',
         'optionTemp',
-        'kijiActive'
+        'kijiActive',
+        'kijiData',
+        'itemData'
       ]),
     //design path
     design: function() {
@@ -166,11 +177,19 @@ export default {
       }
     },
     //kiji path
-    kiji_img_src: function(){
-        return "/html/upload/save_image/0730151143_6103981fcfa43.jpeg"
+    kiji_img: function(){
+      if(this.kijiActive && this.kijiData.length){
+        return this.kijiData.filter(item => item.id == this.kijiActive)[0].img
+      } else{
+        return "0730151143_6103981fcfa43.jpeg"
+      }
     },
     designActive_path: function(){
-      return (this.itemData && this.designActive) ? this.designActive.design_id : null
+      if(this.viewMode){
+        return 'all'
+      } else{
+        return (this.itemData && this.designActive) ? this.designActive.design_id : null
+      }
     },
     itemCombineActive: function(){
       if(this.itemData){
@@ -180,12 +199,11 @@ export default {
         return null
       }
     },
-    styleObject: function(){
-      if(this.styleData){
-        return this.styleData.filter((item) => item.id === this.styleSelected)[0]
-      } else{
-        return {}
-      }
+    styleDataObj: function(){
+      return this.styleData.filter((item) => item.id === this.styleSelected)[0]
+    },
+    modelDataObj: function(){
+      return this.modelData.filter(item => item.modelId == this.modelSelected)[0].data
     },
     optionSaved: function(){
       if($("#option_temp").length > 0 && !this.optionTemp){
@@ -209,14 +227,6 @@ export default {
       }
       return optionSavedList
     },
-
-    // optionTempHtml: function(){
-    //   if(this.optionTemp && this.optionTemp.option_img){
-    //     return '<img id="option_temp" src="'+this.option_img_path + this.optionTemp.option_img+'" class="img_option" type:"'+this.optionTemp.type+'">'
-    //   } else{
-    //     return ''
-    //   }
-    // }
   },
 };
 </script>

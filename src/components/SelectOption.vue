@@ -145,6 +145,7 @@ export default {
             cateLists: this.cateLists,
             optionLists: this.optionLists
           })
+          await this.$store.dispatch('handleUpdateOptionDetailData', this.optionLists)
        }
     },
     setOptionSelected: function(){
@@ -180,7 +181,9 @@ export default {
     //if save loaded data then no download data from api
     if(this.optionDataLoaded){
       const loadedDataIndex = this.optionDataLoaded.findIndex(
-        (item) => item.model_id == this.modelSelected && item.design_id == this.designActive.design_id && item.parent_id == this.optionDetailActive
+        (item) => item.model_id == this.modelSelected
+        && item.design_id == this.designActive.design_id
+        && item.parent_id == this.optionDetailActive
       )
       if(loadedDataIndex !== -1) {
         this.optionLists = this.optionDataLoaded[loadedDataIndex].optionLists
@@ -201,7 +204,8 @@ export default {
       'optionSelectedData',
       'optionDetailActive',
       'optionDataLoaded',
-      'optionParentData'
+      'optionParentData',
+      'optionDetailData'
     ]),
     cateCurrObj: function(){
       if(this.cateLists && this.cateCurr){

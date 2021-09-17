@@ -1,5 +1,9 @@
 <template>
   <div class="container-step">
+    <button type="button" class="container-step-back simu-common-btn" 
+    v-if="canBack"
+    @click="doBack">戻る
+    </button>
     <div class="simu-stepgroup btn-group" role="group">
       <div
         variant="outline-dark"
@@ -52,11 +56,34 @@ export default {
     };
   },
   methods: {
-    
+    doBack: function(){
+      //now is step 1, model select page
+      if(this.step == 1){
+        if(this.page == 2){
+          this.$store.dispatch('handleChangePage', 1)
+        } else{
+          window.location.href = "http://54.248.46.255/myshop/neworder/";
+        }
+      } else if(this.step == 2){
+        this.$store.dispatch('handleChangePage', 2)
+        this.$store.dispatch('handleChangeStep', 1)
+        // this.$store.dispatch('handleChangeModelTemp', {styleId: this.styleSelected, modelId: this.modelSelected})
+      } else{
+        this.$store.dispatch('handleChangeStep', this.step - 1)
+      }
+    }
   },
   props: [],
   computed: {
-    ...mapGetters(['step'])
+    ...mapGetters([
+      'step',
+      'page',
+      'styleSelected',
+      'modelSelected',
+    ]),
+    canBack(){
+      return true
+    }
   }
 };
 </script>

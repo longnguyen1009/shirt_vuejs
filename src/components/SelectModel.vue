@@ -29,24 +29,36 @@
         <ul class="simu-model-itemList">
           <li v-for="(Items, id) in modelDetail.itemlist" :key="id"
             class="d-flex justify-content-start">
-            <div class="simu-model-itemType">
-              <input type="checkbox" :id="'itemType-'+Items.item_type_id" v-model="itemTypeCheck[Items.item_type_id]" @click="typeClick(Items.item_type_id)">
-              <label :for="'itemType-'+Items.item_type_id">{{Items.item_type_name}}</label>
+            <div class="simu-model-itemType" 
+            v-if="(Items.items.length > 1) || (Items.item_type_id == 1) || (Items.item_type_id == 2)">
+              <!-- <input type="checkbox" :id="'itemType-'+Items.item_type_id" 
+              v-model="itemTypeCheck[Items.item_type_id]" 
+              @click="typeClick(Items.item_type_id)"
+              > -->
+              <span>{{Items.item_type_name}}</span>
             </div>
             <div class="simu-model-item d-flex justify-content-between flex-grow-1">
               <div class="form-check form-check-inline" 
-                v-for="item in Items.items" :key="item.id"
-                :class="{item_select_off: Items.items.length == 1}">
-                <input type="radio" :id="'itemId-' + item.id" v-model="itemSelected[Items.item_type_id]" :value="item.id" @click="itemClick(Items.item_type_id)">
-                <label class="form-check-label" :for="'itemId-' + item.id">{{item.name}}</label>
+                v-for="item in Items.items" :key="item.id">
+                <label class="toggle">
+                  <input type="checkbox" :id="'itemId-' + item.id" class="toggle__input"
+                    v-model="itemSelected" 
+                    :value="item.id"
+                    :disabled="canCheck(item.id)"
+                  >
+                  <span class="toggle__label">
+                    <span class="toggle__text">
+                      {{ ((Items.items.length == 1) && (Items.item_type_id != 1) && (Items.item_type_id != 2)) ? Items.item_type_name : item.name}}
+                    </span>
+                  </span>
+                </label>
               </div>  
             </div>
           </li>
         </ul>
         <div class="simu-model-order d-flex justify-content-between align-items-end">
           <p class="simu-model-price">￥{{modelDetail.price}}</p>
-          <button type="button" class="btn btn-secondary"
-          @click="doOrder">ORDER</button>
+          <button type="button" class="simu-common-btn" @click="doOrder">ORDER</button>
         </div>
       </div>
     </div>
@@ -78,47 +90,49 @@ export default {
   },
   methods: {
     doOrder(){
-      var selectedData = this.itemSelected.filter(val => (val!==undefined) && (val!==null));
+      var selectedData = this.itemSelected.filter(val => (val!==undefined) && (val!==null))
       if(selectedData.length > 0){
-        this.$store.dispatch('handleChangeItem', {style: this.styleId, model: this.modelId, item: selectedData})
+        this.$store.dispatch('handleChangeItem', {style: this.modelTemp.styleId, model: this.modelTemp.modelId, item: selectedData})
         this.$store.dispatch('handleChangeStep', 2)
-        this.$store.dispatch('handleChangeModelData', this.modelDetail)
       } else{
         alert("アイテムを選択していません。")
         return false
       }
     },
-    typeClick(typeid){
-      if(this.itemTypeCheck[typeid]){
-        this.itemSelected[typeid] = null
-      } else{
-        if(!this.itemSelected[typeid]){
-          this.itemSelected[typeid] = this.modelDetail.itemlist[typeid].items[0].id
-        }
-      }
-    },
-    itemClick(typeid){
-      if(this.itemTypeCheck[typeid]){
+    canCheck(item_id){
+      if(this.itemSelected.filter((item) => item == item_id).length){
         return false
-      } else{
-        this.itemTypeCheck[typeid] = true
       }
+      var selectedData = this.itemSelected.filter(val => (val!==undefined) && (val!==null))
+      var temp_id_arr = [].concat(selectedData, item_id).map(i=>i.toString())
+      for(const item_combine in this.modelDetail.combine){
+          if(temp_id_arr.every(element => this.modelDetail.combine[item_combine].indexOf(element) > -1)){
+            return false
+          }
+      }
+      return true
     }
   },
-  props: ["styleId", "modelId"],
+  props: [],
   mounted() {
-     this.axios.get('http://54.248.46.255/myshop/getmodel/'+this.modelId)
+    if(this.modelData.length && this.modelData.filter(item => item.modelId == this.modelTemp.modelId).length){
+      this.modelDetail = this.modelData.filter(item => item.modelId == this.modelTemp.modelId)[0].data
+    } else{
+      this.axios.get('http://54.248.46.255/myshop/getmodel/'+this.modelTemp.modelId)
       .then(response => {
         this.modelDetail = response.data.data
+        this.$store.dispatch('handleChangeModelData', {modelId: this.modelTemp.modelId, data: response.data.data})
         console.log(this.modelDetail)
-        // this.modelDetail.itemlist.map(function(value, key) {
-        //   this.itemSelected.push({"type": value.item_type_id, "itemid": ""})
-        // })
       })
       .catch(error => console.log(error))
+    }
   },
   computed: {
-    ...mapGetters(['model_img_path']),
+    ...mapGetters([
+      'model_img_path',
+      'modelTemp',
+      'modelData'
+    ]),
     hasImg(){
       return Object.keys(this.modelDetail).length
     }
