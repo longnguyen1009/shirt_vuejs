@@ -5,6 +5,10 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+
+    //initial info
+    initialData: {}, // {shop_id, customer_id, staff_id, category_select, cartId}
+
     step: 1,
     page: 1, //page 2 is model page
 
@@ -40,7 +44,7 @@ export default new Vuex.Store({
     kijiData: [],
 
     // option parent Data by design
-    optionParentData: [], //{design_id, data}
+    optionParentData: [], //{design_id, genreData, parentData}
 
     //id of selecting option_parent 
     optionDetailActive: null,
@@ -61,6 +65,9 @@ export default new Vuex.Store({
 
     //itemData load form server
     itemData: null,
+
+    //受け取り方法
+    delivery_method: 1
   },
   getters: {
     //step
@@ -96,7 +103,9 @@ export default new Vuex.Store({
     kijiData: state => state.kijiData,
     optionParentData: state => state.optionParentData,
     optionDetailData: state => state.optionDetailData,
-    itemData: state => state.itemData
+    itemData: state => state.itemData,
+    delivery_method: state => state.delivery_method,
+    initialData: state => state.initialData
   },
   mutations: {
     changeStep(state, newStep){
@@ -176,10 +185,18 @@ export default new Vuex.Store({
       state.kijiData = kijiData
     },
     changeOptionParentData(state, parentData){
-      state.optionParentData.push(parentData)
+      const existParentDataIndex = state.optionParentData.findIndex(
+        (item) => item.design_id == parentData.design_id
+      )
+      if(existParentDataIndex !== -1){
+        state.optionParentData[existParentDataIndex] = parentData
+      } else{
+        state.optionParentData.push(parentData)
+      }
+      state.optionParentData = [...state.optionParentData]
     },
     refreshApp(state){
-      state.styleSelected = 0,
+      // state.styleSelected = 0,
       state.modelSelected = 0,
       state.itemSelected = [],
       state.optionMode = 2,
@@ -214,6 +231,19 @@ export default new Vuex.Store({
     },
     changeItemData(state, data){
       state.itemData = data
+    },
+    changeDeliData(state, deli_id){
+      state.delivery_method = deli_id
+    },
+    changeInitialData(state, iniData){
+      state.initialData = iniData
+    },
+    restoreFromIniData(state, data){
+      state.kijiActive = data.product_id
+      state.styleSelected = Number(data.style),
+      state.modelSelected = Number(data.model),
+      state.itemSelected = JSON.parse(data.item),
+      state.optionSelectedData = JSON.parse(data.option_selected)
     }
   },
   actions: {
@@ -268,6 +298,16 @@ export default new Vuex.Store({
     },
     handleChangeItemData(context, data){
       context.commit('changeItemData', data)
+    },
+    handleChangeDeliData(context, deli_id){
+      context.commit('changeDeliData', deli_id)
+    },
+    handleChangeIniData(context, iniData){
+      context.commit('changeInitialData', iniData)
+    },
+    handleRestoreFromIni(context, iniData){
+      context.commit('restoreFromIniData', iniData)
     }
+
   }
 })

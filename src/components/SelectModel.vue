@@ -42,7 +42,7 @@
                 v-for="item in Items.items" :key="item.id">
                 <label class="toggle">
                   <input type="checkbox" :id="'itemId-' + item.id" class="toggle__input"
-                    v-model="itemSelected" 
+                    v-model="itemSelectedTemp" 
                     :value="item.id"
                     :disabled="canCheck(item.id)"
                   >
@@ -84,13 +84,13 @@ export default {
         "navigationEnabled": true,
         "loop": true
       },
-      itemSelected: [],
+      itemSelectedTemp: [],
       itemTypeCheck: [],
     };
   },
   methods: {
     doOrder(){
-      var selectedData = this.itemSelected.filter(val => (val!==undefined) && (val!==null))
+      var selectedData = this.itemSelectedTemp.filter(val => (val!==undefined) && (val!==null))
       if(selectedData.length > 0){
         this.$store.dispatch('handleChangeItem', {style: this.modelTemp.styleId, model: this.modelTemp.modelId, item: selectedData})
         this.$store.dispatch('handleChangeStep', 2)
@@ -100,10 +100,10 @@ export default {
       }
     },
     canCheck(item_id){
-      if(this.itemSelected.filter((item) => item == item_id).length){
+      if(this.itemSelectedTemp.filter((item) => item == item_id).length){
         return false
       }
-      var selectedData = this.itemSelected.filter(val => (val!==undefined) && (val!==null))
+      var selectedData = this.itemSelectedTemp.filter(val => (val!==undefined) && (val!==null))
       var temp_id_arr = [].concat(selectedData, item_id).map(i=>i.toString())
       for(const item_combine in this.modelDetail.combine){
           if(temp_id_arr.every(element => this.modelDetail.combine[item_combine].indexOf(element) > -1)){
@@ -115,10 +115,18 @@ export default {
   },
   props: [],
   mounted() {
+    this.itemSelectedTemp = this.itemSelected
     if(this.modelData.length && this.modelData.filter(item => item.modelId == this.modelTemp.modelId).length){
       this.modelDetail = this.modelData.filter(item => item.modelId == this.modelTemp.modelId)[0].data
     } else{
-      this.axios.get('http://54.248.46.255/myshop/getmodel/'+this.modelTemp.modelId)
+      this.axios.request({
+        url: 'http://54.248.46.255/myshop/getmodel/',
+        method: 'post',
+        headers: {'X-Requested-With': 'XMLHttpRequest'},
+        data: {
+          modelid: this.modelTemp.modelId
+        }
+      })
       .then(response => {
         this.modelDetail = response.data.data
         this.$store.dispatch('handleChangeModelData', {modelId: this.modelTemp.modelId, data: response.data.data})
@@ -131,7 +139,8 @@ export default {
     ...mapGetters([
       'model_img_path',
       'modelTemp',
-      'modelData'
+      'modelData',
+      'itemSelected'
     ]),
     hasImg(){
       return Object.keys(this.modelDetail).length

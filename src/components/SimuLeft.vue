@@ -41,7 +41,8 @@
         </span>
       </div>
       <!-- <div class="sumi-left-zoombtn">+ZOOM</div> -->
-      <button class="sumi-left-downbtn simu-common-btn"><i class="fas fa-download"></i></button>
+      <button class="sumi-left-downbtn simu-common-btn"
+      @click="doSaveTemp"><i class="fas fa-download"></i></button>
       <button class="sumi-left-allbody simu-common-btn" @click="changeViewMode" :class="{on : viewMode == 1}">全身ON/OFF</button>
       <div class="loadding_bl">
         <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
@@ -134,6 +135,34 @@ export default {
     },
     changeViewMode: function(){
       this.viewMode = this.viewMode ? 0 : 1
+    },
+    addToCart: async function(){
+      let ret = null
+      await this.axios.request({
+        url: 'http://54.248.46.255/myshop/addproducttocart/',
+        method: 'post',
+        headers: {'X-Requested-With': 'XMLHttpRequest'},
+        data: {
+          'cartItem_id': this.initialData.,
+          'kiji': this.kijiActive,
+          'category_select': this.initialData.category_select,
+          'style': this.styleSelected,
+          'model': this.modelSelected,
+          'item': this.itemSelected,
+          'option_selected' : this.optionSelectedData
+        }
+      })
+      .then(response => {
+        ret = response.data.data
+      })
+      .catch(error => console.log(error))
+      return ret
+    },
+    doSaveTemp: async function(){
+      await(this.addToCart()).then((response) => {
+        console.log(response)
+        return false
+      })
     }
   },
   watch: {
@@ -161,7 +190,8 @@ export default {
         'optionTemp',
         'kijiActive',
         'kijiData',
-        'itemData'
+        'itemData',
+        'initialData'
       ]),
     //design path
     design: function() {
@@ -200,10 +230,18 @@ export default {
       }
     },
     styleDataObj: function(){
-      return this.styleData.filter((item) => item.id === this.styleSelected)[0]
+      if(this.styleData){
+        return this.styleData.filter((item) => item.id == this.styleSelected)[0]
+      } else{
+        return {}
+      }
     },
     modelDataObj: function(){
-      return this.modelData.filter(item => item.modelId == this.modelSelected)[0].data
+      if(Object.keys(this.modelData).length){
+        return this.modelData.filter(item => item.modelId == this.modelSelected)[0].data
+      } else{
+        return {}
+      }
     },
     optionSaved: function(){
       if($("#option_temp").length > 0 && !this.optionTemp){
@@ -227,6 +265,7 @@ export default {
       }
       return optionSavedList
     },
+
   },
 };
 </script>

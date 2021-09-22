@@ -125,11 +125,20 @@ export default {
       data.append('parent', this.optionDetailActive)
       let ret = null
       if(this.modelSelected && this.designActive.design_id && this.optionDetailActive){
-        await this.axios.post('http://54.248.46.255/myshop/getoptionlist/', data)
-          .then(response => {
-            ret = response.data.data
-          })
-          .catch(error => console.log(error))
+        await this.axios.request({
+          url: 'http://54.248.46.255/myshop/getoptionlist/',
+          method: 'post',
+          headers: {'X-Requested-With': 'XMLHttpRequest'},
+          data: {
+            model: this.modelSelected,
+            design: this.designActive.design_id,
+            parent: this.optionDetailActive
+          }
+        })
+        .then(response => {
+          ret = response.data.data
+        })
+        .catch(error => console.log(error))
       } 
       return ret
     },
@@ -209,7 +218,7 @@ export default {
     ]),
     cateCurrObj: function(){
       if(this.cateLists && this.cateCurr){
-        return this.cateLists.filter((item) => item.cate_id === this.cateCurr)[0];
+        return this.cateLists.filter((item) => item.cate_id == this.cateCurr)[0];
       } else{
         return null
       }
@@ -225,8 +234,8 @@ export default {
       return this.optionCurrLists.filter((item) => item.id == this.optionDetailId)[0]
     },
     optionParent: function(){
-      var parentLists = this.optionParentData.filter((item) => item.design_id === this.designActive.design_id)[0];
-      var parentCurr = parentLists.parentData.filter((item) => item.parent_id === this.optionDetailActive);
+      var parentLists = this.optionParentData.filter((item) => item.design_id == this.designActive.design_id)[0];
+      var parentCurr = parentLists.parentData.filter((item) => item.parent_id == this.optionDetailActive);
       if(parentCurr){
         return parentCurr[0]
       } else{

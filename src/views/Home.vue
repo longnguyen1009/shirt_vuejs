@@ -12,7 +12,9 @@
           </div>
         </div>
       </transition>
+      <transition name="modal">
       <SimuConfirm v-if="step == 3"/>
+      </transition>
     </div>
   </div>
 </template>
@@ -53,15 +55,54 @@ export default {
     };
   },
   methods: {
-    
+    getInitialData: async function(){
+      let ret = null
+      await this.axios.request({
+        url: 'http://54.248.46.255/myshop/getinitial/',
+        method: 'get',
+        headers: {'X-Requested-With': 'XMLHttpRequest'}
+      })
+      .then(response => {
+        ret = response.data.data
+      })
+      .catch(error => console.log(error))
+      return ret
+    },
+    setInitialData: async function(){
+      await this.getInitialData()
+      .then(response => {
+          if(response){
+            console.log(response)
+            if(response.iniData){
+              this.$store.dispatch('handleRestoreFromIni', response.iniData)
+              this.$store.dispatch('handleChangeStep', 2)
+            }
+            this.$store.dispatch('handleChangeIniData', {
+              shop_id: response.shop_id,
+              staff_id: response.staff_id,
+              customer_id: response.customer_id,
+              category_select: response.category_select,
+            })
+          }
+      })
+      .catch(error => console.log(error))
+    }
   },
   watch: {
   },
   mounted() {
-
+    this.setInitialData()
   },
   computed: {
-    ...mapGetters(['step'])
+    ...mapGetters([
+      'step',
+      'initialData',
+      'kijiActive',
+      'styleSelected',
+      'modelSelected',
+      'itemSelected',
+      'optionSelectedData'
+    ]),
   },
 };
 </script>

@@ -110,12 +110,16 @@ export default {
       //Promise to fetch Kiji
       getKijiFromAPI: async function(){
         let ret = null
-        await this.axios.get('http://54.248.46.255/myshop/getkijilist/')
-          .then(response => {
-            // console.log(response)
-            ret = response.data.data
-          })
-          .catch(error => console.log(error))
+        await this.axios.request({
+          url: 'http://54.248.46.255/myshop/getkijilist/',
+          method: 'get',
+          headers: {'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(response => {
+          // console.log(response)
+          ret = response.data.data
+        })
+        .catch(error => console.log(error))
         return ret
       },
       setKijiData: async function(){
@@ -123,16 +127,19 @@ export default {
         this.$store.dispatch('handleChangeKijiData', kijiData)
       },
       getItemData: async function(){
-        var data = new FormData();
-        data.append('items', this.itemSelected);
         let ret = null
         if(this.itemSelected){
-          await this.axios.post('http://54.248.46.255/myshop/getitem/', data)
-            .then(response => {
-              console.log(response.data.data)
-              ret = response.data.data
-            })
-            .catch(error => console.log(error))
+          await this.axios.request({
+            url: 'http://54.248.46.255/myshop/getitem/',
+            method: 'post',
+            headers: {'X-Requested-With': 'XMLHttpRequest'},
+            data: {'items' : this.itemSelected}
+          })
+          .then(response => {
+            console.log(response.data.data)
+            ret = response.data.data
+          })
+          .catch(error => console.log(error))
         }
         return ret
       },
@@ -143,11 +150,16 @@ export default {
         }
       },
       getOptionParentData: async function(){
-        var data = new FormData();
-        data.append('design_id', this.designActive.design_id);
         let ret = null
         if(this.designActive.design_id){
-          await this.axios.post('http://54.248.46.255/myshop/getoptionparent/', data)
+          await this.axios.request({
+            url: 'http://54.248.46.255/myshop/getoptionparent/',
+            method: 'post',
+            headers: {'X-Requested-With': 'XMLHttpRequest'},
+            data: {
+              'design_id': this.designActive.design_id 
+            }
+          })
             .then(response => {
               console.log(response.data.data)
               ret = response.data.data
@@ -163,6 +175,41 @@ export default {
         this.$store.dispatch('handleChangeOptionParentData', 
           {design_id: this.designActive.design_id, genreData: this.genreData, parentData: this.optionParentDataTemp}
         )
+      },
+      getAllOptionParentData: async function(){
+        var arrDesign = [];
+        this.designData.forEach((item) => {
+          arrDesign.push(item.design_id);
+        })
+        let ret = null
+        if(this.designData.length){
+          await this.axios.request({
+            url: 'http://54.248.46.255/myshop/getalloptionparent/',
+            method: 'post',
+            headers: {'X-Requested-With': 'XMLHttpRequest'},
+            data: {
+              design_id: arrDesign
+            }
+          })
+          .then(response => {
+            console.log(response.data.data)
+            ret = response.data.data
+          })
+          .catch(error => console.log(error))
+        } 
+        return ret
+      },
+      updateAllOptionParent: async function(){
+        await this.getAllOptionParentData().then(response => {
+          if(response.length > 0){
+            response.forEach((item) => {
+              this.$store.dispatch('handleChangeOptionParentData', 
+                {design_id: item.design_id, genreData: item.genreData, parentData: item.optionData}
+              )
+            })
+          }
+        })
+        .catch(error => console.log(error))
       },
       showOptionParent(event){
         $(event.target).parents('.simuright-options-row').toggleClass('show')
@@ -188,10 +235,15 @@ export default {
         new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(number)
       },
       doOrderComfirm(){
-        this.$store.dispatch('handleChangeStep', 3)
+        if(!this.kijiActive){
+          alert('生地を選択してください。')
+        } else{
+          this.$store.dispatch('handleChangeStep', 3)
+        }
       }
     },
     mounted() {
+      this.$store.dispatch('handleChangeOptionDetailActive', null)
       if(!this.itemData){
         this.setItemData()
       }
@@ -204,7 +256,7 @@ export default {
       },
       designActive: function(){
         let optionParentIndex = this.optionParentData.findIndex(
-          (item) => item.design_id === this.designActive.design_id
+          (item) => item.design_id == this.designActive.design_id
         )
         if(optionParentIndex !== -1){
           this.genreData = this.optionParentData[optionParentIndex].genreData
@@ -213,6 +265,9 @@ export default {
           this.updateOptionParent()
         }
       },
+      designData: function(){
+        this.updateAllOptionParent()
+      }
     },
     computed: {
       ...mapGetters([
@@ -232,7 +287,11 @@ export default {
         'itemData'
       ]),
       kijiObjectActive: function(){
-        return this.kijiData.filter((item) => item.id === this.kijiActive)[0]
+        if(this.kijiData.length){
+          return this.kijiData.filter((item) => item.id === this.kijiActive)[0]
+        } else{
+          return {}
+        }
       },
       designData: function(){
         return (this.itemData) ? this.itemData.design : null

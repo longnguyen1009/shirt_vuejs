@@ -39,7 +39,7 @@
                 <div class="simu-confirm-option">
                   <div class="simu-confirm-designItem"
                   v-for="Design in designData" :key="Design.design_id">
-                    <h4 class="simu-confirm-design">{{Design.design_label}}</h4>
+                    <h4 class="simu-confirm-design"><i class="far fa-square"></i>&nbsp;{{Design.design_label}}</h4>
                     <ul class="simu-confirm-detail-list d-flex justify-content-between">
                       <li class="simu-confirm-detail-item d-flex justify-content-between align-items-center"
                       v-for="OptionParent in getOptionParent(Design.design_id)" :key="OptionParent.parent_id">
@@ -47,13 +47,15 @@
                         <span class="simu-confirm-detail-value">
                           {{getOptionValue(Design.combine_id, Design.item_id, Design.design_id, OptionParent.parent_id).name}}
                         </span>
-                        <button type="button" class="simu-confirm-detail-change btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#staticBackdrop">修正</button>
+                        <button type="button" class="simu-confirm-detail-change btn btn-outline-dark" 
+                        @click="showDetail(Design.combine_id, Design.item_id, Design.design_id, OptionParent.parent_id)">
+                        修正</button>
                       </li>
                     </ul>
                   </div>
                 </div>
                 <div class="simu-confirm-detail-return d-flex align-items-center justify-content-center">
-                  <button class="simu-common-btn">シミュレーターに戻る</button>
+                  <button class="simu-common-btn" @click="doBack">シミュレーターに戻る</button>
                 </div>
               </div>
             </div>
@@ -62,14 +64,16 @@
               <div class="simu-confirm-payment-left d-flex flex-column justify-content-start">
                 <span class="simu-confirm-label">受取方法</span>
                 <div class="simu-confirm-payment-deli">
-                  <input class="fancy-radio" hidden id="delivery1" checked name="deliMethod" type="radio">
+                  <input class="fancy-radio" hidden id="delivery1" name="deliMethod" type="radio" value="0"
+                  v-model="deli_id">
                   <label class="fancy-radio-label" for="delivery1">
                       <span class="fancy-label--text">配送</span>
                       <span class="fancy-radiobutton">
                           <span class="radiobutton-dot"></span>
                       </span>
                   </label>
-                  <input class="fancy-radio" hidden id="delivery2" checked name="deliMethod" type="radio">
+                  <input class="fancy-radio" hidden id="delivery2" name="deliMethod" type="radio" value="1"
+                  v-model="deli_id">
                   <label class="fancy-radio-label" for="delivery2">
                       <span class="fancy-label--text">当店で受け取り</span>
                       <span class="fancy-radiobutton">
@@ -97,39 +101,57 @@
           <li><a class="dropdown-item" href="#">履歴川作成</a></li>
         </ul>
       </div>
-      <button id="simu-confirm-btn" class="simu-common-btn">オーダー完了</button>
+      <button id="simu-confirm-btn" class="simu-common-btn"
+      @click="confirmModalShow">オーダー完了</button>
     </div>
 
     <!-- Modal -->
-    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="false" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="staticBackdropLabel">Modal title</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            ...
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Understood</button>
+    <transition name="modal">
+      <div class="modal-mask" v-if="optionConfirmActive">
+        <div class="modal-wrapper">
+          <div class="modal-container modal-container-option">
+            <SelectKiji v-if="optionConfirmActive=='kiji'"
+            @closeOption="closeDetailOption($event)"/>
+            <SelectOption
+            v-if="optionDetailActive != 'kiji'"
+            @closeOption="closeDetailOption($event)"/>
           </div>
         </div>
       </div>
-    </div>
+      <div class="modal-mask" v-if="orderConfirmCheck">
+        <div class="modal-wrapper">
+          <div class="modal-container">
+              <div class="modal-body">
+                <span class="order-confirm-question">オーダーを完了しますか？</span>
+              </div>
+              <div class="modal-footer justify-content-center">
+                <slot name="footer">
+                  <button class="simu-common-btn" @click="confirmModalClose">戻る</button>
+                  <button class="simu-common-btn" @click="confirmModalClose">完了</button>
+                </slot>
+              </div>
+          </div>
+        </div>
+      </div>
+
+    </transition>
 
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
+import SelectKiji from "../components/SelectKiji.vue"
+import SelectOption from "../components/SelectOption.vue"
 
 export default {
   name: "SimuConfirm",
+  components: {SelectKiji, SelectOption},
   data() {
     return {
-
+      optionConfirmActive: null,
+      deli_id: null,
+      orderConfirmCheck: null,
     }
   },
   methods: {
@@ -138,7 +160,6 @@ export default {
       $(event.target).toggleClass('on')
     },
     getOptionParent(design_id){
-      console.log(this.optionParentData.filter(item => item.design_id == design_id)[0])
       return this.optionParentData.filter(item => item.design_id == design_id)[0].parentData
     },
     getOptionValue(combine_id, item_id, design_id, parent_id){
@@ -153,20 +174,58 @@ export default {
       } else{
         return {}
       }
+    },
+    showDetailKiji(){
+      this.optionConfirmActive = 'kiji'
+    },
+    showDetail(combine_id, item_id, design_id, parent_id){
+        this.$store.dispatch('handleChangeDesign',{
+          combine_id: combine_id,
+          item_id: item_id,
+          design_id: design_id
+        })
+        this.$store.dispatch('handleChangeOptionDetailActive', parent_id)
+        this.optionConfirmActive = parent_id
+    },
+    closeDetailOption(){
+      this.optionConfirmActive = null
+    },
+    doBack(){
+      this.$store.dispatch('handleChangeStep', this.step - 1)
+    },
+    confirmModalShow(){
+      this.orderConfirmCheck = 1
+    },
+    confirmModalClose(){
+      this.orderConfirmCheck = null
     }
   },
+  mounted(){
+    this.deli_id = this.delivery_method
+  },
   props: [],
+  watch: {
+    deli_id: function(){
+      this.$store.dispatch('handleChangeDeliData', this.deli_id)
+    }
+  },
   computed: {
     ...mapGetters([
+      'step',
       'kiji_img_path',
       'kijiData',
       'kijiActive',
       'itemData',
       'optionParentData',
-      'optionSelectedData'
+      'optionSelectedData',
+      'delivery_method'
     ]),
     kijiActiveObj: function(){
-      return this.kijiData.filter(item => item.id == this.kijiActive)[0]
+      if(this.kijiData){
+        return this.kijiData.filter(item => item.id == this.kijiActive)[0]
+      } else{
+        return {}
+      }
     },
     designData: function(){
         return (this.itemData) ? this.itemData.design : null

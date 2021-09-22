@@ -65,9 +65,9 @@ export default {
           window.location.href = "http://54.248.46.255/myshop/neworder/";
         }
       } else if(this.step == 2){
+        this.$store.dispatch('handleChangeModelTemp', {styleId: this.styleSelected, modelId: this.modelSelected})
         this.$store.dispatch('handleChangePage', 2)
         this.$store.dispatch('handleChangeStep', 1)
-        // this.$store.dispatch('handleChangeModelTemp', {styleId: this.styleSelected, modelId: this.modelSelected})
       } else{
         this.$store.dispatch('handleChangeStep', this.step - 1)
       }

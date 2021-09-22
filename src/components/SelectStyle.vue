@@ -61,7 +61,8 @@ export default {
         "perPage": 3.2,
         "scrollPerPage": false,
         "paginationEnabled": false,
-        "navigationEnabled": true
+        "navigationEnabled": true,
+
       },
       styleActive: 0
     };
@@ -79,17 +80,29 @@ export default {
     },
     getStyleFromAPI: async function(){
       let ret = null
-      await this.axios.get('http://54.248.46.255/myshop/getstyle/')
-        .then(response => {
-          ret = response.data.data
-        })
-        .catch(error => console.log(error))
+      await this.axios.request({
+        url: 'http://54.248.46.255/myshop/getstyle/',
+        method: 'post',
+        headers: {'X-Requested-With': 'XMLHttpRequest'},
+        data: {
+          category_select: this.initialData.category_select
+        }
+      })
+      .then(response => {
+        ret = response.data.data
+      })
+      .catch(error => console.log(error))
       return ret
     },
     setStyleData: async function(){
-      this.styleItems = await this.getStyleFromAPI()
-      this.$store.dispatch('handleChangeStyleData', this.styleItems)
-      console.log(this.styleItems)
+      await this.getStyleFromAPI().then(response => {
+        if(response){
+          console.log(response)
+          this.styleItems = response
+          this.$store.dispatch('handleChangeStyleData', this.styleItems)
+        }
+      })
+      .catch(error => console.log(error))
     },
     //refresh data when back button click
     refreshData(){
@@ -111,7 +124,6 @@ export default {
         $(".simu-style-loading").removeClass("on")
       }, 300);
     }
-
     //refresh selected data
     this.refreshStartData()
   },
@@ -119,7 +131,8 @@ export default {
     ...mapGetters([
       'style_img_path',
       'styleData',
-      'page'
+      'page',
+      'initialData'
     ]),
   }
 };
