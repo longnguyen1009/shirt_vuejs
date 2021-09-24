@@ -11,11 +11,29 @@
               <SimuRight/>
           </div>
         </div>
+
       </transition>
       <transition name="modal">
-      <SimuConfirm v-if="step == 3"/>
+        <SimuConfirm v-if="step == 3"/>
+        <SimuComplete v-if="step == 4"/>
       </transition>
     </div>
+    <transition name="modal">
+      <div class="modal-mask" v-if="errorCode" id="model-error">
+        <div class="modal-wrapper">
+          <div class="modal-container">
+              <div class="modal-body">
+                <span class="order-confirm-question">{{Errors.text}}</span>
+              </div>
+              <div class="modal-footer justify-content-center">
+                <slot name="footer">
+                  <button class="simu-common-btn" @click="clodeErrorModal">閉じる</button>
+                </slot>
+              </div>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -31,6 +49,7 @@ import SimuCourse from "../components/SimuCourse.vue";
 import SimuRight from "../components/SimuRight.vue";
 import SimuModal from "../components/SimuModal.vue";
 import SimuConfirm from "../components/SimuConfirm.vue"
+import SimuComplete from "../components/SimuComplete.vue"
 
 import { mapGetters } from 'vuex'
 
@@ -47,7 +66,8 @@ export default {
     SimuCourse,
     SimuRight,
     SimuModal,
-    SimuConfirm
+    SimuConfirm,
+    SimuComplete
   },
   data() {
     return {
@@ -55,6 +75,9 @@ export default {
     };
   },
   methods: {
+    clodeErrorModal(){
+      this.$store.dispatch('handleChangeErrorCode', 0)
+    },
     getInitialData: async function(){
       let ret = null
       await this.axios.request({
@@ -65,7 +88,10 @@ export default {
       .then(response => {
         ret = response.data.data
       })
-      .catch(error => console.log(error))
+      .catch(error => {
+        this.$store.dispatch('handleChangeErrorCode', 2)
+        console.log(error)
+      })
       return ret
     },
     setInitialData: async function(){
@@ -82,6 +108,8 @@ export default {
               staff_id: response.staff_id,
               customer_id: response.customer_id,
               category_select: response.category_select,
+              cartItemId: response.cartItemId,
+              orderItemId: response.orderItemId
             })
           }
       })
@@ -101,8 +129,17 @@ export default {
       'styleSelected',
       'modelSelected',
       'itemSelected',
-      'optionSelectedData'
+      'optionSelectedData',
+      'errorCode',
+      'errorData'
     ]),
+    Errors: function(){
+      if(this.errorCode){
+        return this.errorData.filter((item) => item.errorCode == this.errorCode)[0]
+      } else{
+        return {}
+      }
+    }
   },
 };
 </script>

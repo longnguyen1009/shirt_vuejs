@@ -64,7 +64,7 @@
               <div class="simu-confirm-payment-left d-flex flex-column justify-content-start">
                 <span class="simu-confirm-label">受取方法</span>
                 <div class="simu-confirm-payment-deli">
-                  <input class="fancy-radio" hidden id="delivery1" name="deliMethod" type="radio" value="0"
+                  <input class="fancy-radio" hidden id="delivery1" name="deliMethod" type="radio" value="1"
                   v-model="deli_id">
                   <label class="fancy-radio-label" for="delivery1">
                       <span class="fancy-label--text">配送</span>
@@ -72,7 +72,7 @@
                           <span class="radiobutton-dot"></span>
                       </span>
                   </label>
-                  <input class="fancy-radio" hidden id="delivery2" name="deliMethod" type="radio" value="1"
+                  <input class="fancy-radio" hidden id="delivery2" name="deliMethod" type="radio" value="2"
                   v-model="deli_id">
                   <label class="fancy-radio-label" for="delivery2">
                       <span class="fancy-label--text">当店で受け取り</span>
@@ -127,7 +127,7 @@
               <div class="modal-footer justify-content-center">
                 <slot name="footer">
                   <button class="simu-common-btn" @click="confirmModalClose">戻る</button>
-                  <button class="simu-common-btn" @click="confirmModalClose">完了</button>
+                  <button class="simu-common-btn" @click="doOrderComplete(1)">完了</button>
                 </slot>
               </div>
           </div>
@@ -198,6 +198,44 @@ export default {
     },
     confirmModalClose(){
       this.orderConfirmCheck = null
+    },
+    saveOrder: async function(order_status){
+      let ret = null
+      await this.axios.request({
+        url: 'http://54.248.46.255/myshop/addorder/',
+        method: 'post',
+        headers: {'X-Requested-With': 'XMLHttpRequest'},
+        data: {
+          order_status : order_status,
+          product_id: this.kijiActive,
+          category_select: this.initialData.category_select,
+          style: this.styleSelected,
+          model: this.modelSelected,
+          item: this.itemSelected,
+          option_selected : this.optionSelectedData,
+          price: 1000,
+          quantity: 1,
+          delivery_id: this.delivery_method
+        }
+      })
+      .then(response => {
+        ret = response.data.data
+      })
+      .catch(error => {
+        this.$store.dispatch('handleChangeErrorCode', 2)
+        console.log(error)
+      })
+      return ret
+    },
+    doOrderComplete: async function(order_status){
+      await(this.saveOrder(order_status)).then((response) => {
+      if(response !== null){
+          this.confirmModalClose();
+          this.$store.dispatch('handleChangeStep', 4)
+          // // this.$store.dispatch('handleChangeCartItemId', response)
+
+        }
+      })
     }
   },
   mounted(){
@@ -215,10 +253,14 @@ export default {
       'kiji_img_path',
       'kijiData',
       'kijiActive',
+      'styleSelected',
+      'modelSelected',
+      'itemSelected',
       'itemData',
       'optionParentData',
       'optionSelectedData',
-      'delivery_method'
+      'delivery_method',
+      'initialData'
     ]),
     kijiActiveObj: function(){
       if(this.kijiData){

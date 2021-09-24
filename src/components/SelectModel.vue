@@ -132,7 +132,10 @@ export default {
         this.$store.dispatch('handleChangeModelData', {modelId: this.modelTemp.modelId, data: response.data.data})
         console.log(this.modelDetail)
       })
-      .catch(error => console.log(error))
+      .catch(error => {
+        this.$store.dispatch('handleChangeErrorCode', 2)
+        console.log(error)
+      })
     }
   },
   computed: {

@@ -7,7 +7,7 @@ export default new Vuex.Store({
   state: {
 
     //initial info
-    initialData: {}, // {shop_id, customer_id, staff_id, category_select, cartId}
+    initialData: {}, // {shop_id, customer_id, staff_id, category_select, cartItemId, orderItemId}
 
     step: 1,
     page: 1, //page 2 is model page
@@ -67,7 +67,16 @@ export default new Vuex.Store({
     itemData: null,
 
     //受け取り方法
-    delivery_method: 1
+    delivery_method: 1,
+
+    errorCode: 0,
+    errorData: [
+      {errorCode: 1, text: '認証が失敗しました。'},
+      {errorCode: 2, text: 'データリクエストにエラーが発生しました。もう一度お試しください。'},
+      {errorCode: 3, text: 'ユーザー情報の確認に失敗しました。もう一度ログインしてください。'},
+      {errorCode: 4, text: '一時保存に入りました。'},
+      {errorCode: 5, text: 'オーダー完了しました。'},
+    ]
   },
   getters: {
     //step
@@ -105,7 +114,9 @@ export default new Vuex.Store({
     optionDetailData: state => state.optionDetailData,
     itemData: state => state.itemData,
     delivery_method: state => state.delivery_method,
-    initialData: state => state.initialData
+    initialData: state => state.initialData,
+    errorCode: state => state.errorCode,
+    errorData: state => state.errorData,
   },
   mutations: {
     changeStep(state, newStep){
@@ -244,6 +255,12 @@ export default new Vuex.Store({
       state.modelSelected = Number(data.model),
       state.itemSelected = JSON.parse(data.item),
       state.optionSelectedData = JSON.parse(data.option_selected)
+    },
+    changeErrorCode(state, code){
+      state.errorCode = code
+    },
+    changeCartItemId(state, cartItemId){
+      state.initialData.cartItemId = cartItemId
     }
   },
   actions: {
@@ -307,7 +324,12 @@ export default new Vuex.Store({
     },
     handleRestoreFromIni(context, iniData){
       context.commit('restoreFromIniData', iniData)
+    },
+    handleChangeErrorCode(context, code){
+      context.commit('changeErrorCode', code)
+    },
+    handleChangeCartItemId(context, cartItemId){
+      context.commit('changeCartItemId', cartItemId)
     }
-
   }
 })

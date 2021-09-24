@@ -91,7 +91,10 @@ export default {
       .then(response => {
         ret = response.data.data
       })
-      .catch(error => console.log(error))
+      .catch(error => {
+        this.$store.dispatch('handleChangeErrorCode', 2)
+        console.log(error)
+      })
       return ret
     },
     setStyleData: async function(){
@@ -119,13 +122,24 @@ export default {
       this.styleItems = this.styleData
     } else{
       $('.simu-style-loading').addClass("on")
-      this.setStyleData()
-      setTimeout(function() {
-        $(".simu-style-loading").removeClass("on")
-      }, 300);
+      // this.setStyleData()
+      // setTimeout(function() {
+      //   $(".simu-style-loading").removeClass("on")
+      // }, 300);
     }
     //refresh selected data
     this.refreshStartData()
+  },
+  watch: {
+    hasCategorySelect: function(){
+      if(this.hasCategorySelect){
+        $('.simu-style-loading').addClass("on")
+        this.setStyleData()
+        setTimeout(function() {
+          $(".simu-style-loading").removeClass("on")
+        }, 300);
+      }
+    }
   },
   computed: {
     ...mapGetters([
@@ -134,6 +148,9 @@ export default {
       'page',
       'initialData'
     ]),
+    hasCategorySelect: function(){
+      return this.initialData.category_select
+    }
   }
 };
 </script>

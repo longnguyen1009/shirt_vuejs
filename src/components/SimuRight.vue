@@ -119,7 +119,10 @@ export default {
           // console.log(response)
           ret = response.data.data
         })
-        .catch(error => console.log(error))
+        .catch(error => {
+          this.$store.dispatch('handleChangeErrorCode', 2)
+          console.log(error)
+        })
         return ret
       },
       setKijiData: async function(){
@@ -139,7 +142,10 @@ export default {
             console.log(response.data.data)
             ret = response.data.data
           })
-          .catch(error => console.log(error))
+          .catch(error => {
+            this.$store.dispatch('handleChangeErrorCode', 2)
+            console.log(error)
+          })
         }
         return ret
       },
@@ -164,7 +170,10 @@ export default {
               console.log(response.data.data)
               ret = response.data.data
             })
-            .catch(error => console.log(error))
+            .catch(error => {
+              this.$store.dispatch('handleChangeErrorCode', 2)
+              console.log(error)
+            })
         } 
         return ret
       },
@@ -195,7 +204,10 @@ export default {
             console.log(response.data.data)
             ret = response.data.data
           })
-          .catch(error => console.log(error))
+          .catch(error => {
+            this.$store.dispatch('handleChangeErrorCode', 2)
+            console.log(error)
+          })
         } 
         return ret
       },

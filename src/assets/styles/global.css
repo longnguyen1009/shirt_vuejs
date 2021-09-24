@@ -1161,12 +1161,14 @@ States
   margin: 0px auto;
   padding: 20px 15px;
   background-color: #333;
+  color: #fff;
   border-radius: 2px;
   border: 1px solid #676665;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
   transition: all 0.3s ease;
   font-family: Helvetica, Arial, sans-serif;
 }
+
 .modal-container-option{
   width: 50%;
   height: 610px;

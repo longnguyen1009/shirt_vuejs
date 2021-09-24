@@ -138,7 +138,10 @@ export default {
         .then(response => {
           ret = response.data.data
         })
-        .catch(error => console.log(error))
+        .catch(error => {
+          this.$store.dispatch('handleChangeErrorCode', 2)
+          console.log(error)
+        })
       } 
       return ret
     },

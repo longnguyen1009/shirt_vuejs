@@ -137,13 +137,14 @@ export default {
       this.viewMode = this.viewMode ? 0 : 1
     },
     addToCart: async function(){
+      console.log(this.initialData)
       let ret = null
       await this.axios.request({
         url: 'http://54.248.46.255/myshop/addproducttocart/',
         method: 'post',
         headers: {'X-Requested-With': 'XMLHttpRequest'},
         data: {
-          'cartItem_id': this.initialData.,
+          'cartItemId': this.initialData.cartItemId,
           'kiji': this.kijiActive,
           'category_select': this.initialData.category_select,
           'style': this.styleSelected,
@@ -155,14 +156,24 @@ export default {
       .then(response => {
         ret = response.data.data
       })
-      .catch(error => console.log(error))
+      .catch(error => {
+        this.$store.dispatch('handleChangeErrorCode', 2)
+        console.log(error)
+      })
       return ret
     },
     doSaveTemp: async function(){
-      await(this.addToCart()).then((response) => {
-        console.log(response)
+      if(this.kijiActive){
+        await(this.addToCart()).then((response) => {
+        if(response !== null){
+            this.$store.dispatch('handleChangeErrorCode', 4)
+            this.$store.dispatch('handleChangeCartItemId', response)
+          }
+        })
+      } else{
+        alert('生地を選択してください。')
         return false
-      })
+      }
     }
   },
   watch: {
