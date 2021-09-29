@@ -66,10 +66,8 @@ export default {
   props: [],
   methods: {
     defaultLoaded() {
+      console.log("1111111")
       $(".loadding_bl").addClass("on");
-      setTimeout(function() {
-        $(".loadding_bl").removeClass("on");
-      }, 700);
     },
     kijiLoaded() {
       var target = document.querySelector(".svgModel").contentDocument;
@@ -99,10 +97,10 @@ export default {
         }
       }
     },
-    loadAllOption(){
+    loadAllOption : async function(){
       //if have type: load img to svg
       var target = document.querySelector(".svgModel").contentDocument;
-      $(".img_option").each(function(index) {
+      await $(".img_option").each(function(index) {
         var cate = $(this).attr('cate')
         if(cate && $(target).find("pattern[cate='"+cate+"']").length){
           $(target)
@@ -110,14 +108,16 @@ export default {
           .find("image")
           .attr("xlink:href", $(this).attr('src'))
         }
-      });
+      })
     },
     svgLoaded02() {
       this.kijiLoaded()
-      this.loadAllOption()
-      setTimeout(function() {
-        $(".loadding_bl").removeClass("on");
-      }, 500);
+      this.loadAllOption().then(response => {
+        setTimeout(function() {
+          console.log("2222222")
+          $(".loadding_bl").removeClass("on");
+        }, 300);
+      })
     },
     loadImgError: function(e) {
       var target = document.querySelector(".svgModel").contentDocument;
@@ -179,6 +179,9 @@ export default {
   watch: {
     designActive: function(){
       this.viewMode = this.viewMode = 0
+    },
+    designActive_path: function(){
+      $(".loadding_bl").addClass("on");
     }
   },
   mounted() {
@@ -202,11 +205,11 @@ export default {
         'kijiActive',
         'kijiData',
         'itemData',
-        'initialData'
+        'initialData',
+        'orderNowId'
       ]),
     //design path
     design: function() {
-      $(".loadding_bl").addClass("on")
       if(this.designActive_path){
         return {
           sample_path: this.simu_img_path + 'designs/' + this.designActive_path + "/sample.png",
@@ -233,8 +236,8 @@ export default {
       }
     },
     itemCombineActive: function(){
-      if(this.itemData){
-        var itemObjectActive = this.itemData.items.filter((item) => item.id === this.designActive.combine_id)[0]
+      if(this.itemDataActive){
+        let itemObjectActive = this.itemDataActive.items.filter((item) => item.id == this.designActive.combine_id)[0]
         return itemObjectActive
       } else{
         return null
@@ -248,9 +251,12 @@ export default {
       }
     },
     modelDataObj: function(){
-      if(Object.keys(this.modelData).length){
+      console.log(this.modelData)
+      console.log(this.modelSelected)
+      if(this.modelData.filter(item => item.modelId == this.modelSelected).length){
         return this.modelData.filter(item => item.modelId == this.modelSelected)[0].data
-      } else{
+      }
+      else{
         return {}
       }
     },
@@ -276,7 +282,13 @@ export default {
       }
       return optionSavedList
     },
-
+    itemDataActive(){
+      if(this.itemData.length && this.itemData.filter(item => item.orderId == this.orderNowId).length){
+        return this.itemData.filter(item => item.orderId == this.orderNowId)[0]
+      } else{
+        return null
+      }
+    }
   },
 };
 </script>

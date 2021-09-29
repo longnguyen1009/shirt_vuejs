@@ -82,6 +82,11 @@ export default {
       'modelSelected',
     ]),
     canBack(){
+      // if(this.step < 4){
+      //   return true
+      // } else{
+      //   return false
+      // }
       return true
     }
   }

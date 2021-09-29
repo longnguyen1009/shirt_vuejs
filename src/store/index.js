@@ -7,7 +7,13 @@ export default new Vuex.Store({
   state: {
 
     //initial info
-    initialData: {}, // {shop_id, customer_id, staff_id, category_select, cartItemId, orderItemId}
+    initialData: {}, // {shop_id, customer_id, staff_id, cartItemId, orderItemId}
+
+    category_select: null,
+
+    orderNowId: 0,
+    //存在ORDER
+    orderTempItem: [], //[{id, style, model, item, option_selected}]
 
     step: 1,
     page: 1, //page 2 is model page
@@ -19,7 +25,7 @@ export default new Vuex.Store({
     option_img_path: "/html/upload/save_image/",
 
     // styleData load from server
-    styleData: null,
+    styleData: [], //[{id, name, brand, detail, img, model[], product_price}]
 
     //modelData load from server
     modelData: [], //{modelId, data}
@@ -64,7 +70,7 @@ export default new Vuex.Store({
     optionDetailData:[],
 
     //itemData load form server
-    itemData: null,
+    itemData: [], //{orderId, items[], design[] in step 2}
 
     //受け取り方法
     delivery_method: 1,
@@ -76,7 +82,8 @@ export default new Vuex.Store({
       {errorCode: 3, text: 'ユーザー情報の確認に失敗しました。もう一度ログインしてください。'},
       {errorCode: 4, text: '一時保存に入りました。'},
       {errorCode: 5, text: 'オーダー完了しました。'},
-    ]
+    ],
+    loaddingData: false,
   },
   getters: {
     //step
@@ -117,6 +124,12 @@ export default new Vuex.Store({
     initialData: state => state.initialData,
     errorCode: state => state.errorCode,
     errorData: state => state.errorData,
+    loaddingData:state => state.loaddingData,
+
+    //step 3
+    orderNowId: state => state.orderNowId,
+    orderTempItem: state => state.orderTempItem,
+    category_select: state => state.category_select
   },
   mutations: {
     changeStep(state, newStep){
@@ -124,6 +137,9 @@ export default new Vuex.Store({
     },
     changePage(state, page){
       state.page = page
+    },
+    changeModelSelected(state, model){
+      state.modelSelected = model
     },
     changeStyleModelItem(state, style_model_item_data){
       state.styleSelected = style_model_item_data.style,
@@ -139,8 +155,19 @@ export default new Vuex.Store({
     changeKiji(state, kiji){
       state.kijiActive = kiji
     },
-    changeStyleData(state, styleData){
-      state.styleData = styleData
+    async changeStyleData(state, styleData){
+      await Object.values(styleData).forEach(element => {
+          const existStyleIndex = state.styleData.findIndex(
+            (item) => (
+              item.id == element.id
+          ))
+          if(existStyleIndex !== -1){
+            state.styleData[existStyleIndex] = element
+          } else{
+            state.styleData.push(element)
+          }
+      })
+      state.styleData = [...state.styleData]
     },
     changeModelData(state, modelData){
       const existModelIndex = state.modelData.findIndex(
@@ -158,7 +185,8 @@ export default new Vuex.Store({
     changeOptionData(state, optionData){
       const existOptionIndex = state.optionSelectedData.findIndex(
         (item) => (
-          item.combine_id == optionData.combine_id
+          item.orderId == optionData.orderId
+          && item.combine_id == optionData.combine_id
           && item.item_id == optionData.item_id
           && item.design_id == optionData.design_id
           && item.parent_id == optionData.parent_id
@@ -196,7 +224,7 @@ export default new Vuex.Store({
       state.kijiData = kijiData
     },
     changeOptionParentData(state, parentData){
-      const existParentDataIndex = state.optionParentData.findIndex(
+      let existParentDataIndex = state.optionParentData.findIndex(
         (item) => item.design_id == parentData.design_id
       )
       if(existParentDataIndex !== -1){
@@ -214,7 +242,7 @@ export default new Vuex.Store({
       state.designActive = {}, //{combine_id, design_id, item_id}
       state.kijiActive = null,
       state.kijiData = [],
-      state.itemData = null,
+      state.itemData = [],
 
       state.optionSelectedData = [], // list of {combine_id, item_id, design_id, parent_id, option_id, cate_id, option_img: simu_img, name}
       state.optionDetailActive = null,
@@ -241,7 +269,13 @@ export default new Vuex.Store({
       state.optionDetailData = [...state.optionDetailData] 
     },
     changeItemData(state, data){
-      state.itemData = data
+      let orderItemIndex = state.itemData.findIndex(item => (item.orderId == data.orderId))
+      if(orderItemIndex !== -1){
+        state.itemData[orderItemIndex] = data
+      } else{
+        state.itemData.push(data)
+      }
+      state.itemData = [...state.itemData]
     },
     changeDeliData(state, deli_id){
       state.delivery_method = deli_id
@@ -250,17 +284,69 @@ export default new Vuex.Store({
       state.initialData = iniData
     },
     restoreFromIniData(state, data){
-      state.kijiActive = data.product_id
-      state.styleSelected = Number(data.style),
-      state.modelSelected = Number(data.model),
-      state.itemSelected = JSON.parse(data.item),
-      state.optionSelectedData = JSON.parse(data.option_selected)
+      state.kijiActive = ((data.product_id !== undefined) && (data.product_id !== null)) ? data.product_id : null
+      state.styleSelected = ((data.style !== undefined) && (data.style !== null)) ? Number(data.style) : null
+      state.modelSelected = ((data.model !== undefined) && (data.model !== null)) ? Number(data.model) : null
+      state.itemSelected = ((data.item !== undefined) && (data.item !== null)) ? JSON.parse(data.item) : []
+      state.optionSelectedData = ((data.option_selected !== undefined) && (data.option_selected !== null)) ? JSON.parse(data.option_selected) : []
+      state.category_select = ((data.category_select !== undefined) && (data.category_select !== null)) ? Number(data.category_select) : null
     },
     changeErrorCode(state, code){
       state.errorCode = code
     },
     changeCartItemId(state, cartItemId){
       state.initialData.cartItemId = cartItemId
+    },
+    changeLoaddingData(state, data){
+      state.loaddingData = data
+    },
+    changeOrderNowId(state, orderTempId){
+      state.orderNowId = orderTempId
+    },
+    updateOrderTempItem(state, orderTempItem){
+      let orderTempIndex = state.orderTempItem.findIndex(item => item.id == orderTempItem.id)
+      if(orderTempIndex !== -1){
+        state.orderTempItem[orderTempIndex] = orderTempItem
+      } else{
+        state.orderTempItem.push(orderTempItem)
+      }
+
+      state.orderTempItem = [...state.orderTempItem]
+    },
+    changeOrderTempItem(state, arrOrderTemp){
+      arrOrderTemp.forEach(element => {
+        const existOrderTemp = state.orderTempItem.findIndex(item => item.id == element.id)
+        if(existOrderTemp == -1){
+          element.category_select = Number(element.category_select)
+          element.style = Number(element.style)
+          element.model = Number(element.model)
+          element.item = JSON.parse(element.item)
+          element.option_selected = JSON.parse(element.option_selected)
+          state.orderTempItem.push(element)
+        }
+      })
+      state.orderTempItem = [...state.orderTempItem]
+    },
+    changeOrder(state, orderId){
+      state.orderNowId = orderId
+      let OrderNows = state.orderTempItem.filter(item => item.id == orderId)
+      if(OrderNows.length){
+        let OrderNow = OrderNows[0]
+        state.kijiActive = OrderNow.product_id
+        state.category_select = OrderNow.category_select
+        state.styleSelected = OrderNow.style,
+        state.modelSelected = OrderNow.model,
+        state.itemSelected = OrderNow.item
+      }
+    },
+    changeCategorySelect(state, category){
+      state.category_select = category
+    },
+    updateOptionSelectedOrderTemp(state){
+      state.orderTempItem.forEach((element, index) => {
+        state.orderTempItem[index].option_selected = state.optionSelectedData.filter(item => item.orderId == element.id)
+      })
+      state.orderTempItem = [...state.orderTempItem]
     }
   },
   actions: {
@@ -330,6 +416,30 @@ export default new Vuex.Store({
     },
     handleChangeCartItemId(context, cartItemId){
       context.commit('changeCartItemId', cartItemId)
+    },
+    handleChangeLoaddingData(context, data){
+      context.commit('changeLoaddingData', data)
+    },
+    handleUpdateOrderTemp(context, orderTempItem){
+      context.commit('updateOrderTempItem', orderTempItem)
+    },
+    handleChangeOrderTemp(context, arrOrderTemp){
+      context.commit('changeOrderTempItem', arrOrderTemp)
+    },
+    handleChangeOrderNow(context, orderNowId){
+      context.commit('changeOrderNowId', orderNowId)
+    },
+    handleChangeModelSelected(context, model){
+      context.commit('changeModelSelected', model)
+    },
+    handleChangeOrder(context, orderId){
+      context.commit('changeOrder', orderId)
+    },
+    handleChangeCategoryOrder(context, category){
+      context.commit('changeCategorySelect', category)
+    },
+    handleUpdateOptionSelectedOrderTemp(context, data){
+      context.commit('updateOptionSelectedOrderTemp')
     }
   }
 })

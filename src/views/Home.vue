@@ -11,11 +11,22 @@
               <SimuRight/>
           </div>
         </div>
-
+        <SimuComplete v-if="step == 4"/>
       </transition>
+
       <transition name="modal">
         <SimuConfirm v-if="step == 3"/>
-        <SimuComplete v-if="step == 4"/>
+      </transition>
+
+      <transition name="modal">
+        <div class="loaddingDataIo" v-if="loaddingData">
+          <div class="loadingio-spinner-spinner-482naetb3m">
+            <div class="ldio-2vyxc9gibh9">
+              <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+              <div></div><div></div><div></div>
+            </div>
+          </div>
+        </div>
       </transition>
     </div>
     <transition name="modal">
@@ -95,31 +106,227 @@ export default {
       return ret
     },
     setInitialData: async function(){
-      await this.getInitialData()
-      .then(response => {
+      await this.getInitialData().then(response => {
           if(response){
-            console.log(response)
             if(response.iniData){
               this.$store.dispatch('handleRestoreFromIni', response.iniData)
-              this.$store.dispatch('handleChangeStep', 2)
+              if(response.cartItemid){
+                this.$store.dispatch('handleChangeStep', 2)
+              } else if(response.orderItemId){
+                this.$store.dispatch('handleChangeStep', 3)
+              }
             }
             this.$store.dispatch('handleChangeIniData', {
               shop_id: response.shop_id,
               staff_id: response.staff_id,
               customer_id: response.customer_id,
-              category_select: response.category_select,
               cartItemId: response.cartItemId,
               orderItemId: response.orderItemId
+            })
+            this.setStyleData().then((response) => {
+                $(".simu-style-loading").removeClass("on")
             })
           }
       })
       .catch(error => console.log(error))
+    },
+    //Promise to fetch Kiji
+    getKijiFromAPI: async function(){
+        let ret = null
+        await this.axios.request({
+          url: 'http://54.248.46.255/myshop/getkijilist/',
+          method: 'get',
+          headers: {'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(response => {
+          // console.log(response)
+          ret = response.data.data
+        })
+        .catch(error => {
+          this.$store.dispatch('handleChangeErrorCode', 2)
+          console.log(error)
+        })
+        return ret
+    },
+    setKijiData: async function(){
+        let kijiData = await this.getKijiFromAPI()
+        this.$store.dispatch('handleChangeKijiData', kijiData)
+    },
+    getItemData: async function(item_selected){
+        let ret = null
+        if(item_selected){
+          await this.axios.request({
+            url: 'http://54.248.46.255/myshop/getitem/',
+            method: 'post',
+            headers: {'X-Requested-With': 'XMLHttpRequest'},
+            data: {'items' : item_selected}
+          })
+          .then(response => {
+            console.log(response.data.data)
+            ret = response.data.data
+          })
+          .catch(error => {
+            this.$store.dispatch('handleChangeErrorCode', 2)
+            console.log(error)
+          })
+        }
+        return ret
+      },
+    setItemData: async function(item_selected){
+      await this.getItemData(item_selected).then(response => {
+        if(response){
+          this.$store.dispatch('handleChangeItemData', {orderId: this.orderNowId, items: response.items, design: response.design})
+        }
+      })
+    },
+    updateItemData: async function(id, item){
+      await this.getItemData(item).then(response => {
+        if(response){
+          this.$store.dispatch('handleChangeItemData', {orderId: id, items: response.items, design: response.design})
+        }
+      })
+    },
+    getAllOptionParentData: async function(designData){
+      var arrDesign = [];
+      let ret = null
+      if(designData && designData.length){
+        designData.forEach((item) => {
+          arrDesign.push(item.design_id);
+        })
+        await this.axios.request({
+          url: 'http://54.248.46.255/myshop/getalloptionparent/',
+          method: 'post',
+          headers: {'X-Requested-With': 'XMLHttpRequest'},
+          data: {
+            design_id: arrDesign
+          }
+        })
+        .then(response => {
+          console.log(response.data.data)
+          ret = response.data.data
+        })
+        .catch(error => {
+          this.$store.dispatch('handleChangeErrorCode', 2)
+          console.log(error)
+        })
+      } 
+      return ret
+    },
+    updateAllOptionParent: async function(){
+      await this.getAllOptionParentData(this.designData).then(response => {
+        if(response){
+          response.forEach((item) => {
+            this.$store.dispatch('handleChangeOptionParentData', 
+              {design_id: item.design_id, genreData: item.genreData, parentData: item.optionData}
+            )
+          })
+        }
+      })
+      .catch(error => console.log(error))
+    },
+    updateAllOptionParentFromOrderTemp: async function(designData){
+      await this.getAllOptionParentData(designData).then(response => {
+        if(response){
+          response.forEach((item) => {
+            this.$store.dispatch('handleChangeOptionParentData', 
+              {design_id: item.design_id, genreData: item.genreData, parentData: item.optionData}
+            )
+          })
+        }
+      })
+      .catch(error => console.log(error))
+    },
+    getStyleFromAPI: async function(){
+      let ret = null
+      await this.axios.request({
+        url: 'http://54.248.46.255/myshop/getstyle/',
+        method: 'post',
+        headers: {'X-Requested-With': 'XMLHttpRequest'},
+        data: {
+          category_select: this.category_select
+        }
+      })
+      .then(response => {
+        ret = response.data.data
+      })
+      .catch(error => {
+        this.$store.dispatch('handleChangeErrorCode', 2)
+        console.log(error)
+      })
+      return ret
+    },
+    setStyleData: async function(){
+      await this.getStyleFromAPI().then(response => {
+        if(response){
+          this.$store.dispatch('handleChangeStyleData', response)
+        }
+      })
+      .catch(error => console.log(error))
+    },
+    updateOptionSelectedData: function(option_selected){
+      option_selected.forEach(element => {
+        this.$store.dispatch('handleChangeOption', element)
+      })
+    },
+    getModelData: async function(){
+      let ret = null
+      if(this.modelSelected){
+        await this.axios.request({
+          url: 'http://54.248.46.255/myshop/getmodel/',
+          method: 'post',
+          headers: {'X-Requested-With': 'XMLHttpRequest'},
+          data: {
+            modelid: this.modelSelected
+          }
+        })
+        .then(response => {
+          ret = response.data.data
+        })
+        .catch(error => {
+          this.$store.dispatch('handleChangeErrorCode', 2)
+          console.log(error)
+        })
+      }
+      return ret
     }
   },
   watch: {
+    itemSelected: function(){
+      if(this.itemSelected.length){
+        this.setItemData(this.itemSelected)
+      }
+    },
+    designData: function(){
+      this.updateAllOptionParent()
+    },
+    orderTempItem: function(){
+      console.log('option temp changed')
+      this.orderTempItem.forEach(element => {
+        if(this.itemData.findIndex(item => item.orderId == element.id) == -1){
+          this.updateItemData(element.id, element.item)
+        }
+        this.updateOptionSelectedData(element.option_selected)
+      })
+    },
+    itemData: function(){
+      this.itemData.forEach(element => {
+        this.updateAllOptionParentFromOrderTemp(element.design)
+      })
+    },
+    category_select: function(){
+      this.setStyleData()
+    },
+    modelSelected: function(){
+      this.getModelData().then(response => {
+        if(response){
+          this.$store.dispatch('handleChangeModelData', {modelId: this.modelSelected, data: response})
+        }
+      })
+    }
   },
   mounted() {
     this.setInitialData()
+    this.setKijiData()
   },
   computed: {
     ...mapGetters([
@@ -131,13 +338,32 @@ export default {
       'itemSelected',
       'optionSelectedData',
       'errorCode',
-      'errorData'
+      'errorData',
+      'loaddingData',
+      'itemData',
+      'orderNowId',
+      'orderTempItem',
+      'category_select'
     ]),
     Errors: function(){
       if(this.errorCode){
         return this.errorData.filter((item) => item.errorCode == this.errorCode)[0]
       } else{
         return {}
+      }
+    },
+    designData: function(){
+      if(this.itemDataActive){
+        return this.itemDataActive.design
+      } else{
+        return null
+      }
+    },
+    itemDataActive(){
+      if(this.itemData.length && this.itemData.filter(item => item.orderId == this.orderNowId).length){
+        return this.itemData.filter(item => item.orderId == this.orderNowId)[0]
+      } else{
+        return null
       }
     }
   },

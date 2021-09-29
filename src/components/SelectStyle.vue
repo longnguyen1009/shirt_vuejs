@@ -56,7 +56,6 @@ export default {
   components: { Carousel,Slide,SelectModel},
   data() {
     return {
-      styleItems: null,
       settings: {
         "perPage": 3.2,
         "scrollPerPage": false,
@@ -78,35 +77,35 @@ export default {
       this.$store.dispatch('handleChangePage', 2)
       this.$store.dispatch('handleChangeModelTemp', {styleId: this.styleActive, modelId: id})
     },
-    getStyleFromAPI: async function(){
-      let ret = null
-      await this.axios.request({
-        url: 'http://54.248.46.255/myshop/getstyle/',
-        method: 'post',
-        headers: {'X-Requested-With': 'XMLHttpRequest'},
-        data: {
-          category_select: this.initialData.category_select
-        }
-      })
-      .then(response => {
-        ret = response.data.data
-      })
-      .catch(error => {
-        this.$store.dispatch('handleChangeErrorCode', 2)
-        console.log(error)
-      })
-      return ret
-    },
-    setStyleData: async function(){
-      await this.getStyleFromAPI().then(response => {
-        if(response){
-          console.log(response)
-          this.styleItems = response
-          this.$store.dispatch('handleChangeStyleData', this.styleItems)
-        }
-      })
-      .catch(error => console.log(error))
-    },
+    // getStyleFromAPI: async function(){
+    //   let ret = null
+    //   await this.axios.request({
+    //     url: 'http://54.248.46.255/myshop/getstyle/',
+    //     method: 'post',
+    //     headers: {'X-Requested-With': 'XMLHttpRequest'},
+    //     data: {
+    //       category_select: this.initialData.category_select
+    //     }
+    //   })
+    //   .then(response => {
+    //     ret = response.data.data
+    //   })
+    //   .catch(error => {
+    //     this.$store.dispatch('handleChangeErrorCode', 2)
+    //     console.log(error)
+    //   })
+    //   return ret
+    // },
+    // setStyleData: async function(){
+    //   await this.getStyleFromAPI().then(response => {
+    //     if(response){
+    //       console.log(response)
+    //       this.styleItems = response
+    //       this.$store.dispatch('handleChangeStyleData', this.styleItems)
+    //     }
+    //   })
+    //   .catch(error => console.log(error))
+    // },
     //refresh data when back button click
     refreshData(){
       this.$store.dispatch('handleRefreshApp', null)
@@ -118,28 +117,13 @@ export default {
   },
   props: [],
   mounted() {
-    if(this.styleData){
-      this.styleItems = this.styleData
-    } else{
+    if(this.styleItems.length == 0){
       $('.simu-style-loading').addClass("on")
-      // this.setStyleData()
-      // setTimeout(function() {
-      //   $(".simu-style-loading").removeClass("on")
-      // }, 300);
     }
-    //refresh selected data
     this.refreshStartData()
   },
   watch: {
-    hasCategorySelect: function(){
-      if(this.hasCategorySelect){
-        $('.simu-style-loading').addClass("on")
-        this.setStyleData()
-        setTimeout(function() {
-          $(".simu-style-loading").removeClass("on")
-        }, 300);
-      }
-    }
+
   },
   computed: {
     ...mapGetters([
@@ -148,8 +132,8 @@ export default {
       'page',
       'initialData'
     ]),
-    hasCategorySelect: function(){
-      return this.initialData.category_select
+    styleItems: function(){
+      return this.styleData
     }
   }
 };

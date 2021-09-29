@@ -47,6 +47,16 @@
         />
       </div>
     </transition>
+    <transition name="modal">
+        <div class="loaddingDataIo" v-if="loaddingOptionData">
+          <div class="loadingio-spinner-spinner-482naetb3m">
+            <div class="ldio-2vyxc9gibh9">
+              <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+              <div></div><div></div><div></div>
+            </div>
+          </div>
+        </div>
+    </transition>
   </div>
 </template>
 
@@ -63,7 +73,8 @@ export default {
       optionDetailId: null,
       cateCurr: null,
       cateLists: [],
-      optionLists: {}
+      optionLists: {},
+      loaddingOptionData: false
     };
   },
   methods: {
@@ -92,6 +103,7 @@ export default {
       if(this.optionSelected){
         var selectedObj = this.optionCurrLists.filter((item) => item.id == this.optionSelected)[0]
         this.$store.dispatch('handleChangeOption', {
+          orderId: this.orderId,
           combine_id: this.designActive.combine_id,
           item_id: this.designActive.item_id,
           design_id: this.designActive.design_id,
@@ -119,10 +131,7 @@ export default {
       this.buttonConfirm()
     },
     getOptionData: async function(){
-      var data = new FormData()
-      data.append('model', this.modelSelected)
-      data.append('design', this.designActive.design_id)
-      data.append('parent', this.optionDetailActive)
+      this.loaddingOptionData = true
       let ret = null
       if(this.modelSelected && this.designActive.design_id && this.optionDetailActive){
         await this.axios.request({
@@ -139,6 +148,7 @@ export default {
           ret = response.data.data
         })
         .catch(error => {
+          this.loaddingOptionData = false
           this.$store.dispatch('handleChangeErrorCode', 2)
           console.log(error)
         })
@@ -150,6 +160,7 @@ export default {
        if(optionDataReceived){
           this.optionLists = optionDataReceived.options
           this.cateLists = optionDataReceived.cates
+          this.loaddingOptionData = false
           this.$store.dispatch('handleSaveOptionDataLoaded', {
             model_id: this.modelSelected,
             design_id: this.designActive.design_id,
@@ -163,6 +174,7 @@ export default {
     setOptionSelected: function(){
       const optionSelectedIndex = this.optionSelectedData.findIndex(
         (item) => (
+            item.orderId == this.orderId &&
             item.combine_id == this.designActive.combine_id && 
             item.item_id == this.designActive.item_id &&
             item.design_id == this.designActive.design_id &&
@@ -188,7 +200,7 @@ export default {
       }
     }
   },
-  props: [],
+  props: ['orderId'],
   mounted() {
     //if save loaded data then no download data from api
     if(this.optionDataLoaded){
@@ -217,7 +229,8 @@ export default {
       'optionDetailActive',
       'optionDataLoaded',
       'optionParentData',
-      'optionDetailData'
+      'optionDetailData',
+      'orderNowId'
     ]),
     cateCurrObj: function(){
       if(this.cateLists && this.cateCurr){

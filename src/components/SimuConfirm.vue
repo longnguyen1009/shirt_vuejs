@@ -3,16 +3,16 @@
     <div class="simu-comfirm-top flex-grow-1">
       <div class="simu-confirm-main">
         <div class="simu-confirm-content">
-          <div class="simu-confirm-card">
+          <div class="simu-confirm-card" v-for="OrderTemp in orderTempItem" :key="OrderTemp.id">
             <div class="simu-confirm-card-top d-flex justify-content-between align-items-stretch">
               <div class="simu-confirm-kiji d-flex justify-content-start flex-grow-1">
                 <span class="simu-confirm-kiji-img">
-                  <img :src="kiji_img_path + kijiActiveObj.img" alt="">
+                  <img :src="kiji_img_path + kijiObj(OrderTemp.product_id).img" alt="">
                 </span>
                 <div class="simu-confirm-kiji-detail d-flex flex-column justify-content-between">
                   <p class="">
-                    <span class="simu-confirm-kiji-code">{{kijiActiveObj.code}}</span><br>
-                    <span class="simu-confirm-kiji-name">{{kijiActiveObj.name}}</span><br>
+                    <span class="simu-confirm-kiji-code">{{kijiObj(OrderTemp.product_id).code}}</span><br>
+                    <span class="simu-confirm-kiji-name">{{kijiObj(OrderTemp.product_id).name}}</span><br>
                     <span class="simu-confirm-kiji-name">c/# 09</span>
                   </p>
                   <button class="simu-common-btn">サイズ詳細</button>
@@ -38,24 +38,24 @@
               <div class="simu-confirm-detail-bottom">
                 <div class="simu-confirm-option">
                   <div class="simu-confirm-designItem"
-                  v-for="Design in designData" :key="Design.design_id">
+                  v-for="Design in designData(OrderTemp.id)" :key="Design.design_id">
                     <h4 class="simu-confirm-design"><i class="far fa-square"></i>&nbsp;{{Design.design_label}}</h4>
                     <ul class="simu-confirm-detail-list d-flex justify-content-between">
                       <li class="simu-confirm-detail-item d-flex justify-content-between align-items-center"
                       v-for="OptionParent in getOptionParent(Design.design_id)" :key="OptionParent.parent_id">
                         <span class="simu-confirm-detail-label">{{OptionParent.name}}</span>
                         <span class="simu-confirm-detail-value">
-                          {{getOptionValue(Design.combine_id, Design.item_id, Design.design_id, OptionParent.parent_id).name}}
+                          {{getOptionItem(OrderTemp.id, Design.combine_id, Design.item_id, Design.design_id, OptionParent.parent_id).name}}
                         </span>
                         <button type="button" class="simu-confirm-detail-change btn btn-outline-dark" 
-                        @click="showDetail(Design.combine_id, Design.item_id, Design.design_id, OptionParent.parent_id)">
+                        @click="showDetail(OrderTemp.id, OrderTemp.model, Design.combine_id, Design.item_id, Design.design_id, OptionParent.parent_id)">
                         修正</button>
                       </li>
                     </ul>
                   </div>
                 </div>
                 <div class="simu-confirm-detail-return d-flex align-items-center justify-content-center">
-                  <button class="simu-common-btn" @click="doBack">シミュレーターに戻る</button>
+                  <button class="simu-common-btn" @click="doBack(OrderTemp.id)">シミュレーターに戻る</button>
                 </div>
               </div>
             </div>
@@ -96,9 +96,9 @@
           オーダー追加
         </button>
         <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton2">
-          <li><a class="dropdown-item active" href="#">小名サイズで作成</a></li>
-          <li><a class="dropdown-item" href="#">違うサイズで作成</a></li>
-          <li><a class="dropdown-item" href="#">履歴川作成</a></li>
+          <li class="dropdown-item">小名サイズで作成</li>
+          <li class="dropdown-item">違うサイズで作成</li>
+          <li class="dropdown-item" @click="doSaveOrderTemp(1)">履歴川作成</li>
         </ul>
       </div>
       <button id="simu-confirm-btn" class="simu-common-btn"
@@ -113,7 +113,8 @@
             <SelectKiji v-if="optionConfirmActive=='kiji'"
             @closeOption="closeDetailOption($event)"/>
             <SelectOption
-            v-if="optionDetailActive != 'kiji'"
+            v-if="optionConfirmActive != 'kiji'"
+            :orderId="orderIdActive"
             @closeOption="closeDetailOption($event)"/>
           </div>
         </div>
@@ -149,9 +150,11 @@ export default {
   components: {SelectKiji, SelectOption},
   data() {
     return {
+      arrOrderTemp: [],
       optionConfirmActive: null,
       deli_id: null,
       orderConfirmCheck: null,
+      orderIdActive: null,
     }
   },
   methods: {
@@ -160,37 +163,44 @@ export default {
       $(event.target).toggleClass('on')
     },
     getOptionParent(design_id){
-      return this.optionParentData.filter(item => item.design_id == design_id)[0].parentData
-    },
-    getOptionValue(combine_id, item_id, design_id, parent_id){
-      const optionIndex = this.optionSelectedData.findIndex(
-        item => item.combine_id == combine_id
-        && item.item_id == item_id
-        && item.design_id == design_id
-        && item.parent_id == parent_id
-      )
-      if(optionIndex !== -1){
-        return this.optionSelectedData[optionIndex]
-      } else{
-        return {}
+      if(this.optionParentData.filter(item => item.design_id == design_id).length){
+        return this.optionParentData.filter(item => item.design_id == design_id)[0].parentData
       }
+    },
+    getOptionItem(orderId, combine_id, item_id, design_id, parent_id){
+        let optionIndex = this.optionSelectedData.findIndex(
+          item => item.orderId == orderId
+          && item.combine_id == combine_id
+          && item.item_id == item_id
+          && item.design_id == design_id
+          && item.parent_id == parent_id
+        )
+        if(optionIndex !== -1){
+          return this.optionSelectedData[optionIndex]
+        } else{
+          return {}
+        }
     },
     showDetailKiji(){
       this.optionConfirmActive = 'kiji'
     },
-    showDetail(combine_id, item_id, design_id, parent_id){
+    showDetail(orderId, model, combine_id, item_id, design_id, parent_id){
+        this.orderIdActive = orderId
         this.$store.dispatch('handleChangeDesign',{
           combine_id: combine_id,
           item_id: item_id,
           design_id: design_id
         })
+        this.$store.dispatch('handleChangeModelSelected', model)
         this.$store.dispatch('handleChangeOptionDetailActive', parent_id)
         this.optionConfirmActive = parent_id
     },
     closeDetailOption(){
       this.optionConfirmActive = null
+      this.orderIdActive = null
     },
-    doBack(){
+    doBack(orderId){
+      this.$store.dispatch('handleChangeOrder', orderId)
       this.$store.dispatch('handleChangeStep', this.step - 1)
     },
     confirmModalShow(){
@@ -200,6 +210,8 @@ export default {
       this.orderConfirmCheck = null
     },
     saveOrder: async function(order_status){
+      this.confirmModalClose();
+      this.$store.dispatch('handleChangeLoaddingData', true)
       let ret = null
       await this.axios.request({
         url: 'http://54.248.46.255/myshop/addorder/',
@@ -222,6 +234,7 @@ export default {
         ret = response.data.data
       })
       .catch(error => {
+        this.$store.dispatch('handleChangeLoaddingData', false)
         this.$store.dispatch('handleChangeErrorCode', 2)
         console.log(error)
       })
@@ -230,16 +243,93 @@ export default {
     doOrderComplete: async function(order_status){
       await(this.saveOrder(order_status)).then((response) => {
       if(response !== null){
-          this.confirmModalClose();
+          this.$store.dispatch('handleChangeLoaddingData', false)
           this.$store.dispatch('handleChangeStep', 4)
           // // this.$store.dispatch('handleChangeCartItemId', response)
-
         }
       })
-    }
+    },
+    saveOrderTemp: async function(order_status){
+      this.$store.dispatch('handleChangeLoaddingData', true)
+      let ret = null
+      await this.axios.request({
+        url: 'http://54.248.46.255/myshop/addordertemp/',
+        method: 'post',
+        headers: {'X-Requested-With': 'XMLHttpRequest'},
+        data: {
+          orderTemp: this.orderTempItem
+        }
+      })
+      .then(response => {
+        ret = response.data.data
+      })
+      .catch(error => {
+        this.$store.dispatch('handleChangeLoaddingData', false)
+        this.$store.dispatch('handleChangeErrorCode', 2)
+        console.log(error)
+      })
+      return ret
+    },
+    doSaveOrderTemp: function(order_status){
+      this.$store.dispatch('handleUpdateOptionSelectedOrderTemp', null)
+      this.saveOrderTemp(order_status).then((response) => {
+      if(response !== null){
+          this.$store.dispatch('handleChangeLoaddingData', false)
+          console.log(response)
+        }
+      })
+    },
+    kijiObj: function(kijiId){
+      if(this.kijiData.length && this.kijiData.filter(item => item.id == kijiId).length){
+        return this.kijiData.filter(item => item.id == kijiId)[0]
+      } else{
+        return {}
+      }
+    },
+    designData: function(orderId){
+      if(this.itemData.length && this.itemData.filter(item => item.orderId == orderId).length){
+        return this.itemData.filter(item => item.orderId == orderId)[0].design
+      } else{
+        return null
+      }
+    },
+    getOrderItemSession: async function(){
+      let ret = null
+      await this.axios.request({
+        url: 'http://54.248.46.255/myshop/getordertemp/',
+        method: 'get',
+        headers: {'X-Requested-With': 'XMLHttpRequest'}
+      })
+      .then(response => {
+        ret = response.data.data
+      })
+      .catch(error => {
+        this.$store.dispatch('handleChangeErrorCode', 2)
+        console.log(error)
+      })
+      return ret
+    },
+    updateOrderItemList: async function(){
+      await this.getOrderItemSession().then(response => {
+        if(response && response.length){
+         this.$store.dispatch('handleChangeOrderTemp', response)
+        }
+      })
+    },
   },
   mounted(){
     this.deli_id = this.delivery_method
+    //save orderItemNow to arrOrderItem
+    this.$store.dispatch('handleUpdateOrderTemp',{
+      id: this.orderNowId,
+      category_select: this.category_select,
+      product_id: this.kijiActive,
+      style: this.styleSelected,
+      model: this.modelSelected,
+      item: this.itemSelected,
+      option_selected: this.optionSelectedData.filter(item => item.orderId == this.orderNowId)
+    })
+    this.updateOrderItemList()
   },
   props: [],
   watch: {
@@ -260,18 +350,11 @@ export default {
       'optionParentData',
       'optionSelectedData',
       'delivery_method',
-      'initialData'
+      'initialData',
+      'orderNowId',
+      'orderTempItem',
+      'category_select'
     ]),
-    kijiActiveObj: function(){
-      if(this.kijiData){
-        return this.kijiData.filter(item => item.id == this.kijiActive)[0]
-      } else{
-        return {}
-      }
-    },
-    designData: function(){
-        return (this.itemData) ? this.itemData.design : null
-    },
     itemCombineData: function(){
         return (this.itemData) ? this.itemData.items : null
     }

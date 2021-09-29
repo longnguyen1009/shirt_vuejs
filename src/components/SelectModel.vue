@@ -119,6 +119,7 @@ export default {
     if(this.modelData.length && this.modelData.filter(item => item.modelId == this.modelTemp.modelId).length){
       this.modelDetail = this.modelData.filter(item => item.modelId == this.modelTemp.modelId)[0].data
     } else{
+      this.$store.dispatch('handleChangeLoaddingData', true)
       this.axios.request({
         url: 'http://54.248.46.255/myshop/getmodel/',
         method: 'post',
@@ -130,9 +131,10 @@ export default {
       .then(response => {
         this.modelDetail = response.data.data
         this.$store.dispatch('handleChangeModelData', {modelId: this.modelTemp.modelId, data: response.data.data})
-        console.log(this.modelDetail)
+        this.$store.dispatch('handleChangeLoaddingData', false)     
       })
       .catch(error => {
+        this.$store.dispatch('handleChangeLoaddingData', false)
         this.$store.dispatch('handleChangeErrorCode', 2)
         console.log(error)
       })
@@ -143,7 +145,7 @@ export default {
       'model_img_path',
       'modelTemp',
       'modelData',
-      'itemSelected'
+      'itemSelected',
     ]),
     hasImg(){
       return Object.keys(this.modelDetail).length

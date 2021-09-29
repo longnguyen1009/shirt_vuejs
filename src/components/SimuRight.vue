@@ -59,6 +59,7 @@
           />
           <SelectOption
             v-if="optionDetailActive != 'kiji'"
+            :orderId="orderNowId"
             @closeOption="closeDetailOption($event)"
           />
         </div>
@@ -130,6 +131,7 @@ export default {
         this.$store.dispatch('handleChangeKijiData', kijiData)
       },
       getItemData: async function(){
+        this.$store.dispatch('handleChangeLoaddingData', true)
         let ret = null
         if(this.itemSelected){
           await this.axios.request({
@@ -143,6 +145,7 @@ export default {
             ret = response.data.data
           })
           .catch(error => {
+            this.$store.dispatch('handleChangeLoaddingData', false)
             this.$store.dispatch('handleChangeErrorCode', 2)
             console.log(error)
           })
@@ -150,10 +153,12 @@ export default {
         return ret
       },
       setItemData: async function(){
-        let itemDataReceived = await this.getItemData()
-        if(itemDataReceived){
-          this.$store.dispatch('handleChangeItemData', itemDataReceived)
-        }
+        await this.getItemData().then(response => {
+          if(response){
+            this.$store.dispatch('handleChangeItemData', {orderId: this.orderNowId, items: response.items, design: response.design})
+            this.$store.dispatch('handleChangeLoaddingData', false)
+          }
+        })
       },
       getOptionParentData: async function(){
         let ret = null
@@ -178,50 +183,15 @@ export default {
         return ret
       },
       updateOptionParent: async function(){
-        let parentDataReceived = await this.getOptionParentData()
-        this.genreData = parentDataReceived.genreData
-        this.optionParentDataTemp = parentDataReceived.optionData
-        this.$store.dispatch('handleChangeOptionParentData', 
-          {design_id: this.designActive.design_id, genreData: this.genreData, parentData: this.optionParentDataTemp}
-        )
-      },
-      getAllOptionParentData: async function(){
-        var arrDesign = [];
-        this.designData.forEach((item) => {
-          arrDesign.push(item.design_id);
-        })
-        let ret = null
-        if(this.designData.length){
-          await this.axios.request({
-            url: 'http://54.248.46.255/myshop/getalloptionparent/',
-            method: 'post',
-            headers: {'X-Requested-With': 'XMLHttpRequest'},
-            data: {
-              design_id: arrDesign
-            }
-          })
-          .then(response => {
-            console.log(response.data.data)
-            ret = response.data.data
-          })
-          .catch(error => {
-            this.$store.dispatch('handleChangeErrorCode', 2)
-            console.log(error)
-          })
-        } 
-        return ret
-      },
-      updateAllOptionParent: async function(){
-        await this.getAllOptionParentData().then(response => {
-          if(response.length > 0){
-            response.forEach((item) => {
-              this.$store.dispatch('handleChangeOptionParentData', 
-                {design_id: item.design_id, genreData: item.genreData, parentData: item.optionData}
-              )
-            })
+        await this.getOptionParentData().then(response => {
+          if(response){
+            this.genreData = response.genreData
+            this.optionParentDataTemp = response.optionData
+            this.$store.dispatch('handleChangeOptionParentData', 
+              {design_id: this.designActive.design_id, genreData: this.genreData, parentData: this.optionParentDataTemp}
+            )
           }
         })
-        .catch(error => console.log(error))
       },
       showOptionParent(event){
         $(event.target).parents('.simuright-options-row').toggleClass('show')
@@ -256,7 +226,7 @@ export default {
     },
     mounted() {
       this.$store.dispatch('handleChangeOptionDetailActive', null)
-      if(!this.itemData){
+      if(!this.itemDataActive){
         this.setItemData()
       }
       this.setKijiData()
@@ -277,9 +247,6 @@ export default {
           this.updateOptionParent()
         }
       },
-      designData: function(){
-        this.updateAllOptionParent()
-      }
     },
     computed: {
       ...mapGetters([
@@ -296,7 +263,9 @@ export default {
         'optionDataLoaded',
         'kijiData',
         'optionParentData',
-        'itemData'
+        'itemData',
+        'loaddingData',
+        'orderNowId'
       ]),
       kijiObjectActive: function(){
         if(this.kijiData.length){
@@ -306,7 +275,11 @@ export default {
         }
       },
       designData: function(){
-        return (this.itemData) ? this.itemData.design : null
+        if(this.itemDataActive){
+          return this.itemDataActive.design
+        } else{
+          return null
+        }
       },
       designActiveSplit: function(){
         if(this.designData && this.designActiveId != null){
@@ -343,6 +316,13 @@ export default {
           return parentSortData
         } else{
           return []
+        }
+      },
+      itemDataActive(){
+        if(this.itemData.length && this.itemData.filter(item => item.orderId == this.orderNowId).length){
+          return this.itemData.filter(item => item.orderId == this.orderNowId)[0]
+        } else{
+          return null
         }
       }
     },
