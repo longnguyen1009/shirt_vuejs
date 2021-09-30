@@ -118,6 +118,7 @@ export default {
             }
             this.$store.dispatch('handleChangeIniData', {
               shop_id: response.shop_id,
+              shop_kind: response.shop_kind,
               staff_id: response.staff_id,
               customer_id: response.customer_id,
               cartItemId: response.cartItemId,
@@ -149,8 +150,12 @@ export default {
         return ret
     },
     setKijiData: async function(){
-        let kijiData = await this.getKijiFromAPI()
-        this.$store.dispatch('handleChangeKijiData', kijiData)
+        await this.getKijiFromAPI().then(response => {
+          if(response){
+            this.$store.dispatch('handleChangeKijiData', response)
+            // this.$store.dispatch('handleChangePriceRank', response.priceRankArr)
+          }
+        })
     },
     getItemData: async function(item_selected){
         let ret = null
@@ -268,6 +273,38 @@ export default {
         this.$store.dispatch('handleChangeOption', element)
       })
     },
+    getPriceFromApi: async function(model, combineId){
+        let ret = null
+        if(model && combineId){
+          await this.axios.request({
+            url: 'http://54.248.46.255/myshop/getpriceofcombine/',
+            method: 'post',
+            headers: {'X-Requested-With': 'XMLHttpRequest'},
+            data: {
+              'model': model,
+              'combineId': combineId,
+            }
+          })
+            .then(response => {
+              console.log(response.data.data)
+              ret = response.data.data
+            })
+            .catch(error => {
+              this.$store.dispatch('handleChangeErrorCode', 2)
+              console.log(error)
+            })
+        }
+        return ret
+    },
+    updateCombineData: async function(model, combineId){
+      if(this.combinePriceData.findIndex(item => (item.model == model && item.combineId == combineId) == -1)){
+        await this.getPriceFromApi(model, combineId).then(response => {
+          if(response){
+            this.$store.dispatch('handleUpdateCombinePrice', response)
+          }
+        })
+      }
+    },
     getModelData: async function(){
       let ret = null
       if(this.modelSelected){
@@ -299,13 +336,14 @@ export default {
     designData: function(){
       this.updateAllOptionParent()
     },
+    //load data from history change
     orderTempItem: function(){
-      console.log('option temp changed')
       this.orderTempItem.forEach(element => {
         if(this.itemData.findIndex(item => item.orderId == element.id) == -1){
           this.updateItemData(element.id, element.item)
         }
         this.updateOptionSelectedData(element.option_selected)
+        this.updateCombineData(element.model, element.combineId)
       })
     },
     itemData: function(){
@@ -343,7 +381,8 @@ export default {
       'itemData',
       'orderNowId',
       'orderTempItem',
-      'category_select'
+      'category_select',
+      'combinePriceData'
     ]),
     Errors: function(){
       if(this.errorCode){

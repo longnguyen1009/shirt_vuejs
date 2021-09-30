@@ -114,7 +114,6 @@ export default {
       this.kijiLoaded()
       this.loadAllOption().then(response => {
         setTimeout(function() {
-          console.log("2222222")
           $(".loadding_bl").removeClass("on");
         }, 300);
       })
@@ -244,6 +243,9 @@ export default {
       }
     },
     styleDataObj: function(){
+      console.log("styleDataObj")
+      console.log(this.styleSelected)
+      console.log(this.styleData)
       if(this.styleData){
         return this.styleData.filter((item) => item.id == this.styleSelected)[0]
       } else{
@@ -251,8 +253,6 @@ export default {
       }
     },
     modelDataObj: function(){
-      console.log(this.modelData)
-      console.log(this.modelSelected)
       if(this.modelData.filter(item => item.modelId == this.modelSelected).length){
         return this.modelData.filter(item => item.modelId == this.modelSelected)[0].data
       }

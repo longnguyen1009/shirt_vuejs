@@ -7,13 +7,13 @@ export default new Vuex.Store({
   state: {
 
     //initial info
-    initialData: {}, // {shop_id, customer_id, staff_id, cartItemId, orderItemId}
+    initialData: {}, // {shop_id, shop_kind, customer_id, staff_id, cartItemId, orderItemId}
 
     category_select: null,
 
     orderNowId: 0,
     //存在ORDER
-    orderTempItem: [], //[{id, style, model, item, option_selected}]
+    orderTempItem: [], //[{id, style, model, item, option_selected, price, quality, combineId}]
 
     step: 1,
     page: 1, //page 2 is model page
@@ -82,8 +82,12 @@ export default new Vuex.Store({
       {errorCode: 3, text: 'ユーザー情報の確認に失敗しました。もう一度ログインしてください。'},
       {errorCode: 4, text: '一時保存に入りました。'},
       {errorCode: 5, text: 'オーダー完了しました。'},
+      {errorCode: 6, text: 'アイテム組み合わせが見つかりません。もう一度確認してください。'},
     ],
     loaddingData: false,
+    combinePriceData: [], //{model, combineid, price}
+    priceActive: 0,
+    combineIdActive: 0,
   },
   getters: {
     //step
@@ -129,7 +133,10 @@ export default new Vuex.Store({
     //step 3
     orderNowId: state => state.orderNowId,
     orderTempItem: state => state.orderTempItem,
-    category_select: state => state.category_select
+    category_select: state => state.category_select,
+    priceActive: state => state.priceActive,
+    combinePriceData: state =>state.combinePriceData,
+    combineIdActive: state => state.combineIdActive
   },
   mutations: {
     changeStep(state, newStep){
@@ -287,6 +294,7 @@ export default new Vuex.Store({
       state.kijiActive = ((data.product_id !== undefined) && (data.product_id !== null)) ? data.product_id : null
       state.styleSelected = ((data.style !== undefined) && (data.style !== null)) ? Number(data.style) : null
       state.modelSelected = ((data.model !== undefined) && (data.model !== null)) ? Number(data.model) : null
+      state.combineIdActive = ((data.combineId !== undefined) && (data.combineId !== null)) ? Number(data.combineId) : null
       state.itemSelected = ((data.item !== undefined) && (data.item !== null)) ? JSON.parse(data.item) : []
       state.optionSelectedData = ((data.option_selected !== undefined) && (data.option_selected !== null)) ? JSON.parse(data.option_selected) : []
       state.category_select = ((data.category_select !== undefined) && (data.category_select !== null)) ? Number(data.category_select) : null
@@ -320,6 +328,8 @@ export default new Vuex.Store({
           element.category_select = Number(element.category_select)
           element.style = Number(element.style)
           element.model = Number(element.model)
+          element.combineId = Number(element.combineId)
+          element.quantity = Number(element.quantity)
           element.item = JSON.parse(element.item)
           element.option_selected = JSON.parse(element.option_selected)
           state.orderTempItem.push(element)
@@ -347,7 +357,29 @@ export default new Vuex.Store({
         state.orderTempItem[index].option_selected = state.optionSelectedData.filter(item => item.orderId == element.id)
       })
       state.orderTempItem = [...state.orderTempItem]
-    }
+    },
+    changePriceActive(state, price){
+      state.priceActive = price
+    },
+    updateCombinePrice(state, combinePrice){
+      combinePrice.forEach(element => {
+        const existPrice = state.combinePriceData.findIndex(item => (
+          item.model == element.model
+          && item.combineId == element.combineId
+          && item.rank == element.rank
+        ))
+        if(existPrice !== -1){
+          state.combinePriceData[existPrice] = element
+        } else{
+          state.combinePriceData.push(element)
+        }
+      })
+      
+      state.combinePriceData = [...state.combinePriceData]
+    },
+    changeCombineIdActive(state, combineId){
+      state.combineIdActive = combineId
+    },
   },
   actions: {
     handleChangeStep(context, newStep){
@@ -440,6 +472,15 @@ export default new Vuex.Store({
     },
     handleUpdateOptionSelectedOrderTemp(context, data){
       context.commit('updateOptionSelectedOrderTemp')
+    },
+    handleChangePriceActive(context, priceActive){
+      context.commit('changePriceActive', priceActive)
+    },
+    handleUpdateCombinePrice(context, combinePrice){
+      context.commit('updateCombinePrice', combinePrice)
+    },
+    handleChangeCombineActive(context, combineId){
+      context.commit('changeCombineIdActive', combineId)
     }
   }
 })

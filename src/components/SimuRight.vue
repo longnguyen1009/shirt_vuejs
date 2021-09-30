@@ -41,7 +41,7 @@
       </div>
       <div class="simuright-price d-flex justify-content-between">
           <div class="simuright-price-left d-flex justify-content-between flex-column">
-            <p class="simuright-prices-basic">商品価格：{{moneyTypeShow01(itemPrice)}}<br>+ カスタマイズ価格：{{moneyTypeShow01(optionPrice)}}円</p>
+            <p class="simuright-prices-basic">商品価格：<span v-if="combinePrice">{{moneyTypeShow01(combinePrice)}}</span>円<br>+ カスタマイズ価格：{{moneyTypeShow01(optionPrice)}}円</p>
             <p class="simuright-prices-total">お支払い金額: <span class="totalPayment">{{moneyTypeShow01(sumPayment)}}円</span></p>
           </div>
           <div class="simuright-price-right d-flex justify-content-between flex-column">
@@ -80,7 +80,7 @@ export default {
         return {
           designActiveId: null,
           optionParentDataTemp: {},
-          genreData: {},
+          genreData: {}
         }
     },
     props: [],
@@ -198,7 +198,8 @@ export default {
       },
       optionSelectedValue(parent_id){
         var option_selected_index = this.optionSelectedData.findIndex(
-            (item) => item.combine_id == this.designActive.combine_id &&
+            (item) => item.orderId == this.orderNowId &&
+                      item.combine_id == this.designActive.combine_id &&
                       item.item_id == this.designActive.item_id &&
                       item.design_id == this.designActive.design_id &&
                       item.parent_id == parent_id
@@ -222,15 +223,45 @@ export default {
         } else{
           this.$store.dispatch('handleChangeStep', 3)
         }
-      }
+      },
+      getPriceFromApi: async function(combine_id){
+        let ret = null
+        if(combine_id && this.modelSelected){
+          await this.axios.request({
+            url: 'http://54.248.46.255/myshop/getpriceofcombine/',
+            method: 'post',
+            headers: {'X-Requested-With': 'XMLHttpRequest'},
+            data: {
+              'model': this.modelSelected,
+              'combineId': combine_id
+            }
+          })
+            .then(response => {
+              console.log(response.data.data)
+              ret = response.data.data
+            })
+            .catch(error => {
+              this.$store.dispatch('handleChangeErrorCode', 2)
+              console.log(error)
+            })
+        }
+        return ret
+      },
+      updatePriceCombine: async function(combine_id){
+        await this.getPriceFromApi(combine_id).then(response => {
+          if(response){
+            this.$store.dispatch('handleUpdateCombinePrice', response)
+          }
+        })
+      },
     },
     mounted() {
       this.$store.dispatch('handleChangeOptionDetailActive', null)
+      this.designActiveId = 0
       if(!this.itemDataActive){
         this.setItemData()
       }
       this.setKijiData()
-      this.designActiveId = 0
     },
     watch: {
       designActiveSplit: function(){
@@ -247,11 +278,18 @@ export default {
           this.updateOptionParent()
         }
       },
+      itemCombineObj: function(){
+        this.$store.dispatch('handleChangeCombineActive', this.itemCombineObj.id)
+        if(this.combinePriceData.findIndex(item => item.model == this.modelSelected && item.combineId == this.itemCombineObj.id) == -1){
+          this.updatePriceCombine(this.itemCombineObj.id)
+        }
+      }
     },
     computed: {
       ...mapGetters([
         'kiji_img_path',
         'option_img_path',
+        'initialData',
         'optionMode',
         'styleSelected',
         'modelSelected',
@@ -265,20 +303,15 @@ export default {
         'optionParentData',
         'itemData',
         'loaddingData',
-        'orderNowId'
+        'orderNowId',
+        'combinePriceData',
+        'combineIdActive'
       ]),
       kijiObjectActive: function(){
         if(this.kijiData.length){
           return this.kijiData.filter((item) => item.id === this.kijiActive)[0]
         } else{
           return {}
-        }
-      },
-      designData: function(){
-        if(this.itemDataActive){
-          return this.itemDataActive.design
-        } else{
-          return null
         }
       },
       designActiveSplit: function(){
@@ -292,18 +325,15 @@ export default {
           return {}
         }
       },
-      itemPrice: function(){
-        return 39000
-      },
       optionPrice: function(){
         let optionTotalprice = 0
-        this.optionSelectedData.forEach(val => {
+        this.optionSelectedData.filter(item => item.orderId == this.orderNowId).forEach(val => {
           optionTotalprice += Number(val.cost);
-        });
+        })
         return optionTotalprice
       },
       sumPayment: function(){
-        return this.itemPrice + this.optionPrice
+        return this.combinePrice + this.optionPrice
       },
       optionParentSortData: function(){
         let parentSortData = []
@@ -318,13 +348,42 @@ export default {
           return []
         }
       },
-      itemDataActive(){
+      itemDataActive: function(){
         if(this.itemData.length && this.itemData.filter(item => item.orderId == this.orderNowId).length){
           return this.itemData.filter(item => item.orderId == this.orderNowId)[0]
         } else{
           return null
         }
-      }
+      },
+      itemCombineObj: function(){
+        if(this.itemDataActive){
+          return this.itemDataActive.items[0]
+        }
+      },
+      designData: function(){
+        if(this.itemDataActive){
+          return this.itemDataActive.design
+        } else{
+          return null
+        }
+      },
+      combinePrice: function(){
+        const shop_kind = this.initialData.shop_kind
+        let rank = 0
+        if(this.kijiActive){
+         rank = (shop_kind == 1) ? this.kijiObjectActive.ua_retail_price : ((shop_kind == 2) ? this.kijiObjectActive.gl_retail_price : 0)
+        }
+        let combinePriceIndex = this.combinePriceData.findIndex(item => 
+          item.model == this.modelSelected
+          && item.combineId == this.itemCombineObj.id
+          && item.rank == rank
+        )
+        if(combinePriceIndex !== -1){
+          return this.combinePriceData[combinePriceIndex].price
+        } else{
+          return 0
+        }
+      },
     },
 };
 </script>

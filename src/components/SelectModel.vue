@@ -90,10 +90,19 @@ export default {
   },
   methods: {
     doOrder(){
-      var selectedData = this.itemSelectedTemp.filter(val => (val!==undefined) && (val!==null))
+      let selectedData = this.itemSelectedTemp.filter(val => (val!==undefined) && (val!==null))
       if(selectedData.length > 0){
-        this.$store.dispatch('handleChangeItem', {style: this.modelTemp.styleId, model: this.modelTemp.modelId, item: selectedData})
-        this.$store.dispatch('handleChangeStep', 2)
+        let temp_id_arr = selectedData.map(i=>i.toString())
+        const resultItems = this.modelDetail.combine.filter(item => (
+          item.length == temp_id_arr.length
+          && temp_id_arr.every(element => item.indexOf(element) > -1)
+        ))
+        if(resultItems.length){
+          this.$store.dispatch('handleChangeItem', {style: this.modelTemp.styleId, model: this.modelTemp.modelId, item: selectedData})
+          this.$store.dispatch('handleChangeStep', 2)
+        } else{
+          this.$store.dispatch('handleChangeErrorCode', 6)
+        }
       } else{
         alert("アイテムを選択していません。")
         return false
@@ -103,8 +112,8 @@ export default {
       if(this.itemSelectedTemp.filter((item) => item == item_id).length){
         return false
       }
-      var selectedData = this.itemSelectedTemp.filter(val => (val!==undefined) && (val!==null))
-      var temp_id_arr = [].concat(selectedData, item_id).map(i=>i.toString())
+      let selectedData = this.itemSelectedTemp.filter(val => (val!==undefined) && (val!==null))
+      let temp_id_arr = [].concat(selectedData, item_id).map(i=>i.toString())
       for(const item_combine in this.modelDetail.combine){
           if(temp_id_arr.every(element => this.modelDetail.combine[item_combine].indexOf(element) > -1)){
             return false

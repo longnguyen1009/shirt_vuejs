@@ -20,15 +20,15 @@
               </div>
               <div class="simu-confirm-card-bl">
                 <span class="simu-confirm-label">単価(税込)</span>
-                <span class="simu-confirm-card-value">￥41,800</span>
+                <span class="simu-confirm-card-value">{{getPriceOrder(OrderTemp.id)}}</span>
               </div>
               <div class="simu-confirm-card-bl">
                 <span class="simu-confirm-label">数量</span>
-                <span class="simu-confirm-card-value">1</span>
+                <span class="simu-confirm-card-value">{{OrderTemp.quantity}}</span>
               </div>
               <div class="simu-confirm-card-bl">
                 <span class="simu-confirm-label">小計(税込)</span>
-                <span class="simu-confirm-card-value">￥41,800</span>
+                <span class="simu-confirm-card-value">￥{{OrderTemp.quantity * getPriceOrder(OrderTemp.id)}}</span>
               </div>
             </div>
             <div class="simu-confirm-detail">
@@ -84,7 +84,7 @@
               </div>
               <div class="simu-confirm-payment-right d-flex flex-column justify-content-between">
                 <span class="simu-confirm-label">商品価格(税込)</span>
-                <span class="simu-confirm-payment-price">￥41,800</span>
+                <span class="simu-confirm-payment-price">￥{{getSumPrice()}}</span>
               </div>
           </div>
         </div>
@@ -316,6 +316,42 @@ export default {
         }
       })
     },
+    optionPrice: function(orderId){
+        let optionTotalprice = 0
+        this.optionSelectedData.filter(item => item.orderId == orderId).forEach(val => {
+          optionTotalprice += Number(val.cost);
+        })
+        return optionTotalprice
+    },
+    getPriceOrder(orderId){
+      let OrderTemp = this.orderTempItem.find(item => item.id == orderId)
+      let kijiObjTempIndex = this.kijiData.findIndex(item => item.id == OrderTemp.product_id)
+      let kijiRank = 0
+      if(kijiObjTempIndex !== -1){
+        kijiRank = this.rankOfKiji(this.kijiData[kijiObjTempIndex].id)
+      }
+      let combinePriceIndex = this.combinePriceData.findIndex(item => (
+        item.model == OrderTemp.model && item.combineId == OrderTemp.combineId && item.rank == kijiRank
+      ))
+      let combinePrice = 0
+      if(combinePriceIndex !== -1){
+        combinePrice = this.combinePriceData[combinePriceIndex].price
+      }
+      let optionPriceTemp = this.optionPrice(orderId)
+      return optionPriceTemp + combinePrice
+    },
+    rankOfKiji(kijiId){
+      const shop_kind = this.initialData.shop_kind
+      let kijiObj = this.kijiData.find(item => (item.id == kijiId))
+      return (shop_kind == 1) ? kijiObj.ua_retail_price : ((shop_kind == 2) ? kijiObj.gl_retail_price : 0)
+    },
+    getSumPrice: function(){
+      let SumPrice = 0
+      this.orderTempItem.forEach(element => {
+        SumPrice += this.getPriceOrder(element.id)
+      })
+      return SumPrice
+    }
   },
   mounted(){
     this.deli_id = this.delivery_method
@@ -327,7 +363,9 @@ export default {
       style: this.styleSelected,
       model: this.modelSelected,
       item: this.itemSelected,
-      option_selected: this.optionSelectedData.filter(item => item.orderId == this.orderNowId)
+      option_selected: this.optionSelectedData.filter(item => item.orderId == this.orderNowId),
+      combineId: this.combineIdActive,
+      quantity: 1
     })
     this.updateOrderItemList()
   },
@@ -353,7 +391,9 @@ export default {
       'initialData',
       'orderNowId',
       'orderTempItem',
-      'category_select'
+      'category_select',
+      'combinePriceData',
+      'combineIdActive'
     ]),
     itemCombineData: function(){
         return (this.itemData) ? this.itemData.items : null
