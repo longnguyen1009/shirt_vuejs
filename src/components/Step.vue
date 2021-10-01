@@ -1,9 +1,5 @@
 <template>
   <div class="container-step">
-    <button type="button" class="container-step-back simu-common-btn" 
-    v-if="canBack"
-    @click="doBack">戻る
-    </button>
     <div class="simu-stepgroup btn-group" role="group">
       <div
         variant="outline-dark"

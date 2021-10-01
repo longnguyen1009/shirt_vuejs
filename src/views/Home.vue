@@ -116,6 +116,11 @@ export default {
                 this.$store.dispatch('handleChangeStep', 3)
               }
             }
+            this.setStyleData().then((response) => {
+                $(".simu-style-loading").removeClass("on")
+            })
+
+            this.$store.dispatch('handleChangeDeliData', response.deliData)
             this.$store.dispatch('handleChangeIniData', {
               shop_id: response.shop_id,
               shop_kind: response.shop_kind,
@@ -123,9 +128,6 @@ export default {
               customer_id: response.customer_id,
               cartItemId: response.cartItemId,
               orderItemId: response.orderItemId
-            })
-            this.setStyleData().then((response) => {
-                $(".simu-style-loading").removeClass("on")
             })
           }
       })
@@ -230,16 +232,18 @@ export default {
       .catch(error => console.log(error))
     },
     updateAllOptionParentFromOrderTemp: async function(designData){
-      await this.getAllOptionParentData(designData).then(response => {
-        if(response){
-          response.forEach((item) => {
-            this.$store.dispatch('handleChangeOptionParentData', 
-              {design_id: item.design_id, genreData: item.genreData, parentData: item.optionData}
-            )
-          })
-        }
-      })
-      .catch(error => console.log(error))
+      if(this.optionParentData.length == 0 || !(designData.every(element => this.optionParentData.findIndex(item => item.design_id == element.design_id) !== -1))){
+        await this.getAllOptionParentData(designData).then(response => {
+          if(response){
+            response.forEach((item) => {
+              this.$store.dispatch('handleChangeOptionParentData', 
+                {design_id: item.design_id, genreData: item.genreData, parentData: item.optionData}
+              )
+            })
+          }
+        })
+        .catch(error => console.log(error))
+      }
     },
     getStyleFromAPI: async function(){
       let ret = null
@@ -297,7 +301,7 @@ export default {
         return ret
     },
     updateCombineData: async function(model, combineId){
-      if(this.combinePriceData.findIndex(item => (item.model == model && item.combineId == combineId) == -1)){
+      if(this.combinePriceData.findIndex(item => (item.model == model && item.combineId == combineId)) == -1){
         await this.getPriceFromApi(model, combineId).then(response => {
           if(response){
             this.$store.dispatch('handleUpdateCombinePrice', response)
@@ -333,9 +337,9 @@ export default {
         this.setItemData(this.itemSelected)
       }
     },
-    designData: function(){
-      this.updateAllOptionParent()
-    },
+    // designData: function(){
+    //   this.updateAllOptionParent()
+    // },
     //load data from history change
     orderTempItem: function(){
       this.orderTempItem.forEach(element => {
@@ -360,7 +364,7 @@ export default {
           this.$store.dispatch('handleChangeModelData', {modelId: this.modelSelected, data: response})
         }
       })
-    }
+    },
   },
   mounted() {
     this.setInitialData()
@@ -382,7 +386,8 @@ export default {
       'orderNowId',
       'orderTempItem',
       'category_select',
-      'combinePriceData'
+      'combinePriceData',
+      'optionParentData'
     ]),
     Errors: function(){
       if(this.errorCode){

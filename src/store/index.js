@@ -73,7 +73,7 @@ export default new Vuex.Store({
     itemData: [], //{orderId, items[], design[] in step 2}
 
     //受け取り方法
-    delivery_method: 1,
+    deliActive: 0,
 
     errorCode: 0,
     errorData: [
@@ -88,6 +88,11 @@ export default new Vuex.Store({
     combinePriceData: [], //{model, combineid, price}
     priceActive: 0,
     combineIdActive: 0,
+
+    //step 4
+    orderCompleteId: 0,
+
+    deliData: []
   },
   getters: {
     //step
@@ -124,7 +129,7 @@ export default new Vuex.Store({
     optionParentData: state => state.optionParentData,
     optionDetailData: state => state.optionDetailData,
     itemData: state => state.itemData,
-    delivery_method: state => state.delivery_method,
+    deliActive: state => state.deliActive,
     initialData: state => state.initialData,
     errorCode: state => state.errorCode,
     errorData: state => state.errorData,
@@ -136,7 +141,11 @@ export default new Vuex.Store({
     category_select: state => state.category_select,
     priceActive: state => state.priceActive,
     combinePriceData: state =>state.combinePriceData,
-    combineIdActive: state => state.combineIdActive
+    combineIdActive: state => state.combineIdActive,
+    
+    //step 4
+    orderCompleteId: state => state.orderCompleteId,
+    deliData: state => state.deliData
   },
   mutations: {
     changeStep(state, newStep){
@@ -248,16 +257,16 @@ export default new Vuex.Store({
       state.optionMode = 2,
       state.designActive = {}, //{combine_id, design_id, item_id}
       state.kijiActive = null,
-      state.kijiData = [],
-      state.itemData = [],
+      // state.kijiData = [],
+      // state.itemData = [],
 
-      state.optionSelectedData = [], // list of {combine_id, item_id, design_id, parent_id, option_id, cate_id, option_img: simu_img, name}
+      state.optionSelectedData = state.optionSelectedData.filter(item => item.orderId != state.orderTempItem), // list of {combine_id, item_id, design_id, parent_id, option_id, cate_id, option_img: simu_img, name}
       state.optionDetailActive = null,
 
       //raw html for option change img temp
       state.optionTemp = null,
-      state.optionDataLoaded = [], //{model_id, design_id, parent_id, cateLists, optionLists }
-      state.optionParentData = [] //{design_id, data}
+      state.optionDataLoaded = [] //{model_id, design_id, parent_id, cateLists, optionLists }
+      // state.optionParentData = [] //{design_id, data}
     },
     async updateOptionDetailData(state, detailData){
       await Object.values(detailData).forEach(element => {
@@ -283,9 +292,6 @@ export default new Vuex.Store({
         state.itemData.push(data)
       }
       state.itemData = [...state.itemData]
-    },
-    changeDeliData(state, deli_id){
-      state.delivery_method = deli_id
     },
     changeInitialData(state, iniData){
       state.initialData = iniData
@@ -352,8 +358,9 @@ export default new Vuex.Store({
     changeCategorySelect(state, category){
       state.category_select = category
     },
-    updateOptionSelectedOrderTemp(state){
+    updateOrderTempAllData(state){
       state.orderTempItem.forEach((element, index) => {
+        //update selected option
         state.orderTempItem[index].option_selected = state.optionSelectedData.filter(item => item.orderId == element.id)
       })
       state.orderTempItem = [...state.orderTempItem]
@@ -380,6 +387,22 @@ export default new Vuex.Store({
     changeCombineIdActive(state, combineId){
       state.combineIdActive = combineId
     },
+    updatePriceOfOrder(state, priceData){
+      const orderIndex = state.orderTempItem.findIndex(item => (item.id == priceData.orderId))
+      if(orderIndex !== -1){
+        state.orderTempItem[orderIndex].price = priceData.price
+      }
+    },
+    changeOrderCompleteId(state, orderId){
+      state.orderCompleteId = orderId
+    },
+    changeDeliActive(state, deli_id){
+      state.deliActive = deli_id
+    },
+    changeDeliData(state, deliData){
+      state.deliActive = deliData[0].id
+      state.deliData = deliData
+    }
   },
   actions: {
     handleChangeStep(context, newStep){
@@ -434,8 +457,8 @@ export default new Vuex.Store({
     handleChangeItemData(context, data){
       context.commit('changeItemData', data)
     },
-    handleChangeDeliData(context, deli_id){
-      context.commit('changeDeliData', deli_id)
+    handleChangeDeliActive(context, deli_id){
+      context.commit('changeDeliActive', deli_id)
     },
     handleChangeIniData(context, iniData){
       context.commit('changeInitialData', iniData)
@@ -470,8 +493,8 @@ export default new Vuex.Store({
     handleChangeCategoryOrder(context, category){
       context.commit('changeCategorySelect', category)
     },
-    handleUpdateOptionSelectedOrderTemp(context, data){
-      context.commit('updateOptionSelectedOrderTemp')
+    handleUpdateOrderTempAllData(context, data){
+      context.commit('updateOrderTempAllData')
     },
     handleChangePriceActive(context, priceActive){
       context.commit('changePriceActive', priceActive)
@@ -481,6 +504,15 @@ export default new Vuex.Store({
     },
     handleChangeCombineActive(context, combineId){
       context.commit('changeCombineIdActive', combineId)
+    },
+    handleUpdatePriceOfOrder(context, priceData){
+      context.commit('updatePriceOfOrder', priceData)
+    },
+    handleChandeOrderComplete(context, orderId){
+      context.commit('changeOrderCompleteId', orderId)
+    },
+    handleChangeDeliData(context, deliData){
+      context.commit('changeDeliData', deliData)
     }
   }
 })

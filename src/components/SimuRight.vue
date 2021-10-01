@@ -41,12 +41,16 @@
       </div>
       <div class="simuright-price d-flex justify-content-between">
           <div class="simuright-price-left d-flex justify-content-between flex-column">
-            <p class="simuright-prices-basic">商品価格：<span v-if="combinePrice">{{moneyTypeShow01(combinePrice)}}</span>円<br>+ カスタマイズ価格：{{moneyTypeShow01(optionPrice)}}円</p>
-            <p class="simuright-prices-total">お支払い金額: <span class="totalPayment">{{moneyTypeShow01(sumPayment)}}円</span></p>
+            <p class="simuright-prices-basic">商品価格：<span v-if="combinePrice">{{moneyTypeShow01(combinePrice)}}</span>円<br>
+            <span v-if="initialData.shop_kind == 2">+ カスタマイズ価格：<span v-if="optionPrice > 0">{{moneyTypeShow01(optionPrice)}}</span>円</span></p>
+            <p class="simuright-prices-total">お支払い金額: <span class="totalPayment"><span v-if="sumPayment > 0">{{moneyTypeShow01(sumPayment)}}</span>円</span></p>
           </div>
           <div class="simuright-price-right d-flex justify-content-between flex-column">
             <p class="delivery-date">仕上がり予定日：12月12日</p>
-            <button class="simu-common-btn" @click="doOrderComfirm">オーダー内容確認</button>
+            <div class="simu-nav-confirm d-flex justify-content-between">
+              <button type="button" class="simu-common-btn" @click="doBack">戻る</button>
+              <button type="button" class="simu-common-btn" @click="doOrderComfirm">決定</button>
+            </div>
           </div>
       </div>
 
@@ -85,6 +89,11 @@ export default {
     },
     props: [],
     methods: {
+      doBack(){
+        this.$store.dispatch('handleChangeModelTemp', {styleId: this.styleSelected, modelId: this.modelSelected})
+        this.$store.dispatch('handleChangePage', 2)
+        this.$store.dispatch('handleChangeStep', 1)
+      },
       openDetailOption: function(optionid){
         this.$store.dispatch('handleChangeOptionDetailActive', optionid)
       },
@@ -258,9 +267,9 @@ export default {
     mounted() {
       this.$store.dispatch('handleChangeOptionDetailActive', null)
       this.designActiveId = 0
-      if(!this.itemDataActive){
-        this.setItemData()
-      }
+      // if(!this.itemDataActive){
+      //   this.setItemData()
+      // }
       this.setKijiData()
     },
     watch: {
@@ -327,9 +336,11 @@ export default {
       },
       optionPrice: function(){
         let optionTotalprice = 0
-        this.optionSelectedData.filter(item => item.orderId == this.orderNowId).forEach(val => {
-          optionTotalprice += Number(val.cost);
-        })
+        if(this.initialData.shop_kind == 2){
+          this.optionSelectedData.filter(item => item.orderId == this.orderNowId).forEach(val => {
+            optionTotalprice += Number(val.cost);
+          })
+        }
         return optionTotalprice
       },
       sumPayment: function(){
@@ -371,7 +382,7 @@ export default {
         const shop_kind = this.initialData.shop_kind
         let rank = 0
         if(this.kijiActive){
-         rank = (shop_kind == 1) ? this.kijiObjectActive.ua_retail_price : ((shop_kind == 2) ? this.kijiObjectActive.gl_retail_price : 0)
+         rank = (shop_kind != 2) ? this.kijiObjectActive.ua_retail_price : ((shop_kind == 2) ? this.kijiObjectActive.gl_retail_price : 0)
         }
         let combinePriceIndex = this.combinePriceData.findIndex(item => 
           item.model == this.modelSelected

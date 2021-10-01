@@ -66,7 +66,6 @@ export default {
   props: [],
   methods: {
     defaultLoaded() {
-      console.log("1111111")
       $(".loadding_bl").addClass("on");
     },
     kijiLoaded() {
@@ -136,7 +135,6 @@ export default {
       this.viewMode = this.viewMode ? 0 : 1
     },
     addToCart: async function(){
-      console.log(this.initialData)
       let ret = null
       await this.axios.request({
         url: 'http://54.248.46.255/myshop/addproducttocart/',
@@ -144,12 +142,14 @@ export default {
         headers: {'X-Requested-With': 'XMLHttpRequest'},
         data: {
           'cartItemId': this.initialData.cartItemId,
-          'kiji': this.kijiActive,
-          'category_select': this.initialData.category_select,
+          'product_id': this.kijiActive,
+          'category_select': this.category_select,
           'style': this.styleSelected,
           'model': this.modelSelected,
           'item': this.itemSelected,
-          'option_selected' : this.optionSelectedData
+          'combineId': this.combineIdActive,
+          'option_selected' : this.optionSelectedData.filter(item => item.orderId == this.orderNowId),
+          'quantity': 1
         }
       })
       .then(response => {
@@ -205,7 +205,8 @@ export default {
         'kijiData',
         'itemData',
         'initialData',
-        'orderNowId'
+        'orderNowId',
+        'combineIdActive'
       ]),
     //design path
     design: function() {
@@ -243,9 +244,6 @@ export default {
       }
     },
     styleDataObj: function(){
-      console.log("styleDataObj")
-      console.log(this.styleSelected)
-      console.log(this.styleData)
       if(this.styleData){
         return this.styleData.filter((item) => item.id == this.styleSelected)[0]
       } else{

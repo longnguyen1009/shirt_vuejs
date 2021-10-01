@@ -56,6 +56,13 @@ body{
   border-radius: 5px;
 }
 
+.simu-nav-confirm{
+  width: 220px;
+}
+.simu-nav-confirm button{
+  width: 102px;
+}
+
 /* VueCarousel */
 .VueCarousel{
   width: 100%;
@@ -431,10 +438,6 @@ States
 .simu-model-item .form-check:first-child{
   padding-left: 0;
 }
-.simu-model-order button{
-  width: 220px;
-  border-radius: 0;
-}
 
 /* RADIO STYLE */
 .fancy-radio-label {
@@ -616,14 +619,14 @@ States
   border-top: 1px solid #676665;
   font-size: 13px;
 }
+.simuright-price .delivery-date{
+  margin-bottom: 18px;
+}
 .simuright-prices-total{
   margin-top: 10px;
 }
 .simuright-prices-total .totalPayment{
   font-size: 17px;
-}
-.simuright-price-right .simu-common-btn{
-  width: 220px;
 }
 .simuright-options{
   flex-grow: 1;
@@ -1015,9 +1018,10 @@ States
 .simu-confirm-card{
   border: 1px solid #676665;
   padding: 50px 50px 0 50px;
+  margin-bottom: 25px;
 }
 .simu-confirm-payment{
-  padding: 30px 50px;
+  padding: 5px 50px 30px 50px;
   font-size: 13px;
   align-items: stretch;
 }

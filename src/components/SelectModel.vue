@@ -51,17 +51,20 @@
                       {{ ((Items.items.length == 1) && (Items.item_type_id != 1) && (Items.item_type_id != 2)) ? Items.item_type_name : item.name}}
                     </span>
                   </span>
-                </label>
+                </label> 
               </div>  
             </div>
           </li>
         </ul>
         <div class="simu-model-order d-flex justify-content-between align-items-end">
-          <p class="simu-model-price">￥{{modelDetail.price}}</p>
-          <button type="button" class="simu-common-btn" @click="doOrder">ORDER</button>
+          <p class="simu-model-price">{{moneyTypeShow02(modelDetail.price)}}</p>
+          <div class="simu-nav-confirm d-flex justify-content-between">
+            <button type="button" class="simu-common-btn" @click="doBack">戻る</button>
+            <button type="button" class="simu-common-btn" @click="doOrder">決定</button>
+          </div>
         </div>
       </div>
-    </div>
+    </div>  
   </div>
 </template>
 
@@ -89,6 +92,9 @@ export default {
     };
   },
   methods: {
+    moneyTypeShow02(number){
+      return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(number)
+    },
     doOrder(){
       let selectedData = this.itemSelectedTemp.filter(val => (val!==undefined) && (val!==null))
       if(selectedData.length > 0){
@@ -120,6 +126,9 @@ export default {
           }
       }
       return true
+    },
+    doBack(){
+      this.$store.dispatch('handleChangePage', 1)
     }
   },
   props: [],

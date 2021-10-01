@@ -20,7 +20,7 @@
               </div>
               <div class="simu-confirm-card-bl">
                 <span class="simu-confirm-label">単価(税込)</span>
-                <span class="simu-confirm-card-value">{{getPriceOrder(OrderTemp.id)}}</span>
+                <span class="simu-confirm-card-value">{{moneyTypeShow02(getPriceOrder(OrderTemp.id))}}</span>
               </div>
               <div class="simu-confirm-card-bl">
                 <span class="simu-confirm-label">数量</span>
@@ -28,7 +28,7 @@
               </div>
               <div class="simu-confirm-card-bl">
                 <span class="simu-confirm-label">小計(税込)</span>
-                <span class="simu-confirm-card-value">￥{{OrderTemp.quantity * getPriceOrder(OrderTemp.id)}}</span>
+                <span class="simu-confirm-card-value">{{moneyTypeShow02(OrderTemp.quantity * getPriceOrder(OrderTemp.id))}}</span>
               </div>
             </div>
             <div class="simu-confirm-detail">
@@ -64,27 +64,21 @@
               <div class="simu-confirm-payment-left d-flex flex-column justify-content-start">
                 <span class="simu-confirm-label">受取方法</span>
                 <div class="simu-confirm-payment-deli">
-                  <input class="fancy-radio" hidden id="delivery1" name="deliMethod" type="radio" value="1"
-                  v-model="deli_id">
-                  <label class="fancy-radio-label" for="delivery1">
-                      <span class="fancy-label--text">配送</span>
-                      <span class="fancy-radiobutton">
-                          <span class="radiobutton-dot"></span>
-                      </span>
-                  </label>
-                  <input class="fancy-radio" hidden id="delivery2" name="deliMethod" type="radio" value="2"
-                  v-model="deli_id">
-                  <label class="fancy-radio-label" for="delivery2">
-                      <span class="fancy-label--text">当店で受け取り</span>
-                      <span class="fancy-radiobutton">
-                          <span class="radiobutton-dot"></span>
-                      </span>
-                  </label>
+                  <span v-for="Deli in deliData" :key="Deli.id">
+                    <input class="fancy-radio" hidden :id="'delivery' + Deli.id" name="deliMethod" type="radio" :value="Deli.id"
+                    v-model="deli_id">
+                    <label class="fancy-radio-label" :for="'delivery' + Deli.id">
+                        <span class="fancy-label--text">{{Deli.name}}</span>
+                        <span class="fancy-radiobutton">
+                            <span class="radiobutton-dot"></span>
+                        </span>
+                    </label>
+                  </span>
                 </div>
               </div>
               <div class="simu-confirm-payment-right d-flex flex-column justify-content-between">
                 <span class="simu-confirm-label">商品価格(税込)</span>
-                <span class="simu-confirm-payment-price">￥{{getSumPrice()}}</span>
+                <span class="simu-confirm-payment-price">{{moneyTypeShow02(getSumPrice())}}</span>
               </div>
           </div>
         </div>
@@ -158,6 +152,9 @@ export default {
     }
   },
   methods: {
+    moneyTypeShow02(number){
+      return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(number)
+    },
     showOrderDetail(event){
       $(event.target).parents('.simu-confirm-detail').find('.simu-confirm-detail-bottom').toggleClass('on')
       $(event.target).toggleClass('on')
@@ -210,6 +207,7 @@ export default {
       this.orderConfirmCheck = null
     },
     saveOrder: async function(order_status){
+      this.$store.dispatch('handleUpdateOrderTempAllData', null)
       this.confirmModalClose();
       this.$store.dispatch('handleChangeLoaddingData', true)
       let ret = null
@@ -218,16 +216,8 @@ export default {
         method: 'post',
         headers: {'X-Requested-With': 'XMLHttpRequest'},
         data: {
-          order_status : order_status,
-          product_id: this.kijiActive,
-          category_select: this.initialData.category_select,
-          style: this.styleSelected,
-          model: this.modelSelected,
-          item: this.itemSelected,
-          option_selected : this.optionSelectedData,
-          price: 1000,
-          quantity: 1,
-          delivery_id: this.delivery_method
+          orderitem: this.orderTempItem,
+          delivery_id: this.deliActive
         }
       })
       .then(response => {
@@ -244,8 +234,8 @@ export default {
       await(this.saveOrder(order_status)).then((response) => {
       if(response !== null){
           this.$store.dispatch('handleChangeLoaddingData', false)
+          this.$store.dispatch('handleChandeOrderComplete', response)
           this.$store.dispatch('handleChangeStep', 4)
-          // // this.$store.dispatch('handleChangeCartItemId', response)
         }
       })
     },
@@ -271,7 +261,7 @@ export default {
       return ret
     },
     doSaveOrderTemp: function(order_status){
-      this.$store.dispatch('handleUpdateOptionSelectedOrderTemp', null)
+      this.$store.dispatch('handleUpdateOrderTempAllData', null)
       this.saveOrderTemp(order_status).then((response) => {
       if(response !== null){
           this.$store.dispatch('handleChangeLoaddingData', false)
@@ -318,9 +308,11 @@ export default {
     },
     optionPrice: function(orderId){
         let optionTotalprice = 0
-        this.optionSelectedData.filter(item => item.orderId == orderId).forEach(val => {
-          optionTotalprice += Number(val.cost);
-        })
+        if(this.initialData.shop_kind != 2){
+          this.optionSelectedData.filter(item => item.orderId == orderId).forEach(val => {
+            optionTotalprice += Number(val.cost);
+          })
+        }
         return optionTotalprice
     },
     getPriceOrder(orderId){
@@ -338,6 +330,7 @@ export default {
         combinePrice = this.combinePriceData[combinePriceIndex].price
       }
       let optionPriceTemp = this.optionPrice(orderId)
+      this.$store.dispatch('handleUpdatePriceOfOrder', {orderId: orderId, price: optionPriceTemp + combinePrice})
       return optionPriceTemp + combinePrice
     },
     rankOfKiji(kijiId){
@@ -354,7 +347,7 @@ export default {
     }
   },
   mounted(){
-    this.deli_id = this.delivery_method
+    this.deli_id = this.deliActive
     //save orderItemNow to arrOrderItem
     this.$store.dispatch('handleUpdateOrderTemp',{
       id: this.orderNowId,
@@ -372,7 +365,7 @@ export default {
   props: [],
   watch: {
     deli_id: function(){
-      this.$store.dispatch('handleChangeDeliData', this.deli_id)
+      this.$store.dispatch('handleChangeDeliActive', this.deli_id)
     }
   },
   computed: {
@@ -387,17 +380,15 @@ export default {
       'itemData',
       'optionParentData',
       'optionSelectedData',
-      'delivery_method',
+      'deliActive',
       'initialData',
       'orderNowId',
       'orderTempItem',
       'category_select',
       'combinePriceData',
-      'combineIdActive'
+      'combineIdActive',
+      'deliData'
     ]),
-    itemCombineData: function(){
-        return (this.itemData) ? this.itemData.items : null
-    }
   }
 };
 </script>
