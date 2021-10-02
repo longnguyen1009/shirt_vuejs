@@ -308,7 +308,7 @@ export default {
     },
     optionPrice: function(orderId){
         let optionTotalprice = 0
-        if(this.initialData.shop_kind != 2){
+        if(this.initialData.shop_kind == 2){
           this.optionSelectedData.filter(item => item.orderId == orderId).forEach(val => {
             optionTotalprice += Number(val.cost);
           })

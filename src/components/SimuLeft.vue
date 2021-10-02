@@ -206,7 +206,8 @@ export default {
         'itemData',
         'initialData',
         'orderNowId',
-        'combineIdActive'
+        'combineIdActive',
+        'category_select'
       ]),
     //design path
     design: function() {
@@ -244,8 +245,8 @@ export default {
       }
     },
     styleDataObj: function(){
-      if(this.styleData){
-        return this.styleData.filter((item) => item.id == this.styleSelected)[0]
+      if(this.styleData && this.styleData.findIndex(item => item.id == this.styleSelected) !== -1){
+        return this.styleData[this.styleData.findIndex(item => item.id == this.styleSelected)]
       } else{
         return {}
       }

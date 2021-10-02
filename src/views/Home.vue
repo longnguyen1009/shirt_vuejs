@@ -110,7 +110,7 @@ export default {
           if(response){
             if(response.iniData){
               this.$store.dispatch('handleRestoreFromIni', response.iniData)
-              if(response.cartItemid){
+              if(response.cartItemId){
                 this.$store.dispatch('handleChangeStep', 2)
               } else if(response.orderItemId){
                 this.$store.dispatch('handleChangeStep', 3)

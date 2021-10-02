@@ -297,13 +297,14 @@ export default new Vuex.Store({
       state.initialData = iniData
     },
     restoreFromIniData(state, data){
-      state.kijiActive = ((data.product_id !== undefined) && (data.product_id !== null)) ? data.product_id : null
-      state.styleSelected = ((data.style !== undefined) && (data.style !== null)) ? Number(data.style) : null
-      state.modelSelected = ((data.model !== undefined) && (data.model !== null)) ? Number(data.model) : null
-      state.combineIdActive = ((data.combineId !== undefined) && (data.combineId !== null)) ? Number(data.combineId) : null
-      state.itemSelected = ((data.item !== undefined) && (data.item !== null)) ? JSON.parse(data.item) : []
-      state.optionSelectedData = ((data.option_selected !== undefined) && (data.option_selected !== null)) ? JSON.parse(data.option_selected) : []
-      state.category_select = ((data.category_select !== undefined) && (data.category_select !== null)) ? Number(data.category_select) : null
+      state.kijiActive = (data.product_id) ? data.product_id : null
+      state.styleSelected = (data.style) ? Number(data.style) : null
+      state.modelSelected = (data.model) ? Number(data.model) : null
+      state.combineIdActive = (data.combineId) ? Number(data.combineId) : null
+      state.itemSelected = (data.item) ? JSON.parse(data.item) : []
+      state.optionSelectedData = (data.option_selected) ? JSON.parse(data.option_selected) : []
+      state.category_select = (data.category_select) ? Number(data.category_select) : null
+      state.deliActive = (data.shipping) ? data.shipping: 0
     },
     changeErrorCode(state, code){
       state.errorCode = code
@@ -400,7 +401,9 @@ export default new Vuex.Store({
       state.deliActive = deli_id
     },
     changeDeliData(state, deliData){
-      state.deliActive = deliData[0].id
+      if(!state.deliActive || deliData.findIndex(item => item.id == state.deliActive) == -1){
+        state.deliActive = deliData[0].id
+      }
       state.deliData = deliData
     }
   },
