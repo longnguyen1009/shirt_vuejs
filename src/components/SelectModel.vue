@@ -56,11 +56,12 @@
             </div>
           </li>
         </ul>
+        <span class="simu-error-message" v-if="!checkErrorSelect">アイテム組み合わせが見つかりません。</span>
         <div class="simu-model-order d-flex justify-content-between align-items-end">
           <p class="simu-model-price">{{moneyTypeShow02(modelDetail.price)}}</p>
           <div class="simu-nav-confirm d-flex justify-content-between">
             <button type="button" class="simu-common-btn" @click="doBack">戻る</button>
-            <button type="button" class="simu-common-btn" @click="doOrder">決定</button>
+            <button type="button" class="simu-common-btn" @click="doOrder" :disabled="!checkErrorSelect">決定</button>
           </div>
         </div>
       </div>
@@ -98,12 +99,7 @@ export default {
     doOrder(){
       let selectedData = this.itemSelectedTemp.filter(val => (val!==undefined) && (val!==null))
       if(selectedData.length > 0){
-        let temp_id_arr = selectedData.map(i=>i.toString())
-        const resultItems = this.modelDetail.combine.filter(item => (
-          item.length == temp_id_arr.length
-          && temp_id_arr.every(element => item.indexOf(element) > -1)
-        ))
-        if(resultItems.length){
+        if(this.checkErrorSelect){
           this.$store.dispatch('handleChangeItem', {style: this.modelTemp.styleId, model: this.modelTemp.modelId, item: selectedData})
           this.$store.dispatch('handleChangeStep', 2)
         } else{
@@ -129,7 +125,7 @@ export default {
     },
     doBack(){
       this.$store.dispatch('handleChangePage', 1)
-    }
+    },
   },
   props: [],
   mounted() {
@@ -167,6 +163,19 @@ export default {
     ]),
     hasImg(){
       return Object.keys(this.modelDetail).length
+    },
+    checkErrorSelect(){
+      let result = true
+      let selectedData = this.itemSelectedTemp.filter(val => (val!==undefined) && (val!==null))
+      if(selectedData.length > 0){
+        let temp_id_arr = selectedData.map(i=>i.toString())
+        const resultItems = this.modelDetail.combine.filter(item => (
+          item.length == temp_id_arr.length
+          && temp_id_arr.every(element => item.indexOf(element) > -1)
+        ))
+        result = resultItems.length ? true : false
+      }
+      return result
     }
   }
 };

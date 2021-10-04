@@ -297,7 +297,16 @@ ul, ol, dl{
   font-size: 13px;
 }
 .simu-model-itemList{
-  margin-bottom: 30px;
+  margin-bottom: 10px;
+}
+.simu-error-message{
+  color: #fff;
+  background-color: #dc3545;
+  border-color: #dc3545;
+  font-size: 12px;
+  width: fit-content;
+  padding: 3px 5px;
+  border-radius: 4px;
 }
 .simu-model-itemList li{
   padding: 15px 5px;
@@ -312,6 +321,10 @@ ul, ol, dl{
 .simu-model-itemList li label{
   padding-left: 5px;
 }
+.simu-model-order{
+  margin-top: 20px;
+}
+
 .simu-model-itemType{
   width: 150px;
   padding-right: 1.5em;
@@ -719,6 +732,14 @@ States
 }
 .simu-common-btn:hover{
   background-color: #676665;
+}
+.simu-common-btn:disabled{
+  pointer-events: none;
+  cursor: not-allowed;
+  opacity: 0.65;
+  filter: alpha(opacity=65);
+  -webkit-box-shadow: none;
+  box-shadow: none;
 }
 
 /* simuright-sub */
