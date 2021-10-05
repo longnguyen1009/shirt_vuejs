@@ -224,7 +224,7 @@ export default {
     //kiji path
     kiji_img: function(){
       if(this.kijiActive && this.kijiData.length){
-        return this.kijiData.filter(item => item.id == this.kijiActive)[0].img
+        return this.kijiData.filter(item => item.id == this.kijiActive)[0].img_simu
       } else{
         return "0730151143_6103981fcfa43.jpeg"
       }
@@ -238,8 +238,8 @@ export default {
     },
     itemCombineActive: function(){
       if(this.itemDataActive){
-        let itemObjectActive = this.itemDataActive.items.filter((item) => item.id == this.designActive.combine_id)[0]
-        return itemObjectActive
+        // let itemObjectActive = this.itemDataActive.items.filter((item) => item.id == this.designActive.combine_id)[0]
+        return this.itemDataActive.items
       } else{
         return null
       }

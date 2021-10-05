@@ -38,6 +38,78 @@
             </ul>
           </div>
         </div>
+        <div class="simuright-options-row">
+          <div class="simuright-options-rowTop optionLv1 d-flex align-items-center" @click="showOptionParent($event)">
+            <span class="simuright-options-label">サイズ</span>
+            <div class="simuright-options-name"></div>
+          </div>
+          <div class="simuright-options-rowDown simuright-options-sizeDown">
+            <div class="simuright-optionLists simuright-optionLists-size">
+              <span v-for="Size in sizeDataActive" :key="Size.id">
+                <input class="fancy-radio" hidden :id="'sizeOption' + Size.id" name="sizeOption" type="radio" :value="Size.id">
+                <label class="fancy-radio-label" :for="'sizeOption' + Size.id">
+                    <span class="fancy-label--text">{{Size.name}}</span>
+                    <span class="fancy-radiobutton">
+                        <span class="radiobutton-dot"></span>
+                    </span>
+                </label>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="simuright-options-row">
+          <div class="simuright-options-rowTop optionLv1 d-flex align-items-center" @click="showOptionParent($event)">
+            <span class="simuright-options-label">採寸</span>
+            <div class="simuright-options-name"></div>
+          </div>
+          <div class="simuright-options-rowDown simuright-options-measureDown">
+            <ul class="simuright-optionLists">
+              <li class="optionLv2 d-flex align-items-center"
+              v-for="measure in measureData[0].measure_detail" :key="measure.id"
+              @click="showMeasureDetail(1)">
+                <!-- <span class="simuright-options-img"><img :src="option_img_path+Option.img" alt=""></span> -->
+                <span class="simuright-options-label">{{measure.name}}</span>
+                <!-- <div class="simuright-options-name">{{optionSelectedValue(Option.parent_id)}}</div> -->
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="measure-sub-fade" v-if="measure_detail_id" @click="closeMeasureDetail"></div>
+        <transition name="transitionRightToLeftHalfWidth">
+          <div class="measure-sub" v-if="measure_detail_id">
+            <ul class="measure-sub-list">
+              <li class="measure-sub-item">
+                  <label class="fancy-radio-label" :for="'measure_detail-1'">
+                      <span class="fancy-label--text">69cm＜おすすめ＞</span>
+                      <span class="fancy-radiobutton">
+                          <span class="radiobutton-dot"></span>
+                      </span>
+                  </label>
+                  <input class="fancy-radio" hidden :id="'measure_detail-1'" name="measure_detail-1" type="radio" :value="1">
+              </li>
+              <li class="measure-sub-item">
+                  <label class="fancy-radio-label" :for="'measure_detail-2'">
+                      <span class="fancy-label--text">69.5cm</span>
+                      <span class="fancy-radiobutton">
+                          <span class="radiobutton-dot"></span>
+                      </span>
+                  </label>
+                  <input class="fancy-radio" hidden :id="'measure_detail-2'" name="measure_detail-2" type="radio" :value="2">
+              </li>
+              <li class="measure-sub-item">
+                  <label class="fancy-radio-label" :for="'measure_detail-3'">
+                      <span class="fancy-label--text">70cm</span>
+                      <span class="fancy-radiobutton">
+                          <span class="radiobutton-dot"></span>
+                      </span>
+                  </label>
+                  <input class="fancy-radio" hidden :id="'measure_detail-3'" name="measure_detail-3" type="radio" :value="3">
+              </li>
+            </ul>
+          </div>
+        </transition>
+
       </div>
       <div class="simuright-price d-flex justify-content-between">
           <div class="simuright-price-left d-flex justify-content-between flex-column">
@@ -68,6 +140,7 @@
           />
         </div>
       </transition>
+
     </div>
 </template>
 
@@ -84,7 +157,25 @@ export default {
         return {
           designActiveId: null,
           optionParentDataTemp: {},
-          genreData: {}
+          genreData: {},
+          sizeDataActive:[
+            {id: 1, val: 10, name:'36'},
+            {id: 2, val: 12, name:'37'},
+            {id: 3, val: 14, name:'38'},
+            {id: 4, val: 15, name:'39'},
+            {id: 5, val: 16, name:'40'},
+            {id: 6, val: 17, name:'41'},
+          ],
+          measureData:[
+            {size_id: 1, measure_detail: [
+              {id:1, name: '着丈', spec: 72, change_id: 1, change_val: '-1,5', total_val: 70.5, },
+              {id:2, name: 'ラベル', spec: 72, change_id: 1, change_val: '-1,5', total_val: 70.5},
+              {id:3, name: '袖丈 (右)', spec: 72, change_id: 1, change_val: '-1,5', total_val: 70.5},
+              {id:4, name: 'ウェスト', spec: 72, change_id: 1, change_val: '-1,5', total_val: 70.5},
+              {id:5, name: '袖丈 (左)', spec: 72, change_id: 1, change_val: '-1,5', total_val: 70.5}
+            ]}
+          ],
+          measure_detail_id: 0
         }
     },
     props: [],
@@ -109,7 +200,7 @@ export default {
           $('.kiji_preloader img').attr('kiji-id', '')
         }
         if(this.kijiActive && this.kijiActive != $('.kiji_preloader img').attr('kiji-id')){
-          $('.kiji_preloader img').attr('src', this.kiji_img_path + this.kijiObjectActive.img)
+          $('.kiji_preloader img').attr('src', this.kiji_img_path + this.kijiObjectActive.img_simu)
           $('.kiji_preloader img').attr('kiji-id', this.kijiActive)
         }
       },
@@ -147,7 +238,10 @@ export default {
             url: 'http://54.248.46.255/myshop/getitem/',
             method: 'post',
             headers: {'X-Requested-With': 'XMLHttpRequest'},
-            data: {'items' : this.itemSelected}
+            data: {
+              'items' : this.itemSelected,
+              'model' : this.modelSelected
+            }
           })
           .then(response => {
             console.log(response.data.data)
@@ -164,7 +258,12 @@ export default {
       setItemData: async function(){
         await this.getItemData().then(response => {
           if(response){
-            this.$store.dispatch('handleChangeItemData', {orderId: this.orderNowId, items: response.items, design: response.design})
+            this.$store.dispatch('handleChangeItemData', {
+              orderId: this.orderNowId,
+              items: response.items,
+              design: response.design,
+              stock: response.stock
+            })
             this.$store.dispatch('handleChangeLoaddingData', false)
           }
         })
@@ -263,6 +362,12 @@ export default {
           }
         })
       },
+      showMeasureDetail: function(measure_id){
+        this.measure_detail_id = measure_id
+      },
+      closeMeasureDetail : function(){
+        this.measure_detail_id = 0
+      }
     },
     mounted() {
       this.$store.dispatch('handleChangeOptionDetailActive', null)
@@ -368,7 +473,7 @@ export default {
       },
       itemCombineObj: function(){
         if(this.itemDataActive){
-          return this.itemDataActive.items[0]
+          return this.itemDataActive.items
         }
       },
       designData: function(){

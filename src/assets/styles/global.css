@@ -499,7 +499,7 @@ States
   border-radius: 3px;
 }
 .fancy-radiobutton {
-  /* border-radius: 50%; */
+  border-radius: 50%;
 }
 .radiobutton-dot {
   background-color: currentColor;
@@ -644,8 +644,11 @@ States
 .simuright-options{
   flex-grow: 1;
   height: 100%;
-  overflow: auto;
+  width: 100%;
+  overflow-y: scroll;
+  overflow-x: hidden;
   font-size: 13px;
+  position: relative;
 }
 .simuright-optionLists{
   background-color: #3A3A3A;
@@ -661,6 +664,15 @@ States
   max-height: 100%;
   transition: max-height 0.25s ease-in;
 }
+.simuright-options-sizeDown{
+  background-color: #3A3A3A;
+}
+.simuright-options-sizeDown .simuright-optionLists{
+  margin: 0 24px;
+  position: relative;
+  padding: 13px 6px;
+}
+
 .optionLv1, .optionLv2{
   margin: 0 24px;
   position: relative;
@@ -776,6 +788,60 @@ States
   transform: translateX(100%);
   transition: all .4s ease;
 }
+
+/* transiton */
+.transitionRightToLeftHalfWidth-enter-active, .transitionRightToLeftHalfWidth-leave-active {
+  position: absolute;
+  transform: translateX(0);
+  opacity: 1;
+  transition: all .4s ease;
+}
+.transitionRightToLeftHalfWidth-enter, .transitionRightToLeftHalfWidth-leave-to {
+  position: absolute;
+  opacity: 1;
+  transform: translateX(100%);
+  transition: all .4s ease;
+}
+.measure-sub{
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 200px;
+  height: 100%;
+  background-color: #3A3A3A;
+  z-index: 3;
+}
+.measure-sub-fade{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  background-color: rgba(0, 0, 0, 0.8);
+  top: 0;
+  left: 0;
+}
+.measure-sub-item{
+  height: 45px;
+  border-bottom: 1px solid #444444;
+}
+.measure-sub-item .fancy-radiobutton{
+  right: 10px;
+  left: auto;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 15px;
+  height: 15px;
+}
+.measure-sub-item .fancy-radio-label{
+  width: 100%;
+  height: 100%;
+  line-height: 44px;
+  padding-left: 10px;
+}
+
+
+
+
 
 /* SimuKiji */
 
@@ -1040,6 +1106,15 @@ States
   border: 1px solid #676665;
   padding: 50px 50px 0 50px;
   margin-bottom: 25px;
+  position: relative;
+}
+.simu-confirm-removeBtn{
+  position: absolute;
+  top: 5px;
+  right: 15px;
+  font-size: 24px;
+  padding: 10px;
+  line-height: 1;
 }
 .simu-confirm-payment{
   padding: 5px 50px 30px 50px;

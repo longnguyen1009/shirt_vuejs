@@ -59,6 +59,10 @@
                 </div>
               </div>
             </div>
+            <span class="simu-confirm-removeBtn" 
+            @click="removeConfirmOrderTemp(OrderTemp.id)"
+            v-if="orderTempItem.length > 1"
+            ><i class="fas fa-times"></i></span>
           </div>
           <div class="simu-confirm-payment d-flex justify-content-between">
               <div class="simu-confirm-payment-left d-flex flex-column justify-content-start">
@@ -128,6 +132,21 @@
           </div>
         </div>
       </div>
+      <div class="modal-mask" v-if="orderRemoveCheck != null">
+        <div class="modal-wrapper">
+          <div class="modal-container">
+              <div class="modal-body">
+                <span class="order-confirm-question">このオーダーアイテムを削除しますか？</span>
+              </div>
+              <div class="modal-footer justify-content-center">
+                <slot name="footer">
+                  <button class="simu-common-btn" @click="confirmModalClose">戻る</button>
+                  <button class="simu-common-btn" @click="removeOrderTemp(orderRemoveCheck)">確認</button>
+                </slot>
+              </div>
+          </div>
+        </div>
+      </div>
 
     </transition>
 
@@ -149,6 +168,7 @@ export default {
       deli_id: null,
       orderConfirmCheck: null,
       orderIdActive: null,
+      orderRemoveCheck: null,
     }
   },
   methods: {
@@ -205,6 +225,7 @@ export default {
     },
     confirmModalClose(){
       this.orderConfirmCheck = null
+      this.orderRemoveCheck = null
     },
     saveOrder: async function(order_status){
       this.$store.dispatch('handleUpdateOrderTempAllData', null)
@@ -344,6 +365,44 @@ export default {
         SumPrice += this.getPriceOrder(element.id)
       })
       return SumPrice
+    },
+    removeConfirmOrderTemp(orderId){
+      this.orderRemoveCheck = orderId
+    },
+    removeOrderTempApi: async function(orderId){
+      let ret = null
+      await this.axios.request({
+        url: 'http://54.248.46.255/myshop/removeordertemp/',
+        method: 'post',
+        headers: {'X-Requested-With': 'XMLHttpRequest'},
+        data: {
+          id: orderId
+        }
+      })
+      .then(response => {
+        ret = response.data.data
+      })
+      .catch(error => {
+        this.$store.dispatch('handleChangeLoaddingData', false)
+        this.$store.dispatch('handleChangeErrorCode', 2)
+        console.log(error)
+      })
+      return ret
+    },
+    removeOrderTemp: async function(orderId){
+      this.confirmModalClose();
+      this.$store.dispatch('handleChangeLoaddingData', true)
+      if(orderId){
+        this.$store.dispatch('handleRemoveOrderTemp', orderId)
+        await this.removeOrderTempApi(orderId).then(response => {
+          if(response){
+            this.$store.dispatch('handleChangeLoaddingData', false)
+          }
+        })
+      } else{
+        this.$store.dispatch('handleRemoveOrderTemp', orderId)
+        this.$store.dispatch('handleChangeLoaddingData', false)
+      }
     }
   },
   mounted(){

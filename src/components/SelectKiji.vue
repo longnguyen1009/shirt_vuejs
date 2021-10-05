@@ -18,10 +18,10 @@
           <div v-for="(Kiji, id) in kijiList" :key="id" class="kijiItem"
             :class="{active: (Kiji.id == kijiSelected)}">
             <img :src="kiji_img_path + Kiji.img" alt=""
-              @click="kijiChange(Kiji.id, Kiji.img)">
+              @click="kijiChange(Kiji.id, Kiji.img_simu)">
             <span class="simuright-kiji-icon" @click="showKijiDetail(Kiji.id)"><i class="fas fa-info-circle"></i></span>
             <div class="simuright-kiji-name"
-              @click="kijiChange(Kiji.id, Kiji.img)">
+              @click="kijiChange(Kiji.id, Kiji.img_simu)">
               <span class="kiji-code">{{Kiji.code}}</span><br>
               <span class="kiji-name">{{Kiji.name}}</span>
             </div>
@@ -83,7 +83,7 @@ export default {
       this.kijiDetailId = id
     },
     confirmKijiDetail(data){
-      this.kijiChange(data.id, data.img)
+      this.kijiChange(data.id, data.img_simu)
       this.kijiConfirm()
     }
   },

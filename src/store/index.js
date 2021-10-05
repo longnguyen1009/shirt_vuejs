@@ -70,7 +70,7 @@ export default new Vuex.Store({
     optionDetailData:[],
 
     //itemData load form server
-    itemData: [], //{orderId, items[], design[] in step 2}
+    itemData: [], //{orderId, items, design[] in step 2}
 
     //受け取り方法
     deliActive: 0,
@@ -89,9 +89,11 @@ export default new Vuex.Store({
     priceActive: 0,
     combineIdActive: 0,
 
+    sizeActiveId: 0,
+    $stockActive: {}, //{kijiId, stock}
+
     //step 4
     orderCompleteId: 0,
-
     deliData: []
   },
   getters: {
@@ -237,7 +239,20 @@ export default new Vuex.Store({
       state.optionDataLoaded = [...state.optionDataLoaded]
     },
     changeKijiData(state, kijiData){
-      state.kijiData = kijiData
+      kijiData.forEach(element => {
+        const existKijiIndex = state.kijiData.findIndex(
+          (item) => (
+            item.id == element.id
+          ))
+        if(existKijiIndex !== -1){
+          state.kijiData[existKijiIndex] = element
+        } else{
+          state.kijiData.push(element)
+        }
+      })
+     
+      //Clone the array to trigger a UI update.
+      state.kijiData = [...state.kijiData]
     },
     changeOptionParentData(state, parentData){
       let existParentDataIndex = state.optionParentData.findIndex(
@@ -405,6 +420,11 @@ export default new Vuex.Store({
         state.deliActive = deliData[0].id
       }
       state.deliData = deliData
+    },
+    removeOrderTemp(state, orderId){
+      state.orderTempItem = state.orderTempItem.filter(item => item.id != orderId)
+      state.optionSelectedData = state.optionSelectedData.filter(item => item.orderId != orderId)
+      state.itemData = state.itemData.filter(item => item.orderId != orderId)
     }
   },
   actions: {
@@ -516,6 +536,9 @@ export default new Vuex.Store({
     },
     handleChangeDeliData(context, deliData){
       context.commit('changeDeliData', deliData)
+    },
+    handleRemoveOrderTemp(context, orderId){
+      context.commit('removeOrderTemp', orderId)
     }
   }
 })
