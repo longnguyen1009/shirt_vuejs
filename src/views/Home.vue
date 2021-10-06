@@ -159,7 +159,7 @@ export default {
           }
         })
     },
-    getItemData: async function(item_selected, model_selected){
+    getItemData: async function(item_selected, model_selected, style_selected){
         let ret = null
         if(item_selected){
           await this.axios.request({
@@ -168,7 +168,8 @@ export default {
             headers: {'X-Requested-With': 'XMLHttpRequest'},
             data: {
               'items' : item_selected,
-              'model' : model_selected
+              'model' : model_selected,
+              'style' : style_selected
             }
           })
           .then(response => {
@@ -182,26 +183,30 @@ export default {
         }
         return ret
       },
-    setItemData: async function(item_selected, model_selected){
-      await this.getItemData(item_selected, model_selected).then(response => {
+    setItemData: async function(item_selected, model_selected, style_selected){
+      await this.getItemData(item_selected, model_selected, style_selected).then(response => {
         if(response){
           this.$store.dispatch('handleChangeItemData', {
             orderId: this.orderNowId,
             items: response.items,
             design: response.design,
-            stock: response.stock
+            stock: response.stock,
+            size: response.size,
+            correction: response.correction
           })
         }
       })
     },
-    updateItemData: async function(id, item, model){
-      await this.getItemData(item, model).then(response => {
+    updateItemData: async function(id, item, model, style){
+      await this.getItemData(item, model, style).then(response => {
         if(response){
           this.$store.dispatch('handleChangeItemData', {
             orderId: id,
             items: response.items,
             design: response.design,
-            stock: response.stock
+            stock: response.stock,
+            size: response.size,
+            correction: response.correction
           })
         }
       })
@@ -347,7 +352,7 @@ export default {
   watch: {
     itemSelected: function(){
       if(this.itemSelected.length){
-        this.setItemData(this.itemSelected, this.modelSelected)
+        this.setItemData(this.itemSelected, this.modelSelected, this.styleSelected)
       }
     },
     // designData: function(){
@@ -357,7 +362,7 @@ export default {
     orderTempItem: function(){
       this.orderTempItem.forEach(element => {
         if(this.itemData.findIndex(item => item.orderId == element.id) == -1){
-          this.updateItemData(element.id, element.item, element.model)
+          this.updateItemData(element.id, element.item, element.model, element.style)
         }
         this.updateOptionSelectedData(element.option_selected)
         this.updateCombineData(element.model, element.combineId)

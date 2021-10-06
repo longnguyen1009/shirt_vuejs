@@ -45,15 +45,16 @@
           </div>
           <div class="simuright-options-rowDown simuright-options-sizeDown">
             <div class="simuright-optionLists simuright-optionLists-size">
-              <span v-for="Size in sizeDataActive" :key="Size.id">
-                <input class="fancy-radio" hidden :id="'sizeOption' + Size.id" name="sizeOption" type="radio" :value="Size.id">
-                <label class="fancy-radio-label" :for="'sizeOption' + Size.id">
+              <span v-for="Size in sizeSortData" :key="Size.id">
+                <input class="fancy-radio" hidden :id="'size-' + Size.id" name="size" type="radio" :value="Size.id" v-model="sizeSelectedValue">
+                <label class="fancy-radio-label" :for="'size-' + Size.id">
                     <span class="fancy-label--text">{{Size.name}}</span>
-                    <span class="fancy-radiobutton">
+                    <span class="fancy-checkbox">
                         <span class="radiobutton-dot"></span>
                     </span>
                 </label>
               </span>
+              <span v-if="sizeSortData.length == 0">サイズがありません</span>
             </div>
           </div>
         </div>
@@ -65,46 +66,26 @@
           <div class="simuright-options-rowDown simuright-options-measureDown">
             <ul class="simuright-optionLists">
               <li class="optionLv2 d-flex align-items-center"
-              v-for="measure in measureData[0].measure_detail" :key="measure.id"
-              @click="showMeasureDetail(1)">
-                <!-- <span class="simuright-options-img"><img :src="option_img_path+Option.img" alt=""></span> -->
-                <span class="simuright-options-label">{{measure.name}}</span>
-                <!-- <div class="simuright-options-name">{{optionSelectedValue(Option.parent_id)}}</div> -->
+              v-for="correctItem in correctionDataActive" :key="correctItem.id"
+              @click="showCorrectionDetail(correctItem.id)">
+                <span class="simuright-options-label">{{correctItem.name}}</span>
               </li>
             </ul>
           </div>
         </div>
 
-        <div class="measure-sub-fade" v-if="measure_detail_id" @click="closeMeasureDetail"></div>
+        <div class="measure-sub-fade" v-if="correction_selected_id" @click="closeCorrectionDetail"></div>
         <transition name="transitionRightToLeftHalfWidth">
-          <div class="measure-sub" v-if="measure_detail_id">
+          <div class="measure-sub" v-if="correction_selected_id">
             <ul class="measure-sub-list">
-              <li class="measure-sub-item">
-                  <label class="fancy-radio-label" :for="'measure_detail-1'">
-                      <span class="fancy-label--text">69cm＜おすすめ＞</span>
-                      <span class="fancy-radiobutton">
-                          <span class="radiobutton-dot"></span>
-                      </span>
-                  </label>
-                  <input class="fancy-radio" hidden :id="'measure_detail-1'" name="measure_detail-1" type="radio" :value="1">
-              </li>
-              <li class="measure-sub-item">
-                  <label class="fancy-radio-label" :for="'measure_detail-2'">
-                      <span class="fancy-label--text">69.5cm</span>
-                      <span class="fancy-radiobutton">
-                          <span class="radiobutton-dot"></span>
-                      </span>
-                  </label>
-                  <input class="fancy-radio" hidden :id="'measure_detail-2'" name="measure_detail-2" type="radio" :value="2">
-              </li>
-              <li class="measure-sub-item">
-                  <label class="fancy-radio-label" :for="'measure_detail-3'">
-                      <span class="fancy-label--text">70cm</span>
-                      <span class="fancy-radiobutton">
-                          <span class="radiobutton-dot"></span>
-                      </span>
-                  </label>
-                  <input class="fancy-radio" hidden :id="'measure_detail-3'" name="measure_detail-3" type="radio" :value="3">
+              <li class="measure-sub-item" v-for="correctDetailItem in correctDetailActive" :key="correctDetailItem.id">
+                <input class="fancy-radio" hidden :id="'correctDetailItem-' + correctDetailItem.id" :name="'correctDetailItem' + correction_selected_id" type="radio" :value="correctDetailItem.id">
+                <label class="fancy-radio-label" :for="'correctDetailItem-' + correctDetailItem.id">
+                    <span class="fancy-label--text">{{correctDetailItem.text}}</span>
+                    <span class="fancy-radio">
+                        <span class="radiobutton-dot"></span>
+                    </span>
+                </label>
               </li>
             </ul>
           </div>
@@ -156,16 +137,9 @@ export default {
     data() {
         return {
           designActiveId: null,
+          sizeSelectedValue: null,
           optionParentDataTemp: {},
           genreData: {},
-          sizeDataActive:[
-            {id: 1, val: 10, name:'36'},
-            {id: 2, val: 12, name:'37'},
-            {id: 3, val: 14, name:'38'},
-            {id: 4, val: 15, name:'39'},
-            {id: 5, val: 16, name:'40'},
-            {id: 6, val: 17, name:'41'},
-          ],
           measureData:[
             {size_id: 1, measure_detail: [
               {id:1, name: '着丈', spec: 72, change_id: 1, change_val: '-1,5', total_val: 70.5, },
@@ -175,7 +149,94 @@ export default {
               {id:5, name: '袖丈 (左)', spec: 72, change_id: 1, change_val: '-1,5', total_val: 70.5}
             ]}
           ],
-          measure_detail_id: 0
+          correctFixedData: [
+            {
+              design_id: 16,
+              fixedData: [
+                {name: '着丈', column_name: 'sh_kitake'},
+                {name: 'ネック', column_name: 'sh_kneck'},
+                {name: '袖丈 (右)', column_name: 'sh_yukitake_right'},
+                {name: '袖口幅 (右)', column_name: 'sh_sodeguchi_right'},
+                {name: '肩幅', column_name: 'sh_katahaba'},
+                {name: 'ウェスト', column_name: 'sh_west'},
+                {name: '袖丈 (左)', column_name: 'sh_yukitake_left'},
+                {name: '袖口幅 (左)', column_name: 'sh_sodeguchi_left'},
+              ],
+              fixedMeasureData: [
+                {name: '1 Measure (胸囲)', column_name_val1: 'onem_sh_kyoui_under', column_name_val2: 'onem_sh_kyoui_upper'},
+                {name: '1 Measure (ネック寸)', column_name_val1: 'onem_sh_kneck_under', column_name_val2: 'onem_sh_kneck_upper'}
+              ]
+            },
+            {
+              design_id: 15, 
+              fixedData: [
+                {name: '着丈', column_name: 'sh_kitake'},
+                {name: 'ネック', column_name: 'sh_kneck'},
+                {name: '袖丈 (右)', column_name: 'sh_yukitake_right'},
+                {name: '袖口幅 (右)', column_name: 'sh_sodeguchi_right'},
+                {name: '肩幅', column_name: 'sh_katahaba'},
+                {name: 'ウェスト', column_name: 'sh_west'},
+                {name: '袖丈 (左)', column_name: 'sh_yukitake_left'},
+                {name: '袖口幅 (左)', column_name: 'sh_sodeguchi_left'},
+              ],
+              fixedMeasureData: [
+                {name: '1 Measure (胸囲)', column_name_val1: 'onem_sh_kyoui_under', column_name_val2: 'onem_sh_kyoui_upper'},
+                {name: '1 Measure (ネック寸)', column_name_val1: 'onem_sh_kneck_under', column_name_val2: 'onem_sh_kneck_upper'}
+              ]
+            },
+            {
+              design_id: 13,
+                fixedData: [
+                {name: '着丈', column_name: 'jk_kitake'},
+                {name: '肩幅', column_name: 'jk_katahaba'},
+                {name: '袖丈 (右)', column_name: 'jk_yukitake_right'},
+                {name: 'ウェスト', column_name: 'jk_west'},
+                {name: '袖丈 (左)', column_name: 'jk_yukitake_left'}
+              ],
+              fixedMeasureData: [
+                {name: '1 Measure (胸囲)', column_name_val1: 'onem_jk_kyoui_under', column_name_val2: 'onem_jk_kyoui_upper'},
+                {name: '1 Measure (ウェスト)', column_name_val1: 'onem_jk_west_under', column_name_val2: 'onem_jk_west_upper'}
+              ]
+            },
+            {
+              design_id: 14,
+              fixedData: [
+                {name: '着丈', column_name: 'jk_kitake'},
+                {name: '肩幅', column_name: 'jk_katahaba'},
+                {name: '袖丈 (右)', column_name: 'jk_yukitake_right'},
+                {name: 'ウェスト', column_name: 'jk_west'},
+                {name: '袖丈 (左)', column_name: 'jk_yukitake_left'}
+              ],
+              fixedMeasureData: [
+                {name: '1 Measure (胸囲)', column_name_val1: 'onem_jk_kyoui_under', column_name_val2: 'onem_jk_kyoui_upper'},
+                {name: '1 Measure (ネック寸)', column_name_val1: 'onem_jk_west_under', column_name_val2: 'onem_jk_west_upper'}
+              ]
+            },
+            {
+              design_id: 6,
+              fixedData: [
+                {name: 'ウェスト', column_name: 'pt_west'},
+                {name: 'ヒップ', column_name: 'pt_hip'}
+              ],
+              fixedMeasureData: [
+                {name: '1 Measure (ヒップ)', column_name_val1: 'onem_pt_hip_under', column_name_val2: 'onem_pt_hip_upper'},
+                {name: '1 Measure (ウェスト)', column_name_val1: 'onem_pt_west_under', column_name_val2: 'onem_pt_west_upper'}
+              ]
+            },
+            {
+              design_id: 6,
+              fixedData: [
+                {name: '着丈', column_name: 'vt_kitake'},
+                {name: 'ウェスト', column_name: 'vt_west'},
+                {name: '肩幅', column_name: 'vt_katahaba'}
+              ],
+              fixedMeasureData: [
+                {name: '1 Measure (胸囲)', column_name_val1: 'onem_vt_kyoui_under', column_name_val2: 'onem_vt_kyoui_upper'},
+                {name: '1 Measure (ウェスト)', column_name_val1: 'onem_vt_west_under', column_name_val2: 'onem_vt_west_upper'}
+              ]
+            },
+          ],
+          correction_selected_id: 0
         }
     },
     props: [],
@@ -240,7 +301,8 @@ export default {
             headers: {'X-Requested-With': 'XMLHttpRequest'},
             data: {
               'items' : this.itemSelected,
-              'model' : this.modelSelected
+              'model' : this.modelSelected,
+              'style' : this.styleSelected
             }
           })
           .then(response => {
@@ -262,7 +324,9 @@ export default {
               orderId: this.orderNowId,
               items: response.items,
               design: response.design,
-              stock: response.stock
+              stock: response.stock,
+              size: response.size,
+              correction: response.correction
             })
             this.$store.dispatch('handleChangeLoaddingData', false)
           }
@@ -362,11 +426,43 @@ export default {
           }
         })
       },
-      showMeasureDetail: function(measure_id){
-        this.measure_detail_id = measure_id
+
+      getCorrectionDetailDataFromApi: async function(correctId){
+        let ret = null
+        if(correctId){
+          await this.axios.request({
+            url: 'http://54.248.46.255/myshop/getcorrectiondetail/',
+            method: 'post',
+            headers: {'X-Requested-With': 'XMLHttpRequest'},
+            data: {
+              'correction_id': correctId
+            }
+          })
+          .then(response => {
+            console.log(response.data.data)
+            ret = response.data.data
+          })
+          .catch(error => {
+            this.$store.dispatch('handleChangeErrorCode', 2)
+            console.log(error)
+          })
+        }
+        return ret
       },
-      closeMeasureDetail : function(){
-        this.measure_detail_id = 0
+
+      getCorrectionDetailData: async function(correctId){
+        await this.getCorrectionDetailDataFromApi(correctId).then(response => {
+          if(response){
+            this.$store.dispatch('handleUpdateCorrectionDetailData', {correct_id: correctId, detail_data: response})
+          }
+        })
+      },
+
+      showCorrectionDetail: function(correct_id){
+        this.correction_selected_id = correct_id
+      },
+      closeCorrectionDetail : function(){
+        this.correction_selected_id = 0
       }
     },
     mounted() {
@@ -391,11 +487,30 @@ export default {
         } else{
           this.updateOptionParent()
         }
+
+        //set initial value size
+        if(this.sizeSortData.length){
+          if(this.sizeSelectedData.findIndex(item => item.orderId == this.orderNowId && item.design == this.designActive.design_id) !== -1){
+            this.sizeSelectedValue = this.sizeSelectedData.find(item => item.orderId == this.orderNowId && item.design == this.designActive.design_id).id
+          } else{
+            this.sizeSelectedValue = this.sizeSortData[0].id
+          }
+        }
       },
       itemCombineObj: function(){
         this.$store.dispatch('handleChangeCombineActive', this.itemCombineObj.id)
         if(this.combinePriceData.findIndex(item => item.model == this.modelSelected && item.combineId == this.itemCombineObj.id) == -1){
           this.updatePriceCombine(this.itemCombineObj.id)
+        }
+      },
+      sizeSelectedValue: function(){
+        if(this.sizeSortData.length){
+          this.$store.dispatch('handleUpdateSizeSelectedData', {orderId: this.orderNowId, design: this.designActive.design_id, ...this.sizeSortData.find(item => item.id == this.sizeSelectedValue)})
+        }
+      },
+      correction_selected_id: function(){
+        if(this.correction_selected_id && this.correctDetailData.findIndex(item => item.correct_id == this.correction_selected_id) == -1){
+          this.getCorrectionDetailData(this.correction_selected_id)
         }
       }
     },
@@ -419,7 +534,9 @@ export default {
         'loaddingData',
         'orderNowId',
         'combinePriceData',
-        'combineIdActive'
+        'combineIdActive',
+        'sizeSelectedData',
+        'correctDetailData'
       ]),
       kijiObjectActive: function(){
         if(this.kijiData.length){
@@ -483,6 +600,44 @@ export default {
           return null
         }
       },
+      sizeData: function(){
+        if(this.itemDataActive){
+          return this.itemDataActive.size
+        } else{
+          return null
+        }
+      },
+      correctionData: function(){
+        if(this.itemDataActive){
+          return this.itemDataActive.correction
+        } else{
+          return null
+        }
+      },
+      correctionDataActive: function(){
+        if(this.correctionData){
+          return this.correctionData.filter(item => (
+            item.design_id == this.designActive.design_id
+            && this.correctFixedDataActive.findIndex(item2 => item.size_link && item2 == item.size_link) !== -1
+          ))
+        } else{
+          return []
+        }
+      },
+      correctFixedDataActive: function(){
+        if(this.correctFixedData.findIndex(item => item.design_id == this.designActive.design_id) !== -1){
+          return this.correctFixedData.find(item => item.design_id == this.designActive.design_id).fixedData.map(item => item.column_name)
+        } else{
+          return []
+        }
+      },
+      sizeSortData: function(){
+        if(this.sizeData){
+          return this.sizeData.filter(item => item.design == this.designActive.design_id)
+        } else{
+          return []
+        }
+      },
       combinePrice: function(){
         const shop_kind = this.initialData.shop_kind
         let rank = 0
@@ -500,6 +655,13 @@ export default {
           return 0
         }
       },
+      correctDetailActive: function(){
+        if(this.correction_selected_id && this.correctDetailData.findIndex(item => item.correct_id == this.correction_selected_id) !== -1){
+          return this.correctDetailData.find(item => item.correct_id == this.correction_selected_id).detail_data
+        } else{
+          return []
+        }
+      }
     },
 };
 </script>

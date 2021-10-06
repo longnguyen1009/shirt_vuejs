@@ -63,6 +63,8 @@ export default new Vuex.Store({
     //list of option item selcted 
     optionSelectedData:[], // list of {combine_id, item_id, design_id, parent_id, option_id, cate_id, option_img, simu_img, name}
 
+    sizeSelectedData: [],// {order_id, size_id, name, ...}
+
     //raw html for option change img temp when change option
     optionTemp: null, // {option_id, option_img, type: type}
 
@@ -94,7 +96,8 @@ export default new Vuex.Store({
 
     //step 4
     orderCompleteId: 0,
-    deliData: []
+    deliData: [],
+    correctDetailData: [] //{correct_id, detail_data}
   },
   getters: {
     //step
@@ -147,7 +150,9 @@ export default new Vuex.Store({
     
     //step 4
     orderCompleteId: state => state.orderCompleteId,
-    deliData: state => state.deliData
+    deliData: state => state.deliData,
+    sizeSelectedData: state => state.sizeSelectedData,
+    correctDetailData: state => state.correctDetailData
   },
   mutations: {
     changeStep(state, newStep){
@@ -425,6 +430,29 @@ export default new Vuex.Store({
       state.orderTempItem = state.orderTempItem.filter(item => item.id != orderId)
       state.optionSelectedData = state.optionSelectedData.filter(item => item.orderId != orderId)
       state.itemData = state.itemData.filter(item => item.orderId != orderId)
+    },
+    updateSizeSelectedData(state, sizeData){
+      const sizeSelectedIndex = state.sizeSelectedData.findIndex(item => (
+        item.orderId == sizeData.orderId
+        && item.design == sizeData.design
+      ))
+      if(sizeSelectedIndex !== -1){
+        state.sizeSelectedData[sizeSelectedIndex] = sizeData
+      } else{
+        state.sizeSelectedData.push(sizeData)
+      }
+      state.sizeSelectedData = [...state.sizeSelectedData]
+    },
+    updateCorrectDetailData(state, correctData){
+      const correcIndex = state.correctDetailData.findIndex(item => (
+        item.correct_id == correctData.correct_id
+      ))
+      if(correcIndex !== -1){
+        state.correctDetailData[correcIndex] = correctData
+      } else{
+        state.correctDetailData.push(correctData)
+      }
+      state.sizeSelectedData = [...state.sizeSelectedData]
     }
   },
   actions: {
@@ -539,6 +567,12 @@ export default new Vuex.Store({
     },
     handleRemoveOrderTemp(context, orderId){
       context.commit('removeOrderTemp', orderId)
+    },
+    handleUpdateSizeSelectedData(context, sizeData){
+      context.commit('updateSizeSelectedData', sizeData)
+    },
+    handleUpdateCorrectionDetailData(context, correctionData){
+      context.commit('updateCorrectDetailData', correctionData)
     }
   }
 })

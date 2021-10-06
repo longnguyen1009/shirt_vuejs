@@ -73,7 +73,7 @@
                     v-model="deli_id">
                     <label class="fancy-radio-label" :for="'delivery' + Deli.id">
                         <span class="fancy-label--text">{{Deli.name}}</span>
-                        <span class="fancy-radiobutton">
+                        <span class="fancy-checkbox">
                             <span class="radiobutton-dot"></span>
                         </span>
                     </label>
