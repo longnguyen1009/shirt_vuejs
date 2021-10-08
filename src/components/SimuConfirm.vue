@@ -15,7 +15,8 @@
                     <span class="simu-confirm-kiji-name">{{kijiObj(OrderTemp.product_id).name}}</span><br>
                     <span class="simu-confirm-kiji-name">c/# 09</span>
                   </p>
-                  <button class="simu-common-btn">サイズ詳細</button>
+                  <button class="simu-common-btn"
+                  @click="showSizeDetail(OrderTemp.id)">サイズ詳細</button>
                 </div>
               </div>
               <div class="simu-confirm-card-bl">
@@ -117,6 +118,31 @@
           </div>
         </div>
       </div>
+      <div class="modal-mask modal-container-white" v-if="sizeConfirmActive !== null">
+        <div class="modal-wrapper">
+          <div class="modal-container modal-container-sizeconfirm">
+            <div class="modal-body">
+              <div v-for="Design in designData(sizeConfirmActive)" :key="Design.design_id" class="modal-sizeconfirm-designItem">
+                <h4 class="modal-sizeconfirm-designName">{{Design.design_label}}</h4>
+                <ul class="modal-sizeconfirm-list d-flex justify-content-between flex-wrap align-content-start">
+                  <li 
+                  v-for="CorrectDetailItem in getSizeDataActiveByDesign(Design.design_id)" :key="CorrectDetailItem.correct_id" 
+                  class="model-sizeconfirm-item d-flex justify-content-start align-items-center">
+                    <span class="modal-sizeconfirm-label">{{CorrectDetailItem.correct_name}}</span>
+                    <span class="modal-sizeconfirm-result">{{CorrectDetailItem.correct_result}}cm</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="modal-footer justify-content-center">
+              <slot name="footer">
+                <button class="simu-common-btn" @click="doBack(sizeConfirmActive)">シミュレーターに戻る</button>
+                <button class="simu-common-btn" @click="confirmModalClose">オーダー確認画面に戻る</button>
+              </slot>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="modal-mask" v-if="orderConfirmCheck">
         <div class="modal-wrapper">
           <div class="modal-container">
@@ -169,6 +195,7 @@ export default {
       orderConfirmCheck: null,
       orderIdActive: null,
       orderRemoveCheck: null,
+      sizeConfirmActive: null
     }
   },
   methods: {
@@ -226,6 +253,7 @@ export default {
     confirmModalClose(){
       this.orderConfirmCheck = null
       this.orderRemoveCheck = null
+      this.sizeConfirmActive = null
     },
     saveOrder: async function(order_status){
       this.$store.dispatch('handleUpdateOrderTempAllData', null)
@@ -403,6 +431,12 @@ export default {
         this.$store.dispatch('handleRemoveOrderTemp', orderId)
         this.$store.dispatch('handleChangeLoaddingData', false)
       }
+    },
+    showSizeDetail: function(orderId){
+      this.sizeConfirmActive = orderId
+    },
+    getSizeDataActiveByDesign(design_id){
+      return this.sizeDetailActive.filter(item => item.design_id == design_id)
     }
   },
   mounted(){
@@ -417,7 +451,11 @@ export default {
       item: this.itemSelected,
       option_selected: this.optionSelectedData.filter(item => item.orderId == this.orderNowId),
       combineId: this.combineIdActive,
-      quantity: 1
+      quantity: 1,
+
+      //size and correction
+      size_selected: this.sizeSelectedData.filter(item => item.orderId == this.orderNowId),
+      correct_selected: this.correctSelectedData.filter(item => item.order_id == this.orderNowId),
     })
     this.updateOrderItemList()
   },
@@ -446,8 +484,20 @@ export default {
       'category_select',
       'combinePriceData',
       'combineIdActive',
-      'deliData'
+      'deliData',
+      'sizeSelectedData',
+      'correctSelectedData'
     ]),
+    sizeDetailActive: function(){
+      if(this.sizeConfirmActive !== null){
+        return this.correctSelectedData.filter(item => (
+          item.order_id == this.sizeConfirmActive
+        ))
+      } else{
+        return []
+      }
+    }
+
   }
 };
 </script>

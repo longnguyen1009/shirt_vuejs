@@ -63,8 +63,6 @@ export default new Vuex.Store({
     //list of option item selcted 
     optionSelectedData:[], // list of {combine_id, item_id, design_id, parent_id, option_id, cate_id, option_img, simu_img, name}
 
-    sizeSelectedData: [],// {order_id, size_id, name, ...}
-
     //raw html for option change img temp when change option
     optionTemp: null, // {option_id, option_img, type: type}
 
@@ -92,12 +90,18 @@ export default new Vuex.Store({
     combineIdActive: 0,
 
     sizeActiveId: 0,
-    $stockActive: {}, //{kijiId, stock}
+
+    stockSelectedData: [], //{orderId, kiji, stockVal, stock_design, stock_min, stock_max }
 
     //step 4
     orderCompleteId: 0,
     deliData: [],
-    correctDetailData: [] //{correct_id, detail_data}
+
+    //size
+    correctDetailData: [], //{correct_id, detail_data}
+
+    sizeSelectedData: [],// {orderId, size_id, name, base_val...}
+    correctSelectedData: [] //{order_id, size_id, design_id, correct_id, correct_name, size_link, base_val, correct_detail_id, correct_detail_name, correct_detail_val, correct_result}
   },
   getters: {
     //step
@@ -152,7 +156,11 @@ export default new Vuex.Store({
     orderCompleteId: state => state.orderCompleteId,
     deliData: state => state.deliData,
     sizeSelectedData: state => state.sizeSelectedData,
-    correctDetailData: state => state.correctDetailData
+    correctDetailData: state => state.correctDetailData,
+    correctSelectedData: state => state.correctSelectedData,
+
+    //stock
+    stockSelectedData: state => state.stockSelectedData
   },
   mutations: {
     changeStep(state, newStep){
@@ -323,6 +331,8 @@ export default new Vuex.Store({
       state.combineIdActive = (data.combineId) ? Number(data.combineId) : null
       state.itemSelected = (data.item) ? JSON.parse(data.item) : []
       state.optionSelectedData = (data.option_selected) ? JSON.parse(data.option_selected) : []
+      state.sizeSelectedData = (data.size_selected) ? JSON.parse(data.size_selected) : []
+      state.correctSelectedData = (data.correct_selected) ? JSON.parse(data.correct_selected) : []
       state.category_select = (data.category_select) ? Number(data.category_select) : null
       state.deliActive = (data.shipping) ? data.shipping: 0
     },
@@ -359,6 +369,8 @@ export default new Vuex.Store({
           element.quantity = Number(element.quantity)
           element.item = JSON.parse(element.item)
           element.option_selected = JSON.parse(element.option_selected)
+          element.size_selected = JSON.parse(element.size_selected)
+          element.correct_selected = JSON.parse(element.correct_selected)
           state.orderTempItem.push(element)
         }
       })
@@ -453,6 +465,70 @@ export default new Vuex.Store({
         state.correctDetailData.push(correctData)
       }
       state.sizeSelectedData = [...state.sizeSelectedData]
+    },
+    updateCorrectSelectedData(state, correctedData){
+      correctedData.forEach(element => {
+        const correctedIndex = state.correctSelectedData.findIndex(item => (
+          item.order_id == element.order_id
+          && item.design_id == element.design_id
+          && item.size_id == element.size_id
+          && item.correct_id == element.correct_id
+        ))
+        if(correctedIndex !== -1){
+          state.correctSelectedData[correctedIndex] = element
+        } else{
+          state.correctSelectedData.push(element)
+        }
+      })
+      state.correctSelectedData = [...state.correctSelectedData]
+    },
+    updateCorrectSelectedDataBySize(state, correctedData){
+      if(correctedData.length){
+        const firstItem = correctedData[0]
+        state.correctSelectedData = state.correctSelectedData.filter(item => !(
+          item.order_id == firstItem.order_id && item.design_id == firstItem.design_id
+        ))
+        state.correctSelectedData = [...state.correctSelectedData, ...correctedData]
+      }
+    },
+
+    // stock data
+    updateStockSelectedData(state, stockData){
+      const stockIndex = state.stockSelectedData.findIndex(item => item.orderId == stockData.orderId)
+      if(stockIndex !== -1){
+        state.stockSelectedData[stockIndex] = {...state.stockSelectedData[stockIndex], ...stockData}
+      } else{
+        state.stockSelectedData.push(...{kiji: null, stockVal : 0}, ...stockData)
+      }
+    },
+    updateInitialStockData(state){
+      state.itemData.forEach(element => {
+        let stockSenseiArr = []
+        let stockBichikuseiArr = []
+        let sensei_min = 0
+        let bichikusei_min = 0
+        element.stock.forEach(el => {
+          stockSenseiArr.push(el.sensei_scale)
+          stockBichikuseiArr.push(el.bichikusei_scale)
+        })
+        if(stockSenseiArr.length){
+          sensei_min = Math.max(0,...stockSenseiArr)
+          bichikusei_min = Math.max(0,...stockBichikuseiArr)
+        }
+
+        let stockDataIndex = state.stockSelectedData.findIndex(item => item.orderId == element.orderId)
+        if(stockDataIndex !== -1){
+          state.stockSelectedData[stockDataIndex].stock_design = element.stock_design
+          state.stockSelectedData[stockDataIndex].sensei_min = sensei_min
+          state.stockSelectedData[stockDataIndex].bichikusei_min = bichikusei_min
+        } else{
+          state.stockSelectedData.push(
+            {orderId: element.orderId, kiji: null, stockVal: 0, stock_design: element.stock_design, sensei_min: sensei_min, bichikusei_min: bichikusei_min}
+          )
+        }
+
+        console.log(state.stockSelectedData)
+      })
     }
   },
   actions: {
@@ -573,6 +649,20 @@ export default new Vuex.Store({
     },
     handleUpdateCorrectionDetailData(context, correctionData){
       context.commit('updateCorrectDetailData', correctionData)
+    },
+    handleUpdateCorrectSelectedData(context, correctSelectedData){
+      context.commit('updateCorrectSelectedData', correctSelectedData)
+    },
+    handleUpdateCorrectSelectedDataBySize(context, correctSelectedData){
+      context.commit('updateCorrectSelectedDataBySize', correctSelectedData)
+    },
+
+    //stock update
+    handleUpdateStockSelectedData(context, stockData){
+      context.commit('updateStockSelectedData', stockData)
+    },
+    handleUpdateInitialStockData(context){
+      context.commit('updateInitialStockData')
     }
   }
 })

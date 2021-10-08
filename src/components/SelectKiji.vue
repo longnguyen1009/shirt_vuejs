@@ -15,17 +15,19 @@
           </div>
         </div>
         <div class="simuright-sub-result simuright-kiji-list d-flex flex-wrap">
-          <div v-for="(Kiji, id) in kijiList" :key="id" class="kijiItem"
+          <template v-for="Kiji in kijiData">
+            <div class="kijiItem" v-if="checkStockKiji(Kiji.id)" :key="Kiji.id"
             :class="{active: (Kiji.id == kijiSelected)}">
-            <img :src="kiji_img_path + Kiji.img" alt=""
-              @click="kijiChange(Kiji.id, Kiji.img_simu)">
-            <span class="simuright-kiji-icon" @click="showKijiDetail(Kiji.id)"><i class="fas fa-info-circle"></i></span>
-            <div class="simuright-kiji-name"
-              @click="kijiChange(Kiji.id, Kiji.img_simu)">
-              <span class="kiji-code">{{Kiji.code}}</span><br>
-              <span class="kiji-name">{{Kiji.name}}</span>
+              <img :src="kiji_img_path + Kiji.img" alt=""
+                @click="kijiChange(Kiji.id, Kiji.img_simu)">
+              <span class="simuright-kiji-icon" @click="showKijiDetail(Kiji.id)"><i class="fas fa-info-circle"></i></span>
+              <div class="simuright-kiji-name"
+                @click="kijiChange(Kiji.id, Kiji.img_simu)">
+                <span class="kiji-code">{{Kiji.code}}</span><br>
+                <span class="kiji-name">{{Kiji.name}}</span>
+              </div>
             </div>
-          </div>
+          </template>
         </div>
       </div>
     </div>
@@ -85,25 +87,65 @@ export default {
     confirmKijiDetail(data){
       this.kijiChange(data.id, data.img_simu)
       this.kijiConfirm()
+    },
+    getKijiFromAPI: async function(){
+        let ret = null
+        await this.axios.request({
+          url: 'http://54.248.46.255/myshop/getkijilist/',
+          method: 'get',
+          headers: {'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(response => {
+          // console.log(response)
+          ret = response.data.data
+        })
+        .catch(error => {
+          this.$store.dispatch('handleChangeErrorCode', 2)
+          console.log(error)
+        })
+        return ret
+    },
+    setKijiData: async function(){
+        await this.getKijiFromAPI().then(response => {
+          if(response){
+            this.$store.dispatch('handleChangeKijiData', response)
+            // this.$store.dispatch('handleChangePriceRank', response.priceRankArr)
+          }
+        })
+    },
+    checkStockKiji: function(id){
+      let Kiji = this.kijiData.find(item => item.id == id)
+      if(Kiji.stock_unlimited){
+        return true
+      }
+      if((Kiji.fabric_kind == 1 && Kiji.stock >= this.stockSelectedDataNow.sensei_min) || 
+      ((Kiji.fabric_kind == 2 && Kiji.stock >= this.stockSelectedDataNow.bichikusei_min))){
+        return true
+      } else{
+        return false
+      }
     }
   },
   props: [],
   mounted() {
+    this.setKijiData()
     this.kijiSelected = this.kijiActive
   },
   computed: {
     ...mapGetters([
       'kiji_img_path',
       'kijiActive',
-      'kijiData'
+      'kijiData',
+      'stockSelectedData',
+      'orderNowId'
     ]),
     kijiDetailData: function(){
       if(this.kijiDetailId != 0){
-        return this.kijiList.filter((item) => item.id === this.kijiDetailId)[0];
+        return this.kijiData.filter((item) => item.id === this.kijiDetailId)[0];
       }
     },
-    kijiList: function(){
-      return this.kijiData
+    stockSelectedDataNow: function(){
+      return this.stockSelectedData.find(item => item.orderId == this.orderNowId)
     }
   }
 };

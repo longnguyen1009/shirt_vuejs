@@ -191,6 +191,7 @@ export default {
             items: response.items,
             design: response.design,
             stock: response.stock,
+            stock_design: response.stock_design,
             size: response.size,
             correction: response.correction
           })
@@ -205,6 +206,7 @@ export default {
             items: response.items,
             design: response.design,
             stock: response.stock,
+            stock_design: response.stock_design,
             size: response.size,
             correction: response.correction
           })
@@ -295,6 +297,15 @@ export default {
         this.$store.dispatch('handleChangeOption', element)
       })
     },
+    updateSizeSelectedData: function(size_selected){
+      size_selected.forEach(element => {
+        this.$store.dispatch('handleUpdateSizeSelectedData', element)
+      })
+    },
+    updateCorrectSelectedData: function(correct_selected){
+      this.$store.dispatch('handleUpdateCorrectSelectedDataBySize', correct_selected)
+    },
+
     getPriceFromApi: async function(model, combineId){
         let ret = null
         if(model && combineId){
@@ -365,6 +376,8 @@ export default {
           this.updateItemData(element.id, element.item, element.model, element.style)
         }
         this.updateOptionSelectedData(element.option_selected)
+        this.updateSizeSelectedData(element.size_selected)
+        this.updateCorrectSelectedData(element.correct_selected)
         this.updateCombineData(element.model, element.combineId)
       })
     },
@@ -372,6 +385,7 @@ export default {
       this.itemData.forEach(element => {
         this.updateAllOptionParentFromOrderTemp(element.design)
       })
+      this.$store.dispatch('handleUpdateInitialStockData')
     },
     category_select: function(){
       this.setStyleData()

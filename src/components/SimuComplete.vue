@@ -53,7 +53,7 @@
 
     <!-- Modal -->
     <transition name="modal">
-      <div class="modal-mask" v-if="barCodeShow" id="barCodeModal">
+      <div class="modal-mask modal-container-white" v-if="barCodeShow" id="barCodeModal">
         <div class="modal-wrapper">
           <div class="modal-container">
               <div class="modal-body">

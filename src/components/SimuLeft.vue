@@ -135,6 +135,7 @@ export default {
       this.viewMode = this.viewMode ? 0 : 1
     },
     addToCart: async function(){
+      this.$store.dispatch('handleChangeLoaddingData', true)
       let ret = null
       await this.axios.request({
         url: 'http://54.248.46.255/myshop/addproducttocart/',
@@ -149,14 +150,18 @@ export default {
           'item': this.itemSelected,
           'combineId': this.combineIdActive,
           'option_selected' : this.optionSelectedData.filter(item => item.orderId == this.orderNowId),
+          'size_selected' : this.sizeSelectedData.filter(item => item.orderId == this.orderNowId),
+          'correct_selected' : this.correctSelectedData.filter(item => item.order_id == this.orderNowId),
           'quantity': 1
         }
       })
       .then(response => {
         ret = response.data.data
+        this.$store.dispatch('handleChangeLoaddingData', false)
       })
       .catch(error => {
         this.$store.dispatch('handleChangeErrorCode', 2)
+        this.$store.dispatch('handleChangeLoaddingData', false)
         console.log(error)
       })
       return ret
@@ -207,7 +212,9 @@ export default {
         'initialData',
         'orderNowId',
         'combineIdActive',
-        'category_select'
+        'category_select',
+        'sizeSelectedData',
+        'correctSelectedData'
       ]),
     //design path
     design: function() {

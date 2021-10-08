@@ -503,7 +503,6 @@ States
 }
 .radiobutton-dot {
   background-color: currentColor;
-  /* border-radius: 50%; */
   height: 8px;
   opacity: 0;
   position: absolute;
@@ -511,6 +510,9 @@ States
   top: 50%;
   transform: translate(-50%, -50%) scale(0);
   width: 8px;
+}
+.fancy-radiobutton .radiobutton-dot{
+  border-radius: 50%;
 }
 .checkmark {
   height: 20px;
@@ -645,10 +647,19 @@ States
   flex-grow: 1;
   height: 100%;
   width: 100%;
-  overflow-y: scroll;
-  overflow-x: hidden;
+  overflow: hidden;
   font-size: 13px;
   position: relative;
+}
+.simuright-options-content{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  z-index: 2;
 }
 .simuright-optionLists{
   background-color: #3A3A3A;
@@ -676,7 +687,7 @@ States
 .optionLv1, .optionLv2{
   margin: 0 24px;
   position: relative;
-  height: 50px;
+  min-height: 50px;
   padding: 0 6px;
 }
 .optionLv1{
@@ -717,9 +728,14 @@ States
 .simuright-top .simuright-modeBtn.active{
   background-color: #676665;
 }
+.simuright-options-measureValue span{
+  display: block;
+  padding: 3px 0;
+}
 .simuleft-options{
   display: none;
 }
+
 /* .simuleft-options img{
   position: absolute;
   top: 0;
@@ -809,13 +825,15 @@ States
   width: 200px;
   height: 100%;
   background-color: #3A3A3A;
-  z-index: 3;
+  z-index: 4;
+  overflow-x: hidden;
+  overflow-y: scroll;
 }
 .measure-sub-fade{
   position: absolute;
   width: 100%;
   height: 100%;
-  z-index: 2;
+  z-index: 3;
   background-color: rgba(0, 0, 0, 0.8);
   top: 0;
   left: 0;
@@ -824,23 +842,35 @@ States
   height: 45px;
   border-bottom: 1px solid #444444;
 }
-.measure-sub-item .radiobutton-dot{
-  right: 10px;
-  left: auto;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 15px;
-  height: 15px;
-}
 .measure-sub-item .fancy-radio-label{
   width: 100%;
   height: 100%;
   line-height: 44px;
   padding-left: 10px;
 }
+.measure-sub-item .fancy-radiobutton{
+  top: 50%;
+  right: 20px;
+  left: auto;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+}
+.measure-sub-item .radiobutton-dot{
+  width: 8px;
+  height: 8px;
+}
 
-
-
+.measure-sub .loaddingDataIo{
+  background-color: inherit;
+}
+.measure-sub .ldio-2vyxc9gibh9 div{
+  left: 97px;
+  top: 80px;
+  width: 3px;
+  height: 5px;
+  transform-origin: 2px 15px;
+}
 
 
 /* SimuKiji */
@@ -1314,36 +1344,62 @@ States
   width: 220px;
   margin: 0 15px;
 }
-#barCodeModal .modal-container{
+.modal-container-white .modal-container{
   background-color: #fff;
   color: #000;
   padding: 0;
 }
-#barCodeModal .modal-body{
+.modal-container-white .modal-body{
   margin: 0;
   padding: 0;
 }
-#barCodeModal .simu-common-btn{
+.modal-container-white .simu-common-btn{
   border: 1px solid #DCDBDA;
   color: #000;
 }
-#barCodeModal .simu-common-btn:hover{
+.modal-container-white .simu-common-btn:hover{
   color: #fff;
 }
-#barCodeModal .modal-footer{
+.modal-container-white .modal-footer{
   padding: 25px 0;
 }
-#barCodeModal .barCodeItem{
+.modal-container-white .barCodeItem{
   padding: 30px 0;
   border-bottom: 1px solid #DCDBDA;
 }
-#barCodeModal .barCodeName{
+.modal-container-white .barCodeName{
   padding-bottom: 15px;
   color: #485049;
   font-size: 12px;
 }
-#barCodeModal .barCodeImg{
+.modal-container-white .barCodeImg{
   padding: 4px 0;
+}
+
+/* modal-sizeconfirm */
+.modal-container-sizeconfirm .modal-body{
+  text-align: initial;
+  padding: 20px 0;
+}
+.modal-sizeconfirm-designName{
+  font-size: 15px;
+  font-weight: bold;
+  padding: 20px 0;
+  border-bottom: 1px solid #DCDBDA;
+  text-align: center;
+}
+.modal-sizeconfirm-list{
+  font-size: 12px;
+  padding: 20px 24px;
+}
+.modal-sizeconfirm-list .model-sizeconfirm-item{
+  width: 45%;
+  padding: 10px 0;
+  border-bottom: 1px solid #DCDBDA;
+}
+.modal-sizeconfirm-list .model-sizeconfirm-item span:nth-child(1){
+  width: 115px;
+  margin-right: 10px;
 }
 
 /* Animation Loading Spinner */
