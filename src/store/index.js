@@ -83,6 +83,7 @@ export default new Vuex.Store({
       {errorCode: 4, text: '一時保存に入りました。'},
       {errorCode: 5, text: 'オーダー完了しました。'},
       {errorCode: 6, text: 'アイテム組み合わせが見つかりません。もう一度確認してください。'},
+      {errorCode: 7, text: 'この生地は在庫がなくなりました。もう一度確認してください。'},
     ],
     loaddingData: false,
     combinePriceData: [], //{model, combineid, price}
@@ -371,6 +372,7 @@ export default new Vuex.Store({
           element.option_selected = JSON.parse(element.option_selected)
           element.size_selected = JSON.parse(element.size_selected)
           element.correct_selected = JSON.parse(element.correct_selected)
+          element.stock = Number(element.stock)
           state.orderTempItem.push(element)
         }
       })
@@ -493,13 +495,35 @@ export default new Vuex.Store({
     },
 
     // stock data
-    updateStockSelectedData(state, stockData){
-      const stockIndex = state.stockSelectedData.findIndex(item => item.orderId == stockData.orderId)
-      if(stockIndex !== -1){
-        state.stockSelectedData[stockIndex] = {...state.stockSelectedData[stockIndex], ...stockData}
-      } else{
-        state.stockSelectedData.push(...{kiji: null, stockVal : 0}, ...stockData)
+    updateStockSelectedData(state){
+      let stockSelectedNowIndex = state.stockSelectedData.findIndex(item => item.orderId == state.orderNowId)
+      let sizeSelectedNow = state.sizeSelectedData.find(item => item.orderId == state.orderNowId)
+      let itemDataNow = state.itemData.find(item => item.orderId == state.orderNowId)
+      if(state.kijiActive && sizeSelectedNow){
+        let KijiNowIndex = state.kijiData.findIndex(item => item.id == state.kijiActive)
+        if(KijiNowIndex !== -1){
+          state.stockSelectedData[stockSelectedNowIndex].kiji = state.kijiActive
+          let KijiNow = state.kijiData[KijiNowIndex]
+          // if(KijiNow.stock_unlimited){
+          //   state.stockSelectedData[stockSelectedNowIndex].stockVal = 0
+          // } else{
+            let stockValTemp = 0
+            let stockItemTemp = itemDataNow.stock.find(item => (item.design_id == itemDataNow.stock_design && item.size_id == sizeSelectedNow.id))
+            if(KijiNow.fabric_kind == 1){
+              stockValTemp = stockItemTemp ? (stockItemTemp.sensei_scale ? stockItemTemp.sensei_scale : 0) : 0
+            } else{
+              stockValTemp = stockItemTemp ? (stockItemTemp.bichikusei_scale ? stockItemTemp.bichikusei_scale : 0) : 0
+            }
+            state.stockSelectedData[stockSelectedNowIndex].stockVal = stockValTemp
+          // }
+        } else{
+          state.stockSelectedData[stockSelectedNowIndex].kiji = null,
+          state.stockSelectedData[stockSelectedNowIndex].stockVal = 0
+        }
       }
+
+      console.log('update updateStockSelectedData')
+      console.log(state.stockSelectedData)
     },
     updateInitialStockData(state){
       state.itemData.forEach(element => {
@@ -526,8 +550,6 @@ export default new Vuex.Store({
             {orderId: element.orderId, kiji: null, stockVal: 0, stock_design: element.stock_design, sensei_min: sensei_min, bichikusei_min: bichikusei_min}
           )
         }
-
-        console.log(state.stockSelectedData)
       })
     }
   },
@@ -658,8 +680,8 @@ export default new Vuex.Store({
     },
 
     //stock update
-    handleUpdateStockSelectedData(context, stockData){
-      context.commit('updateStockSelectedData', stockData)
+    handleUpdateStockSelectedData(context, data){
+      context.commit('updateStockSelectedData')
     },
     handleUpdateInitialStockData(context){
       context.commit('updateInitialStockData')

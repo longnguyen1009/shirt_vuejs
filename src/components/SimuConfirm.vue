@@ -246,6 +246,7 @@ export default {
     doBack(orderId){
       this.$store.dispatch('handleChangeOrder', orderId)
       this.$store.dispatch('handleChangeStep', this.step - 1)
+      this.$store.dispatch('handleUpdateStockSelectedData', null)
     },
     confirmModalShow(){
       this.orderConfirmCheck = 1
@@ -456,6 +457,7 @@ export default {
       //size and correction
       size_selected: this.sizeSelectedData.filter(item => item.orderId == this.orderNowId),
       correct_selected: this.correctSelectedData.filter(item => item.order_id == this.orderNowId),
+      stock: this.stockSelectedData.find(item => item.orderId == this.orderNowId).stockVal
     })
     this.updateOrderItemList()
   },
@@ -486,7 +488,8 @@ export default {
       'combineIdActive',
       'deliData',
       'sizeSelectedData',
-      'correctSelectedData'
+      'correctSelectedData',
+      'stockSelectedData'
     ]),
     sizeDetailActive: function(){
       if(this.sizeConfirmActive !== null){

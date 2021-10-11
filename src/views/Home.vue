@@ -397,6 +397,10 @@ export default {
         }
       })
     },
+    kijiActive: function(){
+      this.$store.dispatch('handleUpdateStockSelectedData', null)
+      console.log(this.stockSelectedData)
+    }
   },
   mounted() {
     this.setInitialData()
@@ -419,7 +423,8 @@ export default {
       'orderTempItem',
       'category_select',
       'combinePriceData',
-      'optionParentData'
+      'optionParentData',
+      'stockSelectedData'
     ]),
     Errors: function(){
       if(this.errorCode){

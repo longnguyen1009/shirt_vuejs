@@ -533,11 +533,19 @@ export default {
         }
       },
       sizeSelectedValue: function(){
+        //update size selected data
         if(this.sizeSortData.length){
           this.$store.dispatch('handleUpdateSizeSelectedData', {orderId: this.orderNowId, design: this.designActive.design_id, ...this.sizeSortData.find(item => item.id == this.sizeSelectedValue)})
         }
+        //update correct selected data
         if(this.initialCorrectionData.length){
           this.$store.dispatch('handleUpdateCorrectSelectedDataBySize', this.initialCorrectionData)
+        }
+        
+        //update stock selected data
+        if(this.stockSelectedDataNow.stock_design == this.designActive.design_id){
+          this.$store.dispatch('handleUpdateStockSelectedData', null)
+          console.log(this.stockSelectedDataNow)
         }
       },
       correction_selected_id: function(){
@@ -595,7 +603,8 @@ export default {
         'combineIdActive',
         'sizeSelectedData',
         'correctDetailData',
-        'correctSelectedData'
+        'correctSelectedData',
+        'stockSelectedData'
       ]),
       kijiObjectActive: function(){
         if(this.kijiData.length){
@@ -798,6 +807,9 @@ export default {
         } else{
           return []
         }
+      },
+      stockSelectedDataNow: function(){
+        return this.stockSelectedData.find(item => item.orderId == this.orderNowId)
       }
     },
 };

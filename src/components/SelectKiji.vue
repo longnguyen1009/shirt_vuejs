@@ -45,6 +45,17 @@
 
       </div>
     </transition>
+
+    <transition name="modal">
+      <div class="loaddingDataIo" v-if="loaddingDataKijiStock">
+        <div class="loadingio-spinner-spinner-482naetb3m">
+          <div class="ldio-2vyxc9gibh9">
+            <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+            <div></div><div></div><div></div>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -59,6 +70,7 @@ export default {
     return {
       kijiSelected: 0,
       kijiDetailId: 0,
+      loaddingDataKijiStock: false
     };
   },
   methods: {
@@ -73,10 +85,55 @@ export default {
       $('.kiji_preloader img').attr('src', this.kiji_img_path + img)
       $('.kiji_preloader img').attr('kiji-id', id)
     },
+    //create temp stock of kiji
+    saveKijiStockApi: async function(kijiId, stock){
+      this.loaddingDataKijiStock = true
+      let ret = null
+        await this.axios.request({
+          url: 'http://54.248.46.255/myshop/savekijistock/',
+          method: 'post',
+          headers: {'X-Requested-With': 'XMLHttpRequest'},
+          data: {
+            kiji: kijiId,
+            stock: stock
+          }
+        })
+        .then(response => {
+          // console.log(response)
+          ret = response.data.data
+           this.loaddingDataKijiStock = false
+        })
+        .catch(error => {
+          this.loaddingDataKijiStock = false
+          this.$store.dispatch('handleChangeErrorCode', 2)
+          console.log(error)
+        })
+        return ret
+    },
     kijiConfirm: function(){
       if(this.kijiSelected){
-        this.$store.dispatch('handleChangeKiji', this.kijiSelected)
-        this.closeOption()
+        let Kiji = this.kijiData.find(item => item.id == this.kijiSelected)
+        if(Kiji.stock_unlimited){
+          this.$store.dispatch('handleChangeKiji', this.kijiSelected)
+          this.closeOption()
+        } else{
+          let requireStock = 0
+          if(Kiji.fabric_kind == 1) {
+              requireStock = this.stockSelectedDataNow.sensei_min
+          } else if(Kiji.fabric_kind == 2){
+              requireStock = this.stockSelectedDataNow.bichikusei_min
+          }
+
+          this.saveKijiStockApi(this.kijiSelected, requireStock).then(response => {
+            if(response){
+              this.$store.dispatch('handleChangeKiji', this.kijiSelected)
+              this.closeOption()
+            } else{
+              this.$store.dispatch('handleChangeErrorCode', 7)
+              this.setKijiData()
+            }
+          })
+        }
       } else{
         alert('生地を選択してください')
       }
