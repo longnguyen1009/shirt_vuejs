@@ -46,7 +46,7 @@
                       v-for="OptionParent in getOptionParent(Design.design_id)" :key="OptionParent.parent_id">
                         <span class="simu-confirm-detail-label">{{OptionParent.name}}</span>
                         <span class="simu-confirm-detail-value">
-                          {{getOptionItem(OrderTemp.id, Design.combine_id, Design.item_id, Design.design_id, OptionParent.parent_id).name}}
+                          {{getNameOptionItem(OrderTemp.id, Design.combine_id, Design.item_id, Design.design_id, OptionParent.parent_id)}}
                         </span>
                         <button type="button" class="simu-confirm-detail-change btn btn-outline-dark" 
                         @click="showDetail(OrderTemp.id, OrderTemp.model, Design.combine_id, Design.item_id, Design.design_id, OptionParent.parent_id)">
@@ -84,24 +84,30 @@
               <div class="simu-confirm-payment-right d-flex flex-column justify-content-between">
                 <span class="simu-confirm-label">商品価格(税込)</span>
                 <span class="simu-confirm-payment-price">{{moneyTypeShow02(getSumPrice())}}</span>
+                <span class="simu-confirm-label simu-confirm-payment-cost" v-if="isStaff">原価：{{getCostTempOrder()}}</span>
               </div>
           </div>
         </div>
       </div>
     </div>
     <div class="simu-comfirm-nav d-flex align-items-center justify-content-center">
-      <div class="dropup">
+      <div class="dropup" v-if="orderTempItem.length > 0">
         <button class="simu-common-btn dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
           オーダー追加
         </button>
         <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton2">
-          <li class="dropdown-item">小名サイズで作成</li>
-          <li class="dropdown-item">違うサイズで作成</li>
-          <li class="dropdown-item" @click="doSaveOrderTemp(1)">履歴川作成</li>
+          <li class="dropdown-item" @click="doSaveOrderTemp(1)">小名サイズで作成</li>
+          <li class="dropdown-item" @click="doSaveOrderTemp(2)">違うサイズで作成</li>
+          <li class="dropdown-item" @click="doSaveOrderTemp(3)">履歴川作成</li>
         </ul>
       </div>
       <button id="simu-confirm-btn" class="simu-common-btn"
-      @click="confirmModalShow">オーダー完了</button>
+      @click="confirmModalShow"
+      v-if="orderTempItem.length > 0">オーダー完了</button>
+
+      <button id="simu-confirm-btn" class="simu-common-btn"
+        v-if="orderTempItem.length == 0"
+        @click="goToTop">TOP</button>
     </div>
 
     <!-- Modal -->
@@ -118,27 +124,63 @@
           </div>
         </div>
       </div>
-      <div class="modal-mask modal-container-white" v-if="sizeConfirmActive !== null">
+      <div class="modal-mask modal-container-white" v-if="orderSizeActive !== null">
         <div class="modal-wrapper">
           <div class="modal-container modal-container-sizeconfirm">
-            <div class="modal-body">
-              <div v-for="Design in designData(sizeConfirmActive)" :key="Design.design_id" class="modal-sizeconfirm-designItem">
-                <h4 class="modal-sizeconfirm-designName">{{Design.design_label}}</h4>
-                <ul class="modal-sizeconfirm-list d-flex justify-content-between flex-wrap align-content-start">
-                  <li 
-                  v-for="CorrectDetailItem in getSizeDataActiveByDesign(Design.design_id)" :key="CorrectDetailItem.correct_id" 
-                  class="model-sizeconfirm-item d-flex justify-content-start align-items-center">
-                    <span class="modal-sizeconfirm-label">{{CorrectDetailItem.correct_name}}</span>
-                    <span class="modal-sizeconfirm-result">{{CorrectDetailItem.correct_result}}cm</span>
-                  </li>
-                </ul>
+            <transition name="transitionRightToLeftHalfWidth">
+                <div class="measure-sub" v-if="correction_selected_id">
+                  <ul class="measure-sub-list">
+                    <li class="measure-sub-item" v-for="correctDetailItem in correctDetailActive" :key="correctDetailItem.id">
+                      <input class="fancy-radio" hidden 
+                        :id="'correctDetailItem-' + correctDetailItem.id" 
+                        :name="'correctDetailItem' + correction_selected_id" 
+                        type="radio" 
+                        :value="correctDetailItem.id"
+                        v-model="tempCorrectDetailId"
+                      >
+                      <label class="fancy-radio-label" :for="'correctDetailItem-' + correctDetailItem.id">
+                          <span class="fancy-label--text">{{correctDetailItem.text}}</span>
+                          <span class="fancy-radiobutton">
+                              <span class="radiobutton-dot"></span>
+                          </span>
+                      </label>
+                    </li>
+                  </ul>
+                  <div class="loaddingDataIo" v-if="loaddingDataCorrectDetail">
+                    <div class="loadingio-spinner-spinner-482naetb3m">
+                      <div class="ldio-2vyxc9gibh9">
+                        <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+                        <div></div><div></div><div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            </transition>
+            <div class="measure-sub-fade" v-if="correction_selected_id" @click="closeCorrectionDetail"></div>
+            <div class="modal-sizeconfirm-content">
+              <div class="modal-body">
+                <div v-for="(Design, id) in designData(orderSizeActive)" :key="id" class="modal-sizeconfirm-designItem">
+                  <h4 class="modal-sizeconfirm-designName">{{Design.design_label}}</h4>
+                  <ul class="modal-sizeconfirm-list d-flex justify-content-between flex-wrap align-content-start">
+                    <li class="model-sizeconfirm-item d-flex justify-content-between align-items-between"
+                    v-for="(CorrectDetailItem, correctID) in getSizeDataActiveByDesign(Design.design_id, Design.item_id)"
+                    :key="correctID">
+                      <span class="modal-sizeconfirm-label">{{CorrectDetailItem.correct_name}}</span>
+                      <span class="modal-sizeconfirm-result flex-grow-1" v-if="CorrectDetailItem.correct_result != null">{{CorrectDetailItem.correct_result}}cm</span>
+                      <span class="modal-sizeconfirm-result flex-grow-1" v-if="CorrectDetailItem.correct_result == null && CorrectDetailItem.correct_detail_id">{{CorrectDetailItem.correct_detail_name}}</span>
+                      <button type="button" class="simu-confirm-detail-change btn btn-outline-dark"
+                      v-if="!isNaN(CorrectDetailItem.correct_id)"
+                      @click="showCorrectionDetail(CorrectDetailItem.correct_id, CorrectDetailItem.design_id, CorrectDetailItem.item_id)">修正</button>
+                    </li>
+                  </ul>
+                </div>
               </div>
-            </div>
-            <div class="modal-footer justify-content-center">
-              <slot name="footer">
-                <button class="simu-common-btn" @click="doBack(sizeConfirmActive)">シミュレーターに戻る</button>
-                <button class="simu-common-btn" @click="confirmModalClose">オーダー確認画面に戻る</button>
-              </slot>
+              <div class="modal-footer justify-content-center">
+                <slot name="footer">
+                  <button class="simu-common-btn" @click="doBack(orderSizeActive)">シミュレーターに戻る</button>
+                  <button class="simu-common-btn" @click="confirmModalClose">オーダー確認画面に戻る</button>
+                </slot>
+              </div>
             </div>
           </div>
         </div>
@@ -195,7 +237,12 @@ export default {
       orderConfirmCheck: null,
       orderIdActive: null,
       orderRemoveCheck: null,
-      sizeConfirmActive: null
+      orderSizeActive: null,
+      correction_selected_id: 0,
+      correction_selected_design_id: 0,
+      correction_selected_item_id: 0,
+      loaddingDataCorrectDetail: false,
+      tempCorrectDetailId: null,
     }
   },
   methods: {
@@ -223,6 +270,24 @@ export default {
           return this.optionSelectedData[optionIndex]
         } else{
           return {}
+        }
+    },
+    getNameOptionItem(orderId, combine_id, item_id, design_id, parent_id){
+      let optionIndex = this.optionSelectedData.findIndex(
+          item => item.orderId == orderId
+          && item.combine_id == combine_id
+          && item.item_id == item_id
+          && item.design_id == design_id
+          && item.parent_id == parent_id
+        )
+        if(optionIndex !== -1){
+          let ret = this.optionSelectedData[optionIndex].name
+          if(parent_id == 35){
+            ret += '/' +this.optionSelectedData[optionIndex].custom_name_color_name
+          }
+          return ret
+        } else{
+          return ''
         }
     },
     showDetailKiji(){
@@ -254,7 +319,7 @@ export default {
     confirmModalClose(){
       this.orderConfirmCheck = null
       this.orderRemoveCheck = null
-      this.sizeConfirmActive = null
+      this.orderSizeActive = null
     },
     saveOrder: async function(order_status){
       this.$store.dispatch('handleUpdateOrderTempAllData', null)
@@ -267,7 +332,8 @@ export default {
         headers: {'X-Requested-With': 'XMLHttpRequest'},
         data: {
           orderitem: this.orderTempItem,
-          delivery_id: this.deliActive
+          delivery_id: this.deliActive,
+          cartTempId: this.initialData.cartItemId
         }
       })
       .then(response => {
@@ -289,7 +355,7 @@ export default {
         }
       })
     },
-    saveOrderTemp: async function(order_status){
+    saveOrderTemp: async function(){
       this.$store.dispatch('handleChangeLoaddingData', true)
       let ret = null
       await this.axios.request({
@@ -297,7 +363,8 @@ export default {
         method: 'post',
         headers: {'X-Requested-With': 'XMLHttpRequest'},
         data: {
-          orderTemp: this.orderTempItem
+          orderTemp: this.orderTempItem,
+          cartTempId: this.initialData.cartItemId
         }
       })
       .then(response => {
@@ -310,12 +377,23 @@ export default {
       })
       return ret
     },
-    doSaveOrderTemp: function(order_status){
+    doSaveOrderTemp: function(savetype){
       this.$store.dispatch('handleUpdateOrderTempAllData', null)
-      this.saveOrderTemp(order_status).then((response) => {
+      this.saveOrderTemp().then((response) => {
       if(response !== null){
           this.$store.dispatch('handleChangeLoaddingData', false)
-          console.log(response)
+          if(savetype == 1){
+            this.$store.dispatch('handleChangeOrder', 0)
+            this.$store.dispatch('handleChangeStep', this.step - 1)
+            this.$store.dispatch('handleUpdateStockSelectedData', null)
+          } else if(savetype == 2){
+            this.$store.dispatch('handleChangeOrder', 0)
+            this.$store.dispatch('handleRemoveSizeData', null)
+            this.$store.dispatch('handleChangeStep', this.step - 1)
+            this.$store.dispatch('handleUpdateStockSelectedData', null)
+          } else if(savetype == 3){
+            window.location.href = "http://54.248.46.255/myshop/";
+          }
         }
       })
     },
@@ -327,7 +405,7 @@ export default {
       }
     },
     designData: function(orderId){
-      if(this.itemData.length && this.itemData.filter(item => item.orderId == orderId).length){
+      if(this.itemData.length && this.itemData.findIndex(item => item.orderId == orderId) !== -1){
         return this.itemData.filter(item => item.orderId == orderId)[0].design
       } else{
         return null
@@ -354,8 +432,25 @@ export default {
         if(response && response.length){
          this.$store.dispatch('handleChangeOrderTemp', response)
         }
+        this.doStuffAsync()
       })
     },
+    doStuffAsync: async function(){
+      const setAsyncTimeout = (cb, timeout = 0) => new Promise(resolve => {
+          setTimeout(() => {
+              cb();
+              resolve();
+          }, timeout);
+      });
+      await setAsyncTimeout(() => {
+        this.getOrderCost().then(response => {
+          if(response){
+            this.$store.dispatch('handleUpdateOrderCostTemp', response)
+          }
+        })
+      }, 300)
+    },
+
     optionPrice: function(orderId){
         let optionTotalprice = 0
         if(this.initialData.shop_kind == 2){
@@ -434,37 +529,160 @@ export default {
       }
     },
     showSizeDetail: function(orderId){
-      this.sizeConfirmActive = orderId
+      this.orderSizeActive = orderId
     },
-    getSizeDataActiveByDesign(design_id){
-      return this.sizeDetailActive.filter(item => item.design_id == design_id)
-    }
+    getSizeDataActiveByDesign(design_id, item_id){
+      return this.sizeDetailActive.filter(item => item.design_id == design_id && item.item_id == item_id)
+    },
+    getOrderCost: async function(){
+      let ret = null
+      await this.axios.request({
+        url: 'http://54.248.46.255/myshop/getcostorderitem/',
+        method: 'post',
+        headers: {'X-Requested-With': 'XMLHttpRequest'},
+        data: {
+          orderitem: this.orderTempItem,
+        }
+      })
+      .then(response => {
+        ret = response.data.data
+      })
+      .catch(error => {
+        console.log(error)
+      })
+      return ret
+    },
+    getCostTempOrder: function(){
+      let cost = 0
+      this.orderTempItem.forEach(element => {
+        cost += element.cost_temp ? element.cost_temp : 0
+      })
+      return parseInt(cost)
+    },
+    goToTop(){
+      window.location.href = "http://54.248.46.255/myshop/neworder/";
+    },
+    changeCorrectDetail(correctId){
+      this.correction_selected_id = correctId
+    },
+    getCorrectionDetailDataFromApi: async function(correctId){
+      this.loaddingDataCorrectDetail = true
+      let ret = null
+      if(correctId){
+        await this.axios.request({
+          url: 'http://54.248.46.255/myshop/getcorrectiondetail/',
+          method: 'post',
+          headers: {'X-Requested-With': 'XMLHttpRequest'},
+          data: {
+            'correction_id': correctId
+          }
+        })
+        .then(response => {
+          ret = response.data.data
+          this.loaddingDataCorrectDetail = false
+        })
+        .catch(error => {
+          this.loaddingDataCorrectDetail = false
+          this.$store.dispatch('handleChangeErrorCode', 2)
+          console.log(error)
+        })
+      }
+      return ret
+    },
+    getCorrectionDetailData: async function(correctId){
+      await this.getCorrectionDetailDataFromApi(correctId).then(response => {
+        if(response){
+          this.$store.dispatch('handleUpdateCorrectionDetailData', {correct_id: correctId, detail_data: response})
+        }
+      })
+    },
+    showCorrectionDetail: function(correct_id, design_id, item_id){
+        this.correction_selected_id = correct_id
+        this.correction_selected_design_id = design_id
+        this.correction_selected_item_id = item_id
+        let correctDetailIndexNow = this.correctSelectedDataActive.findIndex(item => (
+          item.order_id == this.orderSizeActive
+          && item.design_id == design_id
+          && item.item_id == item_id
+          && item.correct_id == correct_id
+        ))
+        if(correctDetailIndexNow !== -1){
+          this.tempCorrectDetailId = this.correctSelectedDataActive[correctDetailIndexNow].correct_detail_id
+        } else{
+          this.tempCorrectDetailId = null
+        }
+    },
+    closeCorrectionDetail : function(){
+      this.correction_selected_id = 0
+    },
   },
   mounted(){
     this.deli_id = this.deliActive
     //save orderItemNow to arrOrderItem
-    this.$store.dispatch('handleUpdateOrderTemp',{
-      id: this.orderNowId,
-      category_select: this.category_select,
-      product_id: this.kijiActive,
-      style: this.styleSelected,
-      model: this.modelSelected,
-      item: this.itemSelected,
-      option_selected: this.optionSelectedData.filter(item => item.orderId == this.orderNowId),
-      combineId: this.combineIdActive,
-      quantity: 1,
 
-      //size and correction
-      size_selected: this.sizeSelectedData.filter(item => item.orderId == this.orderNowId),
-      correct_selected: this.correctSelectedData.filter(item => item.order_id == this.orderNowId),
-      stock: this.stockSelectedData.find(item => item.orderId == this.orderNowId).stockVal
-    })
+    if(!this.initialData.orderCart){
+      this.$store.dispatch('handleUpdateOrderTemp',{
+        id: this.orderNowId,
+        category_select: this.category_select,
+        product_id: this.kijiActive,
+        style: this.styleSelected,
+        model: this.modelSelected,
+        item: this.itemSelected,
+        option_selected: this.optionSelectedData.filter(item => item.orderId == this.orderNowId),
+        combineId: this.combineIdActive,
+        quantity: 1,
+  
+        //size and correction
+        size_selected: this.sizeSelectedData.filter(item => item.orderId == this.orderNowId),
+        correct_selected: this.correctSelectedData.filter(item => item.order_id == this.orderNowId),
+        stock: this.stockSelectedData.find(item => item.orderId == this.orderNowId).stockVal
+      })
+    }
     this.updateOrderItemList()
+
+    //Hide Cart button
+    $('.header-cart-btn').css("display", "none");
   },
   props: [],
   watch: {
     deli_id: function(){
       this.$store.dispatch('handleChangeDeliActive', this.deli_id)
+    },
+    correction_selected_id: function(){
+      if(this.correction_selected_id 
+        && this.correctDetailData.findIndex(item => item.correct_id == this.correction_selected_id) == -1){
+        this.getCorrectionDetailData(this.correction_selected_id)
+      }
+    },
+    tempCorrectDetailId: function(){
+      let tempCorrectDetailIndex = this.correctDetailActive.findIndex(item => item.id == this.tempCorrectDetailId)
+      let correctDetailIndexNow = this.correctSelectedDataActive.findIndex(item => (
+          item.order_id == this.orderSizeActive
+          && item.design_id == this.correction_selected_design_id
+          && item.item_id == this.correction_selected_item_id
+          && item.correct_id == this.correction_selected_id
+        ))
+      if(tempCorrectDetailIndex !== -1 && correctDetailIndexNow !== -1){
+        let tempCorrectDetailItem = this.correctDetailActive[tempCorrectDetailIndex]
+        let tempCorrectionItem = this.correctSelectedDataActive[correctDetailIndexNow]
+        tempCorrectionItem['correct_detail_id'] = tempCorrectDetailItem.id
+        tempCorrectionItem['correct_detail_name'] = tempCorrectDetailItem.text
+        tempCorrectionItem['correct_detail_val'] = tempCorrectDetailItem.value
+        tempCorrectionItem['code'] = tempCorrectDetailItem.code
+        
+        if(tempCorrectionItem['base_val'] == null) {
+          tempCorrectionItem['correct_result'] = null
+        } else{
+            if(tempCorrectDetailItem.value < 0){
+                tempCorrectionItem['correct_result'] = eval(tempCorrectionItem['base_val'] + tempCorrectDetailItem.value)
+            } else if(tempCorrectDetailItem.value > 0){
+              tempCorrectionItem['correct_result'] = eval(tempCorrectionItem['base_val'] + '+' + tempCorrectDetailItem.value)
+            } else{
+              tempCorrectionItem['correct_result'] = tempCorrectionItem['base_val']
+            }
+        }
+        this.$store.dispatch('handleUpdateCorrectSelectedData', [tempCorrectionItem])
+      }
     }
   },
   computed: {
@@ -489,18 +707,38 @@ export default {
       'deliData',
       'sizeSelectedData',
       'correctSelectedData',
-      'stockSelectedData'
+      'stockSelectedData',
+      'correctDetailData'
     ]),
     sizeDetailActive: function(){
-      if(this.sizeConfirmActive !== null){
+      if(this.orderSizeActive !== null){
         return this.correctSelectedData.filter(item => (
-          item.order_id == this.sizeConfirmActive
+          item.order_id == this.orderSizeActive
         ))
       } else{
         return []
       }
-    }
-
+    },
+    isStaff: function(){
+      if((this.initialData.customer_id + '').startsWith("000")){
+        return true
+      } else{
+        return true
+      }
+    },
+    correctDetailActive: function(){
+      if(this.correction_selected_id 
+      && this.correctDetailData.findIndex(item => item.correct_id == this.correction_selected_id) !== -1){
+        return this.correctDetailData.find(item => item.correct_id == this.correction_selected_id).detail_data
+      } else{
+        return []
+      }
+    },
+    correctSelectedDataActive(){
+      return this.correctSelectedData.filter(item => (
+        item.order_id == this.orderSizeActive
+      ))
+    },
   }
 };
 </script>

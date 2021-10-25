@@ -16,15 +16,16 @@
         </div>
         <div class="simuright-sub-result simuright-kiji-list d-flex flex-wrap">
           <template v-for="Kiji in kijiData">
-            <div class="kijiItem" v-if="checkStockKiji(Kiji.id)" :key="Kiji.id"
+            <div class="kijiItem" v-if="checkStyleAndStockKiji(Kiji.id)" :key="Kiji.id"
             :class="{active: (Kiji.id == kijiSelected)}">
               <img :src="kiji_img_path + Kiji.img" alt=""
                 @click="kijiChange(Kiji.id, Kiji.img_simu)">
               <span class="simuright-kiji-icon" @click="showKijiDetail(Kiji.id)"><i class="fas fa-info-circle"></i></span>
-              <div class="simuright-kiji-name"
-                @click="kijiChange(Kiji.id, Kiji.img_simu)">
-                <span class="kiji-code">{{Kiji.code}}</span><br>
-                <span class="kiji-name">{{Kiji.name}}</span>
+              <div class="simuright-kiji-text" @click="kijiChange(Kiji.id, Kiji.img_simu)">
+                <div class="simuright-kiji-text-top d-flex justify-content-between align-items-center">
+                  <span class="simuright-kiji-code">{{Kiji.code}}</span><br>
+                </div>
+                <span class="simuright-kiji-name">{{Kiji.name}}</span>
               </div>
             </div>
           </template>
@@ -119,17 +120,22 @@ export default {
         } else{
           let requireStock = 0
           if(Kiji.fabric_kind == 1) {
-              requireStock = this.stockSelectedDataNow.sensei_min
-          } else if(Kiji.fabric_kind == 2){
               requireStock = this.stockSelectedDataNow.bichikusei_min
+          } else if(Kiji.fabric_kind == 2){
+              requireStock = this.stockSelectedDataNow.sensei_min
           }
 
           this.saveKijiStockApi(this.kijiSelected, requireStock).then(response => {
             if(response){
-              this.$store.dispatch('handleChangeKiji', this.kijiSelected)
-              this.closeOption()
+              if(response == 'nostock'){
+                this.$store.dispatch('handleChangeErrorCode', 7)
+                this.setKijiData()
+              } else{
+                this.$store.dispatch('handleChangeKiji', this.kijiSelected)
+                this.closeOption()
+              }
             } else{
-              this.$store.dispatch('handleChangeErrorCode', 7)
+              this.$store.dispatch('handleChangeErrorCode', 2)
               this.setKijiData()
             }
           })
@@ -170,13 +176,16 @@ export default {
           }
         })
     },
-    checkStockKiji: function(id){
+    checkStyleAndStockKiji: function(id){
       let Kiji = this.kijiData.find(item => item.id == id)
+      if(Kiji.style.length == 0 || Kiji.style.findIndex(item => item == this.styleSelected) == -1){
+        return false
+      }
       if(Kiji.stock_unlimited){
         return true
       }
-      if((Kiji.fabric_kind == 1 && Kiji.stock >= this.stockSelectedDataNow.sensei_min) || 
-      ((Kiji.fabric_kind == 2 && Kiji.stock >= this.stockSelectedDataNow.bichikusei_min))){
+      if((Kiji.fabric_kind == 1 && Kiji.stock >= this.stockSelectedDataNow.bichikusei_min) || 
+      ((Kiji.fabric_kind == 2 && Kiji.stock >= this.stockSelectedDataNow.sensei_min))){
         return true
       } else{
         return false
@@ -194,7 +203,8 @@ export default {
       'kijiActive',
       'kijiData',
       'stockSelectedData',
-      'orderNowId'
+      'orderNowId',
+      'styleSelected'
     ]),
     kijiDetailData: function(){
       if(this.kijiDetailId != 0){

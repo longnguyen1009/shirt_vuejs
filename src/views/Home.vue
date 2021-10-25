@@ -44,8 +44,27 @@
           </div>
         </div>
       </div>
+      <div class="modal-mask" v-if="HcErrorLogin" id="model-error">
+        <div class="modal-wrapper">
+          <div class="modal-container">
+              <div class="modal-body">
+                <span class="order-confirm-question">今HC番号を設定していません。</span>
+              </div>
+              <div class="modal-footer justify-content-center">
+                <slot name="footer">
+                  <a class="simu-common-btn" href="http://54.248.46.255/myshop/hc_search/">HC番号を選択</a>
+                </slot>
+              </div>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <transition name="modalOneMeasure">
+      <SimuOneMeasure v-if="step == 'onemeasure'"/>
     </transition>
   </div>
+
 </template>
 
 <script>
@@ -59,8 +78,9 @@ import SimuNav from "../components/SimuNav.vue";
 import SimuCourse from "../components/SimuCourse.vue";
 import SimuRight from "../components/SimuRight.vue";
 import SimuModal from "../components/SimuModal.vue";
-import SimuConfirm from "../components/SimuConfirm.vue"
-import SimuComplete from "../components/SimuComplete.vue"
+import SimuConfirm from "../components/SimuConfirm.vue";
+import SimuComplete from "../components/SimuComplete.vue";
+import SimuOneMeasure from "../components/SimuOneMeasure.vue";
 
 import { mapGetters } from 'vuex'
 
@@ -78,11 +98,12 @@ export default {
     SimuRight,
     SimuModal,
     SimuConfirm,
-    SimuComplete
+    SimuComplete,
+    SimuOneMeasure
   },
   data() {
     return {
-
+      HcErrorLogin: false
     };
   },
   methods: {
@@ -108,27 +129,33 @@ export default {
     setInitialData: async function(){
       await this.getInitialData().then(response => {
           if(response){
-            if(response.iniData){
-              this.$store.dispatch('handleRestoreFromIni', response.iniData)
-              if(response.cartItemId){
-                this.$store.dispatch('handleChangeStep', 2)
-              } else if(response.orderItemId){
-                this.$store.dispatch('handleChangeStep', 3)
+            if(!response.customer_id){
+              setTimeout(this.HcErrorLogin = true, 1000);
+            } else{
+              if(response.iniData){
+                this.$store.dispatch('handleRestoreFromIni', response.iniData)
+                if(response.cartItemId || response.orderItemId){
+                  this.$store.dispatch('handleChangeStep', 2)
+                }
+                if(response.orderCart){
+                  this.$store.dispatch('handleChangeStep', 3)
+                }
               }
+              this.setStyleData().then((response) => {
+                  $(".simu-style-loading").removeClass("on")
+              })
+  
+              this.$store.dispatch('handleChangeDeliData', response.deliData)
+              this.$store.dispatch('handleChangeIniData', {
+                shop_id: response.shop_id,
+                shop_kind: response.shop_kind,
+                staff_id: response.staff_id,
+                customer_id: response.customer_id,
+                cartItemId: response.cartItemId,
+                orderItemId: response.orderItemId,
+                orderCart: response.orderCart
+              })
             }
-            this.setStyleData().then((response) => {
-                $(".simu-style-loading").removeClass("on")
-            })
-
-            this.$store.dispatch('handleChangeDeliData', response.deliData)
-            this.$store.dispatch('handleChangeIniData', {
-              shop_id: response.shop_id,
-              shop_kind: response.shop_kind,
-              staff_id: response.staff_id,
-              customer_id: response.customer_id,
-              cartItemId: response.cartItemId,
-              orderItemId: response.orderItemId
-            })
           }
       })
       .catch(error => console.log(error))
@@ -160,6 +187,7 @@ export default {
         })
     },
     getItemData: async function(item_selected, model_selected, style_selected){
+        this.$store.dispatch('handleChangeLoaddingData', true)
         let ret = null
         if(item_selected){
           await this.axios.request({
@@ -175,10 +203,12 @@ export default {
           .then(response => {
             console.log(response.data.data)
             ret = response.data.data
+            this.$store.dispatch('handleChangeLoaddingData', false)
           })
           .catch(error => {
             this.$store.dispatch('handleChangeErrorCode', 2)
             console.log(error)
+            this.$store.dispatch('handleChangeLoaddingData', false)
           })
         }
         return ret

@@ -153,6 +153,9 @@ export default {
         console.log(error)
       })
     }
+
+    //Hide Cart button
+    $('.header-cart-btn').css("display", "block");
   },
   computed: {
     ...mapGetters([

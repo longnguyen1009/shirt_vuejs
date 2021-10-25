@@ -38,6 +38,7 @@
               <div class="simu-confirm-payment-right d-flex flex-column justify-content-between">
                 <span class="simu-confirm-label">商品価格(税込)</span>
                 <span class="simu-confirm-payment-price">{{moneyTypeShow02(orderData.payment)}}</span>
+                <span class="simu-confirm-label" v-if="isStaff">原価：{{parseInt(orderData.cost)}}</span>
               </div>
           </div>
         </div>
@@ -163,10 +164,31 @@ export default {
           this.$store.dispatch('handleChangeLoaddingData', false)
         }
       })
-    }
+    },
+
+    sendCompleteMailToFactory: async function(){
+      let ret = null
+      await this.axios.request({
+        url: 'http://54.248.46.255/myshop/sendcompletemailtofactory/',
+        method: 'post',
+        headers: {'X-Requested-With': 'XMLHttpRequest'},
+        data: {
+          orderId: this.orderCompleteId
+        }
+      })
+      .then(response => {
+        ret = response.data.data
+      })
+      .catch(error => {
+        console.log(error)
+      })
+      return ret
+    },
+
   },
   mounted(){
     this.setOrderInfo()
+    this.sendCompleteMailToFactory()
   },
   props: [],
   watch: {
@@ -188,7 +210,14 @@ export default {
       'initialData',
       'orderCompleteId',
       'deliData'
-    ])
+    ]),
+    isStaff: function(){
+      if((this.initialData.customer_id + '').startsWith("000")){
+        return true
+      } else{
+        return true
+      }
+    }
   }
 };
 </script>

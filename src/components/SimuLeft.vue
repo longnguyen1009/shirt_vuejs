@@ -137,6 +137,13 @@ export default {
     addToCart: async function(){
       this.$store.dispatch('handleChangeLoaddingData', true)
       let ret = null
+      let stockTemp = 0
+      let $KijiTemp = this.kijiData.find(item => item.id == this.kijiActive)
+      if($KijiTemp.fabric_kind == 1){
+        stockTemp = this.stockSelectedData.find(item => item.orderId == this.orderNowId).bichikusei_min
+      } else{
+        stockTemp = this.stockSelectedData.find(item => item.orderId == this.orderNowId).sensei_min
+      }
       await this.axios.request({
         url: 'http://54.248.46.255/myshop/addproducttocart/',
         method: 'post',
@@ -152,7 +159,8 @@ export default {
           'option_selected' : this.optionSelectedData.filter(item => item.orderId == this.orderNowId),
           'size_selected' : this.sizeSelectedData.filter(item => item.orderId == this.orderNowId),
           'correct_selected' : this.correctSelectedData.filter(item => item.order_id == this.orderNowId),
-          'quantity': 1
+          'quantity': 1,
+          'stock': stockTemp
         }
       })
       .then(response => {
@@ -214,7 +222,8 @@ export default {
         'combineIdActive',
         'category_select',
         'sizeSelectedData',
-        'correctSelectedData'
+        'correctSelectedData',
+        'stockSelectedData'
       ]),
     //design path
     design: function() {

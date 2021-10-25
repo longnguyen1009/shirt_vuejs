@@ -15,7 +15,7 @@ export default new Vuex.Store({
     //存在ORDER
     orderTempItem: [], //[{id, style, model, item, option_selected, price, quality, combineId}]
 
-    step: 1,
+    step: 'onemeasure',
     page: 1, //page 2 is model page
 
     simu_img_path: "/html/upload/simu_model/",
@@ -101,7 +101,7 @@ export default new Vuex.Store({
     //size
     correctDetailData: [], //{correct_id, detail_data}
 
-    sizeSelectedData: [],// {orderId, size_id, name, base_val...}
+    sizeSelectedData: [],// {orderId, size_id, item_id, name, base_val...}
     correctSelectedData: [] //{order_id, size_id, design_id, correct_id, correct_name, size_link, base_val, correct_detail_id, correct_detail_name, correct_detail_val, correct_result}
   },
   getters: {
@@ -181,6 +181,9 @@ export default new Vuex.Store({
     changeModelTemp(state, modelTemp){
       state.modelTemp = modelTemp
     },
+    changeOptionMode(state, mode){
+      state.optionMode = mode
+    },
     changeDesign(state, designId){
       state.designActive = designId
     },
@@ -252,12 +255,9 @@ export default new Vuex.Store({
       //Clone the array to trigger a UI update.
       state.optionDataLoaded = [...state.optionDataLoaded]
     },
-    changeKijiData(state, kijiData){
-      kijiData.forEach(element => {
-        const existKijiIndex = state.kijiData.findIndex(
-          (item) => (
-            item.id == element.id
-          ))
+    changeKijiData(state, data){
+      data.forEach(element => {
+        let existKijiIndex = state.kijiData.findIndex(item => item.id == element.id)
         if(existKijiIndex !== -1){
           state.kijiData[existKijiIndex] = element
         } else{
@@ -397,6 +397,8 @@ export default new Vuex.Store({
       state.orderTempItem.forEach((element, index) => {
         //update selected option
         state.orderTempItem[index].option_selected = state.optionSelectedData.filter(item => item.orderId == element.id)
+        state.orderTempItem[index].correct_selected = state.correctSelectedData.filter(item => item.order_id == element.id)
+        state.orderTempItem[index].design = state.itemData.find(item => item.orderId == element.id).design
       })
       state.orderTempItem = [...state.orderTempItem]
     },
@@ -449,6 +451,7 @@ export default new Vuex.Store({
       const sizeSelectedIndex = state.sizeSelectedData.findIndex(item => (
         item.orderId == sizeData.orderId
         && item.design == sizeData.design
+        && item.item == sizeData.item
       ))
       if(sizeSelectedIndex !== -1){
         state.sizeSelectedData[sizeSelectedIndex] = sizeData
@@ -466,14 +469,14 @@ export default new Vuex.Store({
       } else{
         state.correctDetailData.push(correctData)
       }
-      state.sizeSelectedData = [...state.sizeSelectedData]
+      state.correctDetailData = [...state.correctDetailData]
     },
     updateCorrectSelectedData(state, correctedData){
       correctedData.forEach(element => {
-        const correctedIndex = state.correctSelectedData.findIndex(item => (
+        let correctedIndex = state.correctSelectedData.findIndex(item => (
           item.order_id == element.order_id
           && item.design_id == element.design_id
-          && item.size_id == element.size_id
+          && item.item_id == element.item_id
           && item.correct_id == element.correct_id
         ))
         if(correctedIndex !== -1){
@@ -486,20 +489,29 @@ export default new Vuex.Store({
     },
     updateCorrectSelectedDataBySize(state, correctedData){
       if(correctedData.length){
-        const firstItem = correctedData[0]
-        state.correctSelectedData = state.correctSelectedData.filter(item => !(
-          item.order_id == firstItem.order_id && item.design_id == firstItem.design_id
-        ))
-        state.correctSelectedData = [...state.correctSelectedData, ...correctedData]
+        correctedData.forEach(element => {
+          let correctIndex = state.correctSelectedData.findIndex(item => (
+            item.order_id == element.order_id
+            && item.design_id == element.design_id
+            && item.item_id == element.item_id
+            && item.correct_id == element.correct_id
+          ))
+          if(correctIndex !== -1){
+            state.correctSelectedData[correctIndex] = element
+          } else{
+            state.correctSelectedData.push(element)
+          }
+        })
+
+        state.correctSelectedData = [...state.correctSelectedData]
       }
     },
-
     // stock data
     updateStockSelectedData(state){
       let stockSelectedNowIndex = state.stockSelectedData.findIndex(item => item.orderId == state.orderNowId)
       let sizeSelectedNow = state.sizeSelectedData.find(item => item.orderId == state.orderNowId)
       let itemDataNow = state.itemData.find(item => item.orderId == state.orderNowId)
-      if(state.kijiActive && sizeSelectedNow){
+      if(state.kijiActive && sizeSelectedNow && stockSelectedNowIndex != -1){
         let KijiNowIndex = state.kijiData.findIndex(item => item.id == state.kijiActive)
         if(KijiNowIndex !== -1){
           state.stockSelectedData[stockSelectedNowIndex].kiji = state.kijiActive
@@ -521,9 +533,6 @@ export default new Vuex.Store({
           state.stockSelectedData[stockSelectedNowIndex].stockVal = 0
         }
       }
-
-      console.log('update updateStockSelectedData')
-      console.log(state.stockSelectedData)
     },
     updateInitialStockData(state){
       state.itemData.forEach(element => {
@@ -551,6 +560,22 @@ export default new Vuex.Store({
           )
         }
       })
+    },
+    removeSizeDataOfOrder(state){
+      state.sizeSelectedData = state.sizeSelectedData.filter(item => item.orderId != state.orderNowId)
+      state.correctSelectedData = state.correctSelectedData.filter(item => item.order_id != state.orderNowId)
+    },
+
+    //原価計算
+    updateOrderCostTemp(state, Costs){
+      Costs.forEach(element => {
+        let orderId = element.orderId
+        let orderTempIndex = state.orderTempItem.findIndex(item => item.id == orderId)
+        if(orderTempIndex != -1){
+          state.orderTempItem[orderTempIndex].cost_temp = element.cost
+        }
+      })
+      state.orderTempItem = [...state.orderTempItem]
     }
   },
   actions: {
@@ -566,6 +591,9 @@ export default new Vuex.Store({
     //do Back from step 3
     handleChangeModelTemp(context, modelTemp){
       context.commit('changeModelTemp', modelTemp)
+    },
+    handleChangeOptionMode(context, mode){
+      context.commit('changeOptionMode', mode)
     },
     handleChangeDesign(context, designId){
       context.commit('changeDesign', designId)
@@ -685,6 +713,14 @@ export default new Vuex.Store({
     },
     handleUpdateInitialStockData(context){
       context.commit('updateInitialStockData')
+    },
+    handleRemoveSizeData(context){
+      context.commit('removeSizeDataOfOrder')
+    },
+
+    //原価計算
+    handleUpdateOrderCostTemp(context, data){
+      context.commit('updateOrderCostTemp', data)
     }
   }
 })

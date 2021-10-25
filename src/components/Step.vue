@@ -67,6 +67,9 @@ export default {
       } else{
         this.$store.dispatch('handleChangeStep', this.step - 1)
       }
+    },
+    testAlert: function(){
+      alert('test')
     }
   },
   props: [],

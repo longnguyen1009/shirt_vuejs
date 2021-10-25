@@ -93,6 +93,9 @@ export default {
       $('.simu-style-loading').addClass("on")
     }
     this.refreshStartData()
+
+    //Hide Cart button
+    $('.header-cart-btn').css("display", "block");
   },
   watch: {
 
