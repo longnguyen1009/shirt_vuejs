@@ -115,7 +115,7 @@ export default {
   },
   methods: {
     goToTop(){
-      window.location.href = "http://54.248.46.255/myshop/neworder/";
+      window.location.href = this.main_path + "myshop/neworder/";
     },
     showBarCode(){
       this.barCodeShow = true
@@ -140,7 +140,7 @@ export default {
       this.$store.dispatch('handleChangeLoaddingData', true)
       let ret = null
       await this.axios.request({
-        url: 'http://54.248.46.255/myshop/getorderinfo/',
+        url: this.main_path + 'myshop/getorderinfo/',
         method: 'post',
         headers: {'X-Requested-With': 'XMLHttpRequest'},
         data: {
@@ -169,7 +169,7 @@ export default {
     sendCompleteMailToFactory: async function(){
       let ret = null
       await this.axios.request({
-        url: 'http://54.248.46.255/myshop/sendcompletemailtofactory/',
+        url: this.main_path + 'myshop/sendcompletemailtofactory/',
         method: 'post',
         headers: {'X-Requested-With': 'XMLHttpRequest'},
         data: {
@@ -196,6 +196,7 @@ export default {
   },
   computed: {
     ...mapGetters([
+      'main_path',
       'step',
       'kiji_img_path',
       'kijiData',

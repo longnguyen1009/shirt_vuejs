@@ -25,8 +25,8 @@ window.$ = window.jQuery = require('jquery')
 // Vue.use(BootstrapVue)
 
 // session
-import VueSession from 'vue-session'
-Vue.use(VueSession)
+// import VueSession from 'vue-session'
+// Vue.use(VueSession)
 
 // vue carousel
 import VueCarousel from 'vue-carousel';

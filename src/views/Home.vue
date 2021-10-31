@@ -51,36 +51,35 @@
                 <span class="order-confirm-question">今HC番号を設定していません。</span>
               </div>
               <div class="modal-footer justify-content-center">
-                <slot name="footer">
-                  <a class="simu-common-btn" href="http://54.248.46.255/myshop/hc_search/">HC番号を選択</a>
-                </slot>
+                <button class="simu-common-btn" @click="showHcSearchModal">HC番号を選択</button>
               </div>
           </div>
         </div>
       </div>
+
+      <SimuHcSearch v-if="HCSearchPopup"
+      @closeHcModal="closeHcModal"/>
     </transition>
 
+    <span @click="HCSearchPopup = true" id="hc_search_popup" style="display: none;">&nbsp;</span>
+
     <transition name="modalOneMeasure">
-      <SimuOneMeasure v-if="step == 'onemeasure'"/>
+      <SimuOneMeasure 
+      :itemDataActive = "itemDataActive"/>
     </transition>
   </div>
 
 </template>
 
 <script>
-import Header from "../components/Header.vue";
-import Footer from "../components/Footer.vue";
 import Step from "../components/Step.vue";
 import SelectStyle from "../components/SelectStyle.vue";
 import SimuLeft from "../components/SimuLeft.vue";
-import SimuGender from "../components/SimuGender.vue";
-import SimuNav from "../components/SimuNav.vue";
-import SimuCourse from "../components/SimuCourse.vue";
 import SimuRight from "../components/SimuRight.vue";
-import SimuModal from "../components/SimuModal.vue";
 import SimuConfirm from "../components/SimuConfirm.vue";
 import SimuComplete from "../components/SimuComplete.vue";
 import SimuOneMeasure from "../components/SimuOneMeasure.vue";
+import SimuHcSearch from "../components/SimuHcSearch.vue";
 
 import { mapGetters } from 'vuex'
 
@@ -89,21 +88,17 @@ export default {
   components: {
     Step,
     SelectStyle,
-    Header,
-    Footer,
     SimuLeft,
-    SimuGender,
-    SimuNav,
-    SimuCourse,
     SimuRight,
-    SimuModal,
     SimuConfirm,
     SimuComplete,
-    SimuOneMeasure
+    SimuOneMeasure,
+    SimuHcSearch
   },
   data() {
     return {
-      HcErrorLogin: false
+      HcErrorLogin: false,
+      HCSearchPopup: false
     };
   },
   methods: {
@@ -113,7 +108,7 @@ export default {
     getInitialData: async function(){
       let ret = null
       await this.axios.request({
-        url: 'http://54.248.46.255/myshop/getinitial/',
+        url: this.main_path + 'myshop/getinitial/',
         method: 'get',
         headers: {'X-Requested-With': 'XMLHttpRequest'}
       })
@@ -129,9 +124,6 @@ export default {
     setInitialData: async function(){
       await this.getInitialData().then(response => {
           if(response){
-            if(!response.customer_id){
-              setTimeout(this.HcErrorLogin = true, 1000);
-            } else{
               if(response.iniData){
                 this.$store.dispatch('handleRestoreFromIni', response.iniData)
                 if(response.cartItemId || response.orderItemId){
@@ -155,7 +147,7 @@ export default {
                 orderItemId: response.orderItemId,
                 orderCart: response.orderCart
               })
-            }
+            // }
           }
       })
       .catch(error => console.log(error))
@@ -164,7 +156,7 @@ export default {
     getKijiFromAPI: async function(){
         let ret = null
         await this.axios.request({
-          url: 'http://54.248.46.255/myshop/getkijilist/',
+          url: this.main_path + 'myshop/getkijilist/',
           method: 'get',
           headers: {'X-Requested-With': 'XMLHttpRequest'}
         })
@@ -191,7 +183,7 @@ export default {
         let ret = null
         if(item_selected){
           await this.axios.request({
-            url: 'http://54.248.46.255/myshop/getitem/',
+            url: this.main_path + 'myshop/getitem/',
             method: 'post',
             headers: {'X-Requested-With': 'XMLHttpRequest'},
             data: {
@@ -251,7 +243,7 @@ export default {
           arrDesign.push(item.design_id);
         })
         await this.axios.request({
-          url: 'http://54.248.46.255/myshop/getalloptionparent/',
+          url: this.main_path + 'myshop/getalloptionparent/',
           method: 'post',
           headers: {'X-Requested-With': 'XMLHttpRequest'},
           data: {
@@ -298,7 +290,7 @@ export default {
     getStyleFromAPI: async function(){
       let ret = null
       await this.axios.request({
-        url: 'http://54.248.46.255/myshop/getstyle/',
+        url: this.main_path + 'myshop/getstyle/',
         method: 'post',
         headers: {'X-Requested-With': 'XMLHttpRequest'},
         data: {
@@ -335,12 +327,11 @@ export default {
     updateCorrectSelectedData: function(correct_selected){
       this.$store.dispatch('handleUpdateCorrectSelectedDataBySize', correct_selected)
     },
-
     getPriceFromApi: async function(model, combineId){
         let ret = null
         if(model && combineId){
           await this.axios.request({
-            url: 'http://54.248.46.255/myshop/getpriceofcombine/',
+            url: this.main_path + 'myshop/getpriceofcombine/',
             method: 'post',
             headers: {'X-Requested-With': 'XMLHttpRequest'},
             data: {
@@ -372,7 +363,7 @@ export default {
       let ret = null
       if(this.modelSelected){
         await this.axios.request({
-          url: 'http://54.248.46.255/myshop/getmodel/',
+          url: this.main_path + 'myshop/getmodel/',
           method: 'post',
           headers: {'X-Requested-With': 'XMLHttpRequest'},
           data: {
@@ -388,6 +379,13 @@ export default {
         })
       }
       return ret
+    },
+    showHcSearchModal: function(){
+      this.HCSearchPopup = true
+      this.HcErrorLogin = false
+    },
+    closeHcModal: function(){
+      this.HCSearchPopup = false
     }
   },
   watch: {
@@ -396,9 +394,6 @@ export default {
         this.setItemData(this.itemSelected, this.modelSelected, this.styleSelected)
       }
     },
-    // designData: function(){
-    //   this.updateAllOptionParent()
-    // },
     //load data from history change
     orderTempItem: function(){
       this.orderTempItem.forEach(element => {
@@ -435,9 +430,16 @@ export default {
   mounted() {
     this.setInitialData()
     this.setKijiData()
+
+    window.setInterval(() => {
+      if((this.step == 2 || this.step == 3) && !this.initialData.customer_id && !this.HcErrorLogin && !this.HCSearchPopup){
+          this.HcErrorLogin = true
+      }
+    }, 20000)
   },
   computed: {
     ...mapGetters([
+      'main_path',
       'step',
       'initialData',
       'kijiActive',

@@ -58,7 +58,7 @@ export default {
         if(this.page == 2){
           this.$store.dispatch('handleChangePage', 1)
         } else{
-          window.location.href = "http://54.248.46.255/myshop/neworder/";
+          window.location.href = this.main_path + "myshop/neworder/";
         }
       } else if(this.step == 2){
         this.$store.dispatch('handleChangeModelTemp', {styleId: this.styleSelected, modelId: this.modelSelected})

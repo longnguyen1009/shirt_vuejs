@@ -1,0 +1,207 @@
+<template>
+  <div class="container-hcsearch">
+    <div class="hcsearch-fade" @click="closeModal"></div>
+    <div class="hcsearch-content">
+      <span class="closeBtn" @click="closeModal"><img :src="main_path + 'html/user_data/assets/img/common/header_close.svg'" alt=""></span>
+      <div class="hcsearch-header d-flex align-items-center justify-content-center">HC情報を検索</div>
+      <div class="hcsearch-body">
+        <div class="loaddingDataIo" v-if="loaddingDataHcSearch">
+          <div class="loadingio-spinner-spinner-482naetb3m">
+            <div class="ldio-2vyxc9gibh9">
+              <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+              <div></div><div></div><div></div>
+            </div>
+          </div>
+        </div>
+        <div class="hcsearch-form">
+          <div class="hcsearch-form-top">
+            <dl class="hcsearch-form-item">
+              <dt class="hcsearch-for-label">HC番号</dt>
+              <dd class="hcsearch-for-input"><input type="text" v-model="hcSearchData.hc_no"></dd>
+            </dl>
+            <dl class="hcsearch-form-item">
+              <dt class="hcsearch-for-label">氏(カナ)</dt>
+              <dd class="hcsearch-for-input"><input type="text" v-model="hcSearchData.hc_name01"></dd>
+            </dl>
+            <dl class="hcsearch-form-item">
+              <dt class="hcsearch-for-label">名(カナ)</dt>
+              <dd class="hcsearch-for-input"><input type="text" v-model="hcSearchData.hc_name02"></dd>
+            </dl>
+            <dl class="hcsearch-form-item">
+              <dt class="hcsearch-for-label">電話番号（下4桁）</dt>
+              <dd class="hcsearch-for-input"><input type="text" v-model="hcSearchData.hc_phone"></dd>
+            </dl>
+            <dl class="hcsearch-form-item">
+              <dt class="hcsearch-for-label">携帯電話番号（下4桁）</dt>
+              <dd class="hcsearch-for-input"><input type="text" v-model="hcSearchData.hc_mobilephone"></dd>
+            </dl>
+          </div>
+          <div class="hcsearch-form-bottom d-flex align-items-center justify-content-center">
+            <button class="simu-common-btn gray btnSize01" @click="doSeachHc">検索</button>
+          </div>
+        </div>
+        <div class="hcsearch-result" v-if="searchFinish">
+          <p class="ec-para-normal">{{arrHcResult.length}}件の履歴があります</p>
+          <table class="hcsearch-result-table">
+              <thead>
+                  <tr>
+                      <th scope="col" colspan="1">HC番号</th>
+                      <th scope="col" colspan="1">お客様名</th>
+                      <th scope="col" colspan="1">電話番号</th>
+                      <th scope="col" colspan="1">最終購入日</th>
+                      <th scope="col" colspan="1">選択</th>
+                  </tr>
+              </thead>
+              <tbody>
+                <template v-if="arrHcResult.length > 0">
+                  <tr v-for="(HC, id) in getHcItems" :key="id">
+                      <td scope="row" class="">{{HC.kaiinNo}}</td>
+                      <td>{{HC.nameKj1}}</td>
+                      <td>{{HC.tel3}}</td>
+                      <td>1970/08/19 16:53</td>
+                      <td>
+                          <button class="simu-common-btn gray btnSize01" @click="HcConfirm(HC)">選択</button>
+                      </td>
+                  </tr>
+                </template>
+                <tr v-if="getHcItems.length == 0">
+                    <td colspan="10">検索結果はありません。</td>
+                </tr>
+              </tbody>
+          </table>
+          <Paginate
+            :page-count="getPageCount"
+            :click-handler="clickCallback"
+            :prev-text="'前へ'"
+            :next-text="'次へ'"
+            :container-class="'ec-pager'"
+            :page-class="'ec-pager__item'"
+            :next-class="'ec-pager__item'"
+            :prev-class="'ec-pager__item'"
+            :first-last-button="true"
+            :first-button-text="'最初へ'"
+            :page-range="5"
+            :last-button-text="'最後へ'"
+            hide-prev-next="true"
+            v-if="arrHcResult.length > 0"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { mapGetters } from 'vuex'
+import Paginate from 'vuejs-paginate'
+
+export default {
+  name: "SimuHcSearch",
+  components: {Paginate},
+  data() {
+    return {
+      hcSearchData:{},
+      loaddingDataHcSearch: false,
+      arrHcResult: [],
+      searchFinish: false,
+
+      //pagination
+      perPage: 5,
+      currentPage: 1
+    };
+  },
+  methods: {
+    closeModal: function(){
+      this.$emit('closeHcModal')
+    },
+    doSeachHc: async function(){
+      this.loaddingDataHcSearch = true
+      //check error input
+      
+      //get HcSeach result form API
+      await this.getHcSeachFromApi().then(response => {
+        if(response){
+          if(response.status_code == 0){
+            this.arrHcResult = response.kaiinInfos
+          } else{
+            this.arrHcResult = []
+          }
+          this.loaddingDataHcSearch = false
+        }
+      })
+    },
+    getHcSeachFromApi: async function(){
+        let ret = null
+        await this.axios.request({
+          url: this.main_path + 'myshop/gethcsearch/',
+          method: 'post',
+          headers: {'X-Requested-With': 'XMLHttpRequest'},
+          data: {
+            searchparam: this.hcSearchData
+          }
+        })
+        .then(response => {
+          ret = response.data.data
+        })
+        .catch(error => {
+          this.loaddingDataHcSearch = false
+          console.log(error)
+        })
+        this.searchFinish = true
+        return ret
+    },
+    HcConfirm: async function(HC){
+      this.loaddingDataHcSearch = true
+      await this.setHcInfo(HC).then(response => {
+        if(response){
+          this.loaddingDataHcSearch = false
+          alert('HC番号を設定しました。')
+          $('.header__customer').html(response.hc_html.content);
+          this.$store.dispatch('handleChangeCustomerId', response.id)
+          this.closeModal()
+        }
+      })
+    },
+    setHcInfo: async function(HC){
+      let ret = null
+        await this.axios.request({
+          url: this.main_path + 'myshop/sethcinfo/',
+          method: 'post',
+          headers: {'X-Requested-With': 'XMLHttpRequest'},
+          data: {
+            'id': HC.kaiinNo,
+            'name01': HC.nameKj1,
+            'name02': HC.nameKj2,
+            'phone': HC.tel3 ? HC.tel3 : HC.keiTelNo3,
+            'lastbuy': HC.birthDate ? new Date(HC.birthDate * 1000) : new Date(),
+          }
+        })
+        .then(response => {
+          ret = response.data.data
+        })
+        .catch(error => {
+          this.loaddingDataHcSearch = false
+          console.log(error)
+        })
+        return ret
+    },
+    clickCallback: function (pageNum) {
+       this.currentPage = Number(pageNum);
+    }
+  },
+  props: [],
+  computed: {
+    ...mapGetters([
+      'main_path',
+    ]),
+    getHcItems: function() {
+       let current = this.currentPage * this.perPage;
+       let start = current - this.perPage;
+       return this.arrHcResult.slice(start, current);
+    },
+    getPageCount: function() {
+      return Math.ceil(this.arrHcResult.length / this.perPage);
+    }
+  }
+};
+</script>

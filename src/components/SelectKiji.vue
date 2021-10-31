@@ -6,26 +6,29 @@
         <div class="simuright-sub-nav simuright-sub-search">
           <div class="simuright-sub-searchTop d-flex justify-content-between align-items-center">
             <div class="simuright-sub-searchInput">
-              <span><i class="fas fa-search"></i></span>
-              <input type="text" placeholder="検索する" aria-label="検索">
+              <span><img :src="main_path + 'html/user_data/assets/img/common/icon_search.png'" alt=""></span>
+              <input type="text" @input="isTyping = true" v-model="searchKijiNo" placeholder="生地品番を入力" aria-label="検索">
             </div>
-            <div class="simuright-sub-searchSelect">
-              <span>絞り込む&nbsp;<i class="fas fa-th-list"></i></span>
+            <div class="simuright-sub-searchSelect d-flex justify-content-end align-items-center">
+              <span @click="search_brand_shop = true">ブランドから探す&nbsp;</span>
+              <span @click="search_other_shop = true">絞り込む&nbsp;</span>
             </div>
           </div>
         </div>
         <div class="simuright-sub-result simuright-kiji-list d-flex flex-wrap">
-          <template v-for="Kiji in kijiData">
+          <template v-for="Kiji in kijiSortResult">
             <div class="kijiItem" v-if="checkStyleAndStockKiji(Kiji.id)" :key="Kiji.id"
             :class="{active: (Kiji.id == kijiSelected)}">
-              <img :src="kiji_img_path + Kiji.img" alt=""
+              <img class="kijiitem-img" :src="kiji_img_path + Kiji.img" alt=""
                 @click="kijiChange(Kiji.id, Kiji.img_simu)">
-              <span class="simuright-kiji-icon" @click="showKijiDetail(Kiji.id)"><i class="fas fa-info-circle"></i></span>
+              <span class="simuright-kiji-icon" @click="showKijiDetail(Kiji.id)">
+                <img :src="main_path + 'html/user_data/assets/img/common/icon_info.png'" alt="">
+              </span>
               <div class="simuright-kiji-text" @click="kijiChange(Kiji.id, Kiji.img_simu)">
                 <div class="simuright-kiji-text-top d-flex justify-content-between align-items-center">
                   <span class="simuright-kiji-code">{{Kiji.code}}</span><br>
                 </div>
-                <span class="simuright-kiji-name">{{Kiji.name}}</span>
+                <span class="simuright-kiji-name">{{Kiji.brand_name}}</span>
               </div>
             </div>
           </template>
@@ -33,8 +36,8 @@
       </div>
     </div>
     <div class="simuright-sub-navi d-flex align-items-center">
-      <button class="simu-common-btn" @click="closeOption">戻る</button>
-      <button class="simu-common-btn" @click="kijiConfirm">決定</button>
+      <button class="simu-common-btn btnSize02 btnSizeHalf" @click="closeOption">戻る</button>
+      <button class="simu-common-btn btnSize02 gray btnSizeHalf" @click="kijiConfirm">決定</button>
     </div>
     <transition name="transitionRightToLeft">
       <div class="simu-subpage" v-if="kijiDetailId != 0">
@@ -43,12 +46,25 @@
         @close-detail="closeKijiDetail($event)"
         @kiji-confirm="confirmKijiDetail($event)"
         />
-
       </div>
+      <KijiSearchBrand
+        v-if="search_brand_shop"
+        :brandSelected="sortParam.brand"
+        @closeSearchKiji="closeSearchKiji(event)"
+        @confirmSearchKiji="confirmSearchKiji"
+      />
+      <KijiSearchOther
+        v-if="search_other_shop"
+        :seasonSelected="sortParam.season"
+        :colorSelected="sortParam.color"
+        :patternSelected="sortParam.pattern"
+        @closeSearchKiji="closeSearchKiji(event)"
+        @confirmSearchKiji="confirmSearchKiji"
+      />
     </transition>
 
     <transition name="modal">
-      <div class="loaddingDataIo" v-if="loaddingDataKijiStock">
+      <div class="loaddingDataIo" v-if="isLoading">
         <div class="loadingio-spinner-spinner-482naetb3m">
           <div class="ldio-2vyxc9gibh9">
             <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
@@ -62,21 +78,50 @@
 
 <script>
 import KijiDetail from './KijiDetail.vue';
+import KijiSearchBrand from './KijiSearchBrand.vue';
+import KijiSearchOther from './KijiSearchOther.vue';
 import { mapGetters } from 'vuex';
+import _ from 'lodash'
 
 export default {
   name: "SelectKiji",
-  components: {KijiDetail},
+  components: {KijiDetail, KijiSearchBrand, KijiSearchOther},
   data() {
     return {
       kijiSelected: 0,
       kijiDetailId: 0,
-      loaddingDataKijiStock: false
+      isLoading: false,
+
+      sortParam: {
+        kijiNo: '',
+        brand: [],
+        season: [],
+        color: [],
+        pattern: []
+      },
+      isTyping: false,
+      searchKijiNo: '',
+      kijiSortResult: null,
+      search_brand_shop: false,
+      search_other_shop: false,
     };
   },
   methods: {
     closeOption: function(){
       this.$emit("closeOption")
+    },
+    closeSearchKiji: function(){
+      this.search_brand_shop = false,
+      this.search_other_shop = false
+    },
+    confirmSearchKiji: function(searchKijiData){
+      this.search_brand_shop = false
+      this.search_other_shop = false
+      for (const [key, value] of Object.entries(searchKijiData)) {
+        this.sortParam[key] = value
+      }
+      this.isLoading = true
+      this.searchKiji()
     },
     closeKijiDetail:function(){
       this.kijiDetailId = 0
@@ -88,10 +133,10 @@ export default {
     },
     //create temp stock of kiji
     saveKijiStockApi: async function(kijiId, stock){
-      this.loaddingDataKijiStock = true
+      this.isLoading = true
       let ret = null
         await this.axios.request({
-          url: 'http://54.248.46.255/myshop/savekijistock/',
+          url: this.main_path + 'myshop/savekijistock/',
           method: 'post',
           headers: {'X-Requested-With': 'XMLHttpRequest'},
           data: {
@@ -102,17 +147,17 @@ export default {
         .then(response => {
           // console.log(response)
           ret = response.data.data
-           this.loaddingDataKijiStock = false
+           this.isLoading = false
         })
         .catch(error => {
-          this.loaddingDataKijiStock = false
+          this.isLoading = false
           this.$store.dispatch('handleChangeErrorCode', 2)
           console.log(error)
         })
         return ret
     },
     kijiConfirm: function(){
-      if(this.kijiSelected){
+      if(this.kijiSelected && this.kijiData.find(item => item.id == this.kijiSelected)){
         let Kiji = this.kijiData.find(item => item.id == this.kijiSelected)
         if(Kiji.stock_unlimited){
           this.$store.dispatch('handleChangeKiji', this.kijiSelected)
@@ -154,7 +199,7 @@ export default {
     getKijiFromAPI: async function(){
         let ret = null
         await this.axios.request({
-          url: 'http://54.248.46.255/myshop/getkijilist/',
+          url: this.main_path + 'myshop/getkijilist/',
           method: 'get',
           headers: {'X-Requested-With': 'XMLHttpRequest'}
         })
@@ -190,15 +235,43 @@ export default {
       } else{
         return false
       }
+    },
+    searchKiji: function(){
+      let ret = this.kijiData
+      //kijiNo
+      if(this.sortParam.kijiNo != null){
+        ret = ret.filter(item => item.code.toLowerCase().includes(this.sortParam.kijiNo.toLowerCase()))
+      }
+      //brand
+      if(this.sortParam.brand.length){
+        ret = ret.filter(item => this.sortParam.brand.indexOf(item.brand_id) !== -1)
+      }
+      //season
+      if(this.sortParam.season.length){
+        ret = ret.filter(item => this.sortParam.season.indexOf(item.season_id) !== -1)
+      }
+      //color
+      if(this.sortParam.color.length){
+        ret = ret.filter(item => this.sortParam.color.every(element => item.color.findIndex(item2 => item2.id == element) != -1))
+      }
+      //pattern
+      if(this.sortParam.pattern.length){
+        ret = ret.filter(item => this.sortParam.pattern.every(element => item.pattern.findIndex(item2 => item2.id == element) != -1))
+      }
+      
+      this.kijiSortResult = ret
+      setTimeout(() => this.isLoading = false, 200)
     }
   },
   props: [],
   mounted() {
     this.setKijiData()
     this.kijiSelected = this.kijiActive
+    this.kijiSortResult = this.kijiData
   },
   computed: {
     ...mapGetters([
+      'main_path',
       'kiji_img_path',
       'kijiActive',
       'kijiData',
@@ -213,6 +286,26 @@ export default {
     },
     stockSelectedDataNow: function(){
       return this.stockSelectedData.find(item => item.orderId == this.orderNowId)
+    },
+    // kijiSortResult: function(){
+    //   let sortResult = this.kijiData
+    //   if(this.sortParam.kijiNo != null){
+    //     sortResult = this.kijiData
+    //   }
+    //   return sortResult
+    // }
+  },
+
+  watch: {
+    searchKijiNo: _.debounce(function() {
+      this.isTyping = false;
+    }, 500),
+    isTyping: function(value) {
+      if (!value) {
+        this.isLoading = true
+        this.sortParam.kijiNo = this.searchKijiNo
+        this.searchKiji()
+      }
     }
   }
 };

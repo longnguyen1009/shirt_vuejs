@@ -1,4 +1,6 @@
-export var OneMeasureSDKParameters={
+function test2(){
+  
+var OneMeasureSDKParameters={
     appKey:'',//AppKey assigned to developers by TOZI Cloud
     appSecret:'',//AppSecret assigned to developers by TOZI Cloud
     taskId:null,
@@ -28,7 +30,7 @@ export var OneMeasureSDKParameters={
 };
 
 //demo's function. loading demo
-export var tozLoadingDemo={
+var tozLoadingDemo={
     start(){
         $("#tozLoadingDemo").remove();
         var loadingDiv='<div id="tozLoadingDemo" style="z-index: 100000;position: absolute;top:0;bottom:0;left:0;right:0;' +
@@ -189,6 +191,7 @@ $("#userGender").change(function () {
 
 //demo's function
 $("#userHeight").change(function () {
+    console.log("aaaaaaaaaa")
     OneMeasureSDKParameters.height= Number($("#userHeight").val());
 });
 
@@ -520,18 +523,18 @@ document.getElementById("tozAdjustView").addEventListener('touchmove', function(
 }, {passive:false});
 
 //optional. detect device whether keep in portrait screen orientation mode
-window.addEventListener("onorientationchange" in window ? "orientationchange" : "resize", function() {
-    // if (window.orientation === 180 || window.orientation === 0) {}
-    if (window.orientation === 90 || window.orientation === -90 ){
-        var tozWarning={
-            'en-US':'Device must be in portrait screen orientation mode',
-            'zh-HK':'請保持手機豎直',
-            'ja-JP':'端末は縦長の画面方向モードにする必要があります',
-            'zh-CN':'请保持手机竖直'
-        }
-        alert(tozWarning[OneMeasureSDKParameters.language]);
-    }
-}, false);
+// window.addEventListener("onorientationchange" in window ? "orientationchange" : "resize", function() {
+//     // if (window.orientation === 180 || window.orientation === 0) {}
+//     if (window.orientation === 90 || window.orientation === -90 ){
+//         var tozWarning={
+//             'en-US':'Device must be in portrait screen orientation mode',
+//             'zh-HK':'請保持手機豎直',
+//             'ja-JP':'端末は縦長の画面方向モードにする必要があります',
+//             'zh-CN':'请保持手机竖直'
+//         }
+//         alert(tozWarning[OneMeasureSDKParameters.language]);
+//     }
+// }, false);
 
 //optional, get the list of  cameras' deviceId
 $("#GetCamList").click(function () {
@@ -580,3 +583,7 @@ $("#SideByDeviceId").click(function () {
     cameraView.registerSensor();
     cameraView.setCameraById($("#cameraList option:selected").val());
 });
+
+}
+
+export default test2;

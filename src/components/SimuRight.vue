@@ -18,7 +18,7 @@
               @click="openDetailOption('kiji')">
               <span class="simuright-options-label">生地</span>
               <div class="simuright-options-name"
-              v-if="kijiActive">{{kijiObjectActive.name}}</div>
+              v-if="kijiActive && kijiObjectActive">{{kijiObjectActive.code}}</div>
             </div>
           </div>
           <div class="simuright-options-row" 
@@ -130,8 +130,8 @@
           <div class="simuright-price-right d-flex justify-content-between flex-column">
             <p class="delivery-date">仕上がり予定日：12月12日</p>
             <div class="simu-nav-confirm d-flex justify-content-between">
-              <button type="button" class="simu-common-btn" @click="doBack">戻る</button>
-              <button type="button" class="simu-common-btn" @click="doOrderComfirm">決定</button>
+              <button type="button" class="simu-common-btn btnSize01" @click="doBack">戻る</button>
+              <button type="button" class="simu-common-btn btnSize01 gray" @click="doOrderComfirm">決定</button>
             </div>
           </div>
       </div>
@@ -259,7 +259,7 @@ export default {
           ],
           correction_selected_id: 0,
           tempCorrectDetailId: null,
-          loaddingDataCorrectDetail: false,
+          loaddingDataCorrectDetail: false
         }
     },
     props: [],
@@ -296,7 +296,7 @@ export default {
       getKijiFromAPI: async function(){
         let ret = null
         await this.axios.request({
-          url: 'http://54.248.46.255/myshop/getkijilist/',
+          url: this.main_path + 'myshop/getkijilist/',
           method: 'get',
           headers: {'X-Requested-With': 'XMLHttpRequest'}
         })
@@ -322,7 +322,7 @@ export default {
         let ret = null
         if(this.itemSelected){
           await this.axios.request({
-            url: 'http://54.248.46.255/myshop/getitem/',
+            url: this.main_path + 'myshop/getitem/',
             method: 'post',
             headers: {'X-Requested-With': 'XMLHttpRequest'},
             data: {
@@ -363,7 +363,7 @@ export default {
         let ret = null
         if(this.designActive.design_id){
           await this.axios.request({
-            url: 'http://54.248.46.255/myshop/getoptionparent/',
+            url: this.main_path + 'myshop/getoptionparent/',
             method: 'post',
             headers: {'X-Requested-With': 'XMLHttpRequest'},
             data: {
@@ -426,7 +426,10 @@ export default {
       doOrderComfirm(){
         if(!this.kijiActive){
           alert('生地を選択してください。')
-        } else if(!this.sizeSelectedCheck){
+        } else if(!this.initialData.customer_id){
+          alert('HC番号をを設定ください。')
+        } 
+        else if(!this.sizeSelectedCheck){
           alert('サイズを選択してください。')
         } else if(!this.allOptionSelectedCheck()){
           alert('オプションを全て選択してください。')
@@ -438,7 +441,7 @@ export default {
         let ret = null
         if(combine_id && this.modelSelected){
           await this.axios.request({
-            url: 'http://54.248.46.255/myshop/getpriceofcombine/',
+            url: this.main_path + 'myshop/getpriceofcombine/',
             method: 'post',
             headers: {'X-Requested-With': 'XMLHttpRequest'},
             data: {
@@ -470,7 +473,7 @@ export default {
         let ret = null
         if(correctId){
           await this.axios.request({
-            url: 'http://54.248.46.255/myshop/getcorrectiondetail/',
+            url: this.main_path + 'myshop/getcorrectiondetail/',
             method: 'post',
             headers: {'X-Requested-With': 'XMLHttpRequest'},
             data: {
@@ -540,6 +543,7 @@ export default {
         })
       },
       changeStepOneMeasure: function(){
+        $('.container-onemeasure').addClass('show')
         this.$store.dispatch('handleChangeStep', 'onemeasure')
       }
     },
@@ -553,6 +557,10 @@ export default {
 
       //Hide Cart button
       $('.header-cart-btn').css("display", "block");
+
+      if(this.kijiActive && this.kijiData.length && !(this.kijiData.find(item => item.id == this.kijiActive))){
+        this.$store.dispatch('handleChangeKiji', null)
+      }
     },
     watch: {
       designActiveSplit: function(){
@@ -614,6 +622,7 @@ export default {
         if(this.correction_selected_id && this.correctDetailData.findIndex(item => item.correct_id == this.correction_selected_id) == -1){
           this.getCorrectionDetailData(this.correction_selected_id)
         }
+        this.$store.dispatch('handleChangeCorrectionSelectedId', this.correction_selected_id)
       },
       //correct detail change
       tempCorrectDetailId: function(){
@@ -650,6 +659,7 @@ export default {
     },
     computed: {
       ...mapGetters([
+        'main_path',
         'kiji_img_path',
         'option_img_path',
         'initialData',
@@ -675,8 +685,8 @@ export default {
         'stockSelectedData'
       ]),
       kijiObjectActive: function(){
-        if(this.kijiData.length){
-          return this.kijiData.filter((item) => item.id === this.kijiActive)[0]
+        if(this.kijiData.length && this.kijiData.findIndex((item) => item.id === this.kijiActive) !== -1){
+          return this.kijiData.find((item) => item.id === this.kijiActive)
         } else{
           return {}
         }

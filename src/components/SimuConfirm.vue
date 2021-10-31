@@ -60,10 +60,10 @@
                 </div>
               </div>
             </div>
-            <span class="simu-confirm-removeBtn" 
-            @click="removeConfirmOrderTemp(OrderTemp.id)"
-            v-if="orderTempItem.length > 1"
-            ><i class="fas fa-times"></i></span>
+            <span class="simu-confirm-removeBtn closeBtn" 
+            @click="removeConfirmOrderTemp(OrderTemp.id)">
+            <img :src="main_path + 'html/user_data/assets/img/common/header_close.svg'" alt="">
+            </span>
           </div>
           <div class="simu-confirm-payment d-flex justify-content-between">
               <div class="simu-confirm-payment-left d-flex flex-column justify-content-start">
@@ -131,19 +131,21 @@
                 <div class="measure-sub" v-if="correction_selected_id">
                   <ul class="measure-sub-list">
                     <li class="measure-sub-item" v-for="correctDetailItem in correctDetailActive" :key="correctDetailItem.id">
-                      <input class="fancy-radio" hidden 
-                        :id="'correctDetailItem-' + correctDetailItem.id" 
-                        :name="'correctDetailItem' + correction_selected_id" 
-                        type="radio" 
-                        :value="correctDetailItem.id"
-                        v-model="tempCorrectDetailId"
-                      >
-                      <label class="fancy-radio-label" :for="'correctDetailItem-' + correctDetailItem.id">
-                          <span class="fancy-label--text">{{correctDetailItem.text}}</span>
-                          <span class="fancy-radiobutton">
-                              <span class="radiobutton-dot"></span>
-                          </span>
-                      </label>
+                      <span class="fancy-input">
+                        <input class="fancy-radio black" hidden 
+                          :id="'correctDetailItem-' + correctDetailItem.id" 
+                          :name="'correctDetailItem' + correction_selected_id" 
+                          type="radio" 
+                          :value="correctDetailItem.id"
+                          v-model="tempCorrectDetailId"
+                        >
+                        <label class="fancy-radio-label" :for="'correctDetailItem-' + correctDetailItem.id">
+                            <span class="fancy-label--text">{{correctDetailItem.text}}</span>
+                            <span class="fancy-radiobutton">
+                                <span class="radiobutton-dot"></span>
+                            </span>
+                        </label>
+                      </span>
                     </li>
                   </ul>
                   <div class="loaddingDataIo" v-if="loaddingDataCorrectDetail">
@@ -166,8 +168,10 @@
                     v-for="(CorrectDetailItem, correctID) in getSizeDataActiveByDesign(Design.design_id, Design.item_id)"
                     :key="correctID">
                       <span class="modal-sizeconfirm-label">{{CorrectDetailItem.correct_name}}</span>
-                      <span class="modal-sizeconfirm-result flex-grow-1" v-if="CorrectDetailItem.correct_result != null">{{CorrectDetailItem.correct_result}}cm</span>
-                      <span class="modal-sizeconfirm-result flex-grow-1" v-if="CorrectDetailItem.correct_result == null && CorrectDetailItem.correct_detail_id">{{CorrectDetailItem.correct_detail_name}}</span>
+                      <span class="modal-sizeconfirm-result flex-grow-1">
+                        <span v-if="CorrectDetailItem.correct_detail_id">補正：{{CorrectDetailItem.correct_detail_name}}</span><br>
+                        <span v-if="CorrectDetailItem.correct_result != null">仕上：{{CorrectDetailItem.correct_result}}cm</span>
+                      </span>
                       <button type="button" class="simu-confirm-detail-change btn btn-outline-dark"
                       v-if="!isNaN(CorrectDetailItem.correct_id)"
                       @click="showCorrectionDetail(CorrectDetailItem.correct_id, CorrectDetailItem.design_id, CorrectDetailItem.item_id)">修正</button>
@@ -216,6 +220,21 @@
         </div>
       </div>
 
+      <div class="modal-mask" v-if="HcErrorLogin" id="model-error">
+        <div class="modal-wrapper">
+          <div class="modal-container">
+              <div class="modal-body">
+                <span class="order-confirm-question">今HC番号を設定していません。</span>
+              </div>
+              <div class="modal-footer justify-content-center">
+                <slot name="footer">
+                  <a class="simu-common-btn" :href="main_path + 'myshop/hc_search/'">HC番号を選択</a>
+                </slot>
+              </div>
+          </div>
+        </div>
+      </div>
+
     </transition>
 
   </div>
@@ -243,6 +262,7 @@ export default {
       correction_selected_item_id: 0,
       loaddingDataCorrectDetail: false,
       tempCorrectDetailId: null,
+      HcErrorLogin: false
     }
   },
   methods: {
@@ -327,7 +347,7 @@ export default {
       this.$store.dispatch('handleChangeLoaddingData', true)
       let ret = null
       await this.axios.request({
-        url: 'http://54.248.46.255/myshop/addorder/',
+        url: this.main_path + 'myshop/addorder/',
         method: 'post',
         headers: {'X-Requested-With': 'XMLHttpRequest'},
         data: {
@@ -359,7 +379,7 @@ export default {
       this.$store.dispatch('handleChangeLoaddingData', true)
       let ret = null
       await this.axios.request({
-        url: 'http://54.248.46.255/myshop/addordertemp/',
+        url: this.main_path + 'myshop/addordertemp/',
         method: 'post',
         headers: {'X-Requested-With': 'XMLHttpRequest'},
         data: {
@@ -377,9 +397,9 @@ export default {
       })
       return ret
     },
-    doSaveOrderTemp: function(savetype){
+    doSaveOrderTemp: async function(savetype){
       this.$store.dispatch('handleUpdateOrderTempAllData', null)
-      this.saveOrderTemp().then((response) => {
+      await this.saveOrderTemp().then((response) => {
       if(response !== null){
           this.$store.dispatch('handleChangeLoaddingData', false)
           if(savetype == 1){
@@ -392,7 +412,7 @@ export default {
             this.$store.dispatch('handleChangeStep', this.step - 1)
             this.$store.dispatch('handleUpdateStockSelectedData', null)
           } else if(savetype == 3){
-            window.location.href = "http://54.248.46.255/myshop/";
+            window.location.href = this.main_path + "myshop/";
           }
         }
       })
@@ -413,10 +433,18 @@ export default {
     },
     getOrderItemSession: async function(){
       let ret = null
+      let order_temp_zore = null
+      if(this.orderTempItem.findIndex(item => item.id == 0) !== -1){
+        order_temp_zore = this.orderTempItem.find(item => item.id == 0)
+      }
       await this.axios.request({
-        url: 'http://54.248.46.255/myshop/getordertemp/',
-        method: 'get',
-        headers: {'X-Requested-With': 'XMLHttpRequest'}
+        url: this.main_path + 'myshop/getordertemp/',
+        method: 'post',
+        headers: {'X-Requested-With': 'XMLHttpRequest'},
+        data: {
+          'order_temp_zore': order_temp_zore,
+          'cartTempId': this.initialData.cartItemId
+        }
       })
       .then(response => {
         ret = response.data.data
@@ -496,7 +524,7 @@ export default {
     removeOrderTempApi: async function(orderId){
       let ret = null
       await this.axios.request({
-        url: 'http://54.248.46.255/myshop/removeordertemp/',
+        url: this.main_path + 'myshop/removeordertemp/',
         method: 'post',
         headers: {'X-Requested-With': 'XMLHttpRequest'},
         data: {
@@ -537,7 +565,7 @@ export default {
     getOrderCost: async function(){
       let ret = null
       await this.axios.request({
-        url: 'http://54.248.46.255/myshop/getcostorderitem/',
+        url: this.main_path + 'myshop/getcostorderitem/',
         method: 'post',
         headers: {'X-Requested-With': 'XMLHttpRequest'},
         data: {
@@ -560,7 +588,7 @@ export default {
       return parseInt(cost)
     },
     goToTop(){
-      window.location.href = "http://54.248.46.255/myshop/neworder/";
+      window.location.href = this.main_path + "myshop/neworder/";
     },
     changeCorrectDetail(correctId){
       this.correction_selected_id = correctId
@@ -570,7 +598,7 @@ export default {
       let ret = null
       if(correctId){
         await this.axios.request({
-          url: 'http://54.248.46.255/myshop/getcorrectiondetail/',
+          url: this.main_path + 'myshop/getcorrectiondetail/',
           method: 'post',
           headers: {'X-Requested-With': 'XMLHttpRequest'},
           data: {
@@ -638,10 +666,17 @@ export default {
         stock: this.stockSelectedData.find(item => item.orderId == this.orderNowId).stockVal
       })
     }
-    this.updateOrderItemList()
-
+    //show modal loginerror
+    if(!this.initialData.customer_id){
+      setTimeout(this.HcErrorLogin = true, 1000)
+    } else{
+      this.updateOrderItemList()
+    }
+    
     //Hide Cart button
     $('.header-cart-btn').css("display", "none");
+
+    
   },
   props: [],
   watch: {
@@ -687,6 +722,7 @@ export default {
   },
   computed: {
     ...mapGetters([
+      'main_path',
       'step',
       'kiji_img_path',
       'kijiData',

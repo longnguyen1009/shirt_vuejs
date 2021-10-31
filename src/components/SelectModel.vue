@@ -23,7 +23,7 @@
       <div class="simu-model-rightTop">
         <h3 class="simu-model-styleName">{{modelDetail.style_name}}</h3>
         <h4 class="simu-model-modelTyle">{{modelDetail.name}}</h4>
-        <p class="simu-model-description">{{modelDetail.detail}}</p>
+        <p class="simu-model-description"><pre>{{modelDetail.detail}}</pre></p>
       </div>
       <div class="simu-model-itemSelect d-flex flex-column justify-content-end">
         <ul class="simu-model-itemList">
@@ -40,18 +40,28 @@
             <div class="simu-model-item d-flex justify-content-between flex-grow-1">
               <div class="form-check form-check-inline" 
                 v-for="item in Items.items" :key="item.id">
-                <label class="toggle">
+                <span class="fancy-input">
+                  <input class="fancy-radio" hidden :id="'itemId-' + item.id" type="checkbox" :value="item.id" v-model="itemSelectedTemp" :disabled="canCheck(item.id)">
+                  <label class="fancy-radio-label" :for="'itemId-' + item.id">
+                      <span class="fancy-label--text">{{ ((Items.items.length == 1) && (Items.item_type_id != 1) && (Items.item_type_id != 2)) ? Items.item_type_name : item.name}}</span>
+                      <span class="fancy-checkbox">
+                          <span class="radiobutton-dot"></span>
+                      </span>
+                  </label>
+                </span>
+
+                <!-- <label class="toggle">
                   <input type="checkbox" :id="'itemId-' + item.id" class="toggle__input"
                     v-model="itemSelectedTemp" 
                     :value="item.id"
-                    :disabled="canCheck(item.id)"
+                    
                   >
                   <span class="toggle__label">
                     <span class="toggle__text">
                       {{ ((Items.items.length == 1) && (Items.item_type_id != 1) && (Items.item_type_id != 2)) ? Items.item_type_name : item.name}}
                     </span>
                   </span>
-                </label> 
+                </label>  -->
               </div>  
             </div>
           </li>
@@ -60,8 +70,8 @@
         <div class="simu-model-order d-flex justify-content-between align-items-end">
           <p class="simu-model-price">{{moneyTypeShow02(modelDetail.price)}}</p>
           <div class="simu-nav-confirm d-flex justify-content-between">
-            <button type="button" class="simu-common-btn" @click="doBack">戻る</button>
-            <button type="button" class="simu-common-btn" @click="doOrder" :disabled="!checkErrorSelect">決定</button>
+            <button type="button" class="simu-common-btn btnSize01" @click="doBack">戻る</button>
+            <button type="button" class="simu-common-btn btnSize01 gray" @click="doOrder" :disabled="!checkErrorSelect">決定</button>
           </div>
         </div>
       </div>
@@ -86,7 +96,9 @@ export default {
         "scrollPerPage": false,
         "paginationEnabled": false,
         "navigationEnabled": true,
-        "loop": true
+        "loop": true,
+        "navigationNextLabel": '<img src="/html/user_data/assets/img/common/icon_arraw_right_02.png" alt="">',
+        "navigationPrevLabel": '<img src="/html/user_data/assets/img/common/icon_arraw_left_02.png" alt="">'
       },
       itemSelectedTemp: [],
       itemTypeCheck: [],
@@ -135,7 +147,7 @@ export default {
     } else{
       this.$store.dispatch('handleChangeLoaddingData', true)
       this.axios.request({
-        url: 'http://54.248.46.255/myshop/getmodel/',
+        url: this.main_path + 'myshop/getmodel/',
         method: 'post',
         headers: {'X-Requested-With': 'XMLHttpRequest'},
         data: {
@@ -159,6 +171,7 @@ export default {
   },
   computed: {
     ...mapGetters([
+      'main_path',
       'model_img_path',
       'modelTemp',
       'modelData',

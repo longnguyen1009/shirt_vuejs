@@ -1,9 +1,9 @@
 <template>
   <div class="container-selectstyle">
-    <div class="simu-styleList" v-if="styleItems != null && styleItems.length > 0">
-      <carousel v-bind="settings">
-          <slide class="simu-styleItem" v-for="Item in styleItems" :key="Item.id"
-          @slideclick="styleClick(Item.id)">
+    <div class="simu-styleList" v-if="styleData != null && styleData.length > 0">
+      <carousel v-bind="settings" @page-change="pageChangeHandle">
+          <slide class="simu-styleItem" :class="{disable: Item.disable}" v-for="Item in styleData" :key="Item.id"
+          @slideclick="styleClick(Item.id, Item.disable)">
             <div class="simu-styleItem-front">
               <img :src="style_img_path + Item.image" alt="">
               <div class="simu-styleItem-label">
@@ -13,7 +13,7 @@
               <button class="simu-styleItem-btn">MORE DETAILS</button>
             </div>
             <div class="simu-styleItem-detail" :class="{active: styleActive == Item.id}">
-              <span class="closeBtn" @click="styleClose(Item.id)"><i class="fas fa-times"></i></span>
+              <span class="closeBtn" @click="styleClose(Item.id)"><img :src="main_path + 'html/user_data/assets/img/common/header_close.svg'" alt=""></span>
               <div class="simu-styleItem-detailTop">
                 <h2 class="simu-styleItem-name">{{Item.name}}</h2>
                 <p class="simu-styleItem-description">{{Item.detail}}</p>
@@ -29,7 +29,7 @@
           </slide>
       </carousel>
     </div>
-    <div class="simu-styleNone" v-if="styleItems != null && styleItems.length == 0">
+    <div class="simu-styleNone" v-if="styleData != null && styleData.length == 0">
       <p><i class="fas fa-exclamation-triangle"></i><span>スタイルはありませんでした。</span></p>
     </div>
     <div class="loadding_bl simu-style-loading">
@@ -61,14 +61,18 @@ export default {
         "scrollPerPage": false,
         "paginationEnabled": false,
         "navigationEnabled": true,
-
+        "navigationNextLabel": '<img src="/html/user_data/assets/img/common/icon_arraw_right_02.png" alt="">'
       },
       styleActive: 0
     };
   },
   methods: {
-    styleClick(id){
-      this.styleActive = id
+    styleClick(id, disable){
+      if(!disable){
+        this.styleActive = id
+      } else{
+        return false
+      }
     },
     styleClose(id){
       this.styleActive = 0
@@ -85,11 +89,18 @@ export default {
     },
     refreshStartData: async function(){
       await this.refreshData()
+    },
+    pageChangeHandle(page_num) {
+      if(page_num + 3 == this.styleData.length){
+        $('.VueCarousel-navigation').css('display', 'none')
+      } else{
+        $('.VueCarousel-navigation').css('display', 'block')
+      }
     }
   },
   props: [],
   mounted() {
-    if(this.styleItems.length == 0){
+    if(this.styleData.length == 0){
       $('.simu-style-loading').addClass("on")
     }
     this.refreshStartData()
@@ -102,17 +113,18 @@ export default {
   },
   computed: {
     ...mapGetters([
+      'main_path',
       'style_img_path',
       'styleData',
       'page',
       'initialData'
-    ]),
-    styleItems: function(){
-      return this.styleData
-    }
+    ])
   }
 };
+
 </script>
+
+
 
 <style scoped>
 </style>

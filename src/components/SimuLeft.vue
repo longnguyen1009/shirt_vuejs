@@ -21,6 +21,9 @@
               style="image-rendering: pixelated"
             ></object>
             <img :src="design.shadow_path" class="img_shadow" />
+            <span class="correct_detail_img" v-if="correct_detail_id_now">
+              <img :src="correct_detail_img" alt="" v-on:error="loadImgError">
+            </span>
       </div>
       <div class="simuleft-options">
         <span v-for="(Option,id) in optionSaved" :key="id">
@@ -40,9 +43,13 @@
          v-on:error="loadImgError">
         </span>
       </div>
+      <div class="simuleft-correct">
+        
+      </div>
       <!-- <div class="sumi-left-zoombtn">+ZOOM</div> -->
-      <button class="sumi-left-downbtn simu-common-btn"
-      @click="doSaveTemp"><i class="fas fa-download"></i></button>
+      <span class="sumi-left-downbtn" @click="doSaveTemp">
+        <img :src="main_path + 'html/user_data/assets/img/common/icon_save.png'" alt="">
+      </span>
       <button class="sumi-left-allbody simu-common-btn" @click="changeViewMode" :class="{on : viewMode == 1}">全身ON/OFF</button>
       <div class="loadding_bl">
         <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
@@ -145,7 +152,7 @@ export default {
         stockTemp = this.stockSelectedData.find(item => item.orderId == this.orderNowId).sensei_min
       }
       await this.axios.request({
-        url: 'http://54.248.46.255/myshop/addproducttocart/',
+        url: this.main_path + 'myshop/addproducttocart/',
         method: 'post',
         headers: {'X-Requested-With': 'XMLHttpRequest'},
         data: {
@@ -175,16 +182,17 @@ export default {
       return ret
     },
     doSaveTemp: async function(){
-      if(this.kijiActive){
-        await(this.addToCart()).then((response) => {
+      if(!this.kijiActive){
+        alert('生地を選択してください。')
+      } else if(!this.initialData.customer_id){
+        alert('HC番号を設定ください。')
+      } else if(this.kijiActive){
+        await this.addToCart().then((response) => {
         if(response !== null){
             this.$store.dispatch('handleChangeErrorCode', 4)
             this.$store.dispatch('handleChangeCartItemId', response)
           }
         })
-      } else{
-        alert('生地を選択してください。')
-        return false
       }
     }
   },
@@ -201,9 +209,11 @@ export default {
   },
   computed: {
     ...mapGetters([
+        'main_path',
         'kiji_img_path',
         'simu_img_path',
         'option_img_path',
+        'correct_detail_img_path',
         'optionMode',
         'styleSelected',
         'modelSelected',
@@ -223,7 +233,8 @@ export default {
         'category_select',
         'sizeSelectedData',
         'correctSelectedData',
-        'stockSelectedData'
+        'stockSelectedData',
+        'correct_detail_id_now'
       ]),
     //design path
     design: function() {
@@ -237,10 +248,18 @@ export default {
         return {}
       }
     },
+    correct_detail_img: function(){
+      if(this.correct_detail_id_now){
+        return this.correct_detail_img_path + this.correct_detail_id_now + '.png'
+      } else{
+        return ''
+      }
+    },
     //kiji path
     kiji_img: function(){
-      if(this.kijiActive && this.kijiData.length){
-        return this.kijiData.filter(item => item.id == this.kijiActive)[0].img_simu
+      if(this.kijiActive && this.kijiData.length && this.kijiData.findIndex(item => item.id == this.kijiActive) !== -1){
+        let kijiTemp = this.kijiData.find(item => item.id == this.kijiActive)
+        return kijiTemp.img_simu ? kijiTemp.img_simu : '0730151143_6103981fcfa43.jpeg'
       } else{
         return "0730151143_6103981fcfa43.jpeg"
       }
@@ -303,7 +322,8 @@ export default {
       } else{
         return null
       }
-    }
+    },
+    
   },
 };
 </script>

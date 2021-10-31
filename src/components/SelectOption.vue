@@ -6,7 +6,7 @@
         <div class="simuright-sub-nav" v-if="cateLists.length > 0 && optionDetailActive != 35">
           <div class="simuright-sub-searchTop d-flex justify-content- align-items-center">
             <!-- Button Category -->
-            <ul class="optionParentList d-flex justify-content-around align-items-center">
+            <ul class="optionParentList scroll">
               <li class="optionParent"
               v-for="Cate in cateLists" :key="Cate.cate_id"
               :class="{active: cateCurr == Cate.cate_id}"
@@ -24,7 +24,9 @@
             :class="{active: (Option.id == optionSelected)}">
             <img :src="option_img_path + Option.img" alt=""
               @click="optionChange(Option.id, Option.simu_img, Option.type)">
-            <span class="simuright-option-icon" @click="showOptionDetail(Option.id)"><i class="fas fa-info-circle"></i></span>
+            <span class="simuright-option-icon" @click="showOptionDetail(Option.id)">
+              <img :src="main_path + 'html/user_data/assets/img/common/icon_info.png'" alt="">
+            </span>
             <div class="simuright-option-name"
               @click="optionChange(Option.id, Option.simu_img, Option.type)">
               <span class="option-code">{{Option.name}}</span><br>
@@ -67,8 +69,8 @@
       </div>
     </div>
     <div class="simuright-sub-navi d-flex align-items-center">
-      <button class="simu-common-btn" @click="closeOption">戻る</button>
-      <button class="simu-common-btn" @click="buttonConfirm">決定</button>
+      <button class="simu-common-btn btnSize02 btnSizeHalf" @click="closeOption">戻る</button>
+      <button class="simu-common-btn btnSize02 btnSizeHalf gray" @click="buttonConfirm">決定</button>
     </div>
     <transition name="transitionRightToLeft">
       <div class="simu-subpage" v-if="optionDetailId">
@@ -216,7 +218,7 @@ export default {
       let ret = null
       if(this.modelSelected && this.designActive.design_id && this.optionDetailActive){
         await this.axios.request({
-          url: 'http://54.248.46.255/myshop/getoptionlist/',
+          url: this.main_path + 'myshop/getoptionlist/',
           method: 'post',
           headers: {'X-Requested-With': 'XMLHttpRequest'},
           data: {
@@ -240,7 +242,7 @@ export default {
       let ret = null
       if(this.modelSelected && this.designActive.design_id && this.optionDetailActive){
         await this.axios.request({
-          url: 'http://54.248.46.255/myshop/getoptionlist/',
+          url: this.main_path + 'myshop/getoptionlist/',
           method: 'post',
           headers: {'X-Requested-With': 'XMLHttpRequest'},
           data: {
@@ -366,6 +368,7 @@ export default {
   },
   computed: {
     ...mapGetters([
+      'main_path',
       'option_img_path',
       'modelSelected',
       'designActive',

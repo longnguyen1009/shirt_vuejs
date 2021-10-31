@@ -15,14 +15,16 @@ export default new Vuex.Store({
     //存在ORDER
     orderTempItem: [], //[{id, style, model, item, option_selected, price, quality, combineId}]
 
-    step: 'onemeasure',
+    step: 1,
     page: 1, //page 2 is model page
 
+    main_path: 'https://ua.coremobile.win/',
     simu_img_path: "/html/upload/simu_model/",
     style_img_path: "/html/upload/save_image/",
     model_img_path: "/html/upload/save_image/",
     kiji_img_path: "/html/upload/save_image/",
     option_img_path: "/html/upload/save_image/",
+    correct_detail_img_path: "/html/upload/correct_detail/",
 
     // styleData load from server
     styleData: [], //[{id, name, brand, detail, img, model[], product_price}]
@@ -48,6 +50,7 @@ export default new Vuex.Store({
 
     // kijiData load from server
     kijiData: [],
+    kijiSearchData: {},
 
     // option parent Data by design
     optionParentData: [], //{design_id, genreData, parentData}
@@ -102,7 +105,8 @@ export default new Vuex.Store({
     correctDetailData: [], //{correct_id, detail_data}
 
     sizeSelectedData: [],// {orderId, size_id, item_id, name, base_val...}
-    correctSelectedData: [] //{order_id, size_id, design_id, correct_id, correct_name, size_link, base_val, correct_detail_id, correct_detail_name, correct_detail_val, correct_result}
+    correctSelectedData: [], //{order_id, size_id, design_id, correct_id, correct_name, size_link, base_val, correct_detail_id, correct_detail_name, correct_detail_val, correct_result}
+    correct_detail_id_now: 0
   },
   getters: {
     //step
@@ -115,6 +119,7 @@ export default new Vuex.Store({
     model_img_path: state => state.model_img_path,
     kiji_img_path: state => state.kiji_img_path,
     option_img_path: state => state.option_img_path,
+    correct_detail_img_path: state => state.correct_detail_img_path,
 
     //
     styleSelected: state => state.styleSelected,
@@ -136,6 +141,7 @@ export default new Vuex.Store({
     optionTemp: state => state.optionTemp,
     optionDataLoaded: state => state.optionDataLoaded,
     kijiData: state => state.kijiData,
+    kijiSearchData: state => state.kijiSearchData,
     optionParentData: state => state.optionParentData,
     optionDetailData: state => state.optionDetailData,
     itemData: state => state.itemData,
@@ -161,7 +167,9 @@ export default new Vuex.Store({
     correctSelectedData: state => state.correctSelectedData,
 
     //stock
-    stockSelectedData: state => state.stockSelectedData
+    stockSelectedData: state => state.stockSelectedData,
+    main_path: state => state.main_path,
+    correct_detail_id_now: state => state.correct_detail_id_now,
   },
   mutations: {
     changeStep(state, newStep){
@@ -189,6 +197,9 @@ export default new Vuex.Store({
     },
     changeKiji(state, kiji){
       state.kijiActive = kiji
+    },
+    updateKijiSearchData(state, searchData){
+      state.kijiSearchData = searchData
     },
     async changeStyleData(state, styleData){
       await Object.values(styleData).forEach(element => {
@@ -325,6 +336,9 @@ export default new Vuex.Store({
     changeInitialData(state, iniData){
       state.initialData = iniData
     },
+    changeCustomerId(state, customer_id){
+      state.initialData.customer_id = customer_id
+    },
     restoreFromIniData(state, data){
       state.kijiActive = (data.product_id) ? data.product_id : null
       state.styleSelected = (data.style) ? Number(data.style) : null
@@ -360,6 +374,7 @@ export default new Vuex.Store({
       state.orderTempItem = [...state.orderTempItem]
     },
     changeOrderTempItem(state, arrOrderTemp){
+      state.orderTempItem = state.orderTempItem.filter(item => item.id != 0)
       arrOrderTemp.forEach(element => {
         const existOrderTemp = state.orderTempItem.findIndex(item => item.id == element.id)
         if(existOrderTemp == -1){
@@ -460,6 +475,9 @@ export default new Vuex.Store({
       }
       state.sizeSelectedData = [...state.sizeSelectedData]
     },
+    // updateSizeFromMeasure(state, sizeDataMeasure){
+      
+    // },
     updateCorrectDetailData(state, correctData){
       const correcIndex = state.correctDetailData.findIndex(item => (
         item.correct_id == correctData.correct_id
@@ -576,6 +594,9 @@ export default new Vuex.Store({
         }
       })
       state.orderTempItem = [...state.orderTempItem]
+    },
+    changeCorrectionSelectedId(state, id){
+      state.correct_detail_id_now = id
     }
   },
   actions: {
@@ -600,6 +621,9 @@ export default new Vuex.Store({
     },
     handleChangeKiji(context, kiji){
       context.commit('changeKiji', kiji)
+    },
+    handleUpdateKijiSearchData(context, searchData){
+      context.commit('updateKijiSearchData', searchData)
     },
     handleChangeStyleData(context, styleData){
       context.commit('changeStyleData', styleData)
@@ -639,6 +663,9 @@ export default new Vuex.Store({
     },
     handleChangeIniData(context, iniData){
       context.commit('changeInitialData', iniData)
+    },
+    handleChangeCustomerId(context, customer_id){
+      context.commit('changeCustomerId', customer_id)
     },
     handleRestoreFromIni(context, iniData){
       context.commit('restoreFromIniData', iniData)
@@ -721,6 +748,10 @@ export default new Vuex.Store({
     //原価計算
     handleUpdateOrderCostTemp(context, data){
       context.commit('updateOrderCostTemp', data)
+    },
+    
+    handleChangeCorrectionSelectedId(context, id){
+      context.commit('changeCorrectionSelectedId', id)
     }
   }
 })
