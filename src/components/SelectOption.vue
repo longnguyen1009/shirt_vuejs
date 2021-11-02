@@ -22,15 +22,16 @@
         <div class="simuright-sub-result d-flex flex-wrap" v-if="optionDetailActive != 35">
           <div v-for="Option in optionCurrLists" :key="Option.id" class="optionItem"
             :class="{active: (Option.id == optionSelected)}">
-            <img :src="option_img_path + Option.img" alt=""
+            <img :src="option_img_path + Option.img" alt="" class="optionitem-img"
               @click="optionChange(Option.id, Option.simu_img, Option.type)">
             <span class="simuright-option-icon" @click="showOptionDetail(Option.id)">
               <img :src="main_path + 'html/user_data/assets/img/common/icon_info.png'" alt="">
             </span>
-            <div class="simuright-option-name"
-              @click="optionChange(Option.id, Option.simu_img, Option.type)">
-              <span class="option-code">{{Option.name}}</span><br>
-              <span class="option-name">{{Option.ua_code_jp}}</span>
+            <div class="simuright-option-text" @click="optionChange(Option.id, Option.simu_img, Option.type)">
+              <div class="simuright-kiji-text-top d-flex justify-content-between align-items-center">
+                <span class="simuright-kiji-code">{{Option.name}}</span><br>
+              </div>
+              <span class="simuright-kiji-name">{{Option.color_code}}</span>
             </div>
           </div>
         </div>
@@ -61,7 +62,7 @@
             <p class="option-customname-title">ネーム入力</p>
             <p class="option-customname-inputval">
               <!-- <span class="text-alert">※ヤンアルタ14文字/東和10文字/那須8文字まで</span> -->
-              <input type="text" placeholder="" maxlength="14" v-model="optionCustomNameText">
+              <input type="text" placeholder="" maxlength="8" v-model="optionCustomNameText">
             </p>
           </div>
 
@@ -76,6 +77,7 @@
       <div class="simu-subpage" v-if="optionDetailId">
         <OptionDetail 
         :OptionDetailData="OptionDetailData"
+        :cateCurrObj="cateCurrObj"
         @close-detail="closeOptionDetail($event)"
         @option-confirm="confirmOptionDetail($event)"
         />
@@ -170,7 +172,9 @@ export default {
         if(this.optionSelected){
           let selectedObj = this.optionDetailData.filter((item) => item.id == this.optionSelected)[0]
           let optionCustomNameObj = this.optionCustomNameSubLists.find(item => item.id == this.optionCustomNameSelected)
-          if(this.optionSelected == 43 || (this.optionSelected != 43 && this.optionCustomNameSelected && this.optionCustomNameText != '')){
+          let reg = new RegExp('^(\s*([0-9]|[a-zA-Z])+\s*)+$');
+          if(this.optionSelected == 43 || (this.optionSelected != 43 && this.optionCustomNameSelected && this.optionCustomNameText != '' && reg.test(this.optionCustomNameText))){
+
               this.$store.dispatch('handleChangeOption', {
                   orderId: this.orderId,
                   combine_id: this.designActive.combine_id,
@@ -195,6 +199,8 @@ export default {
               alert('刺繍糸色を選択してください。')
             } else if(this.optionCustomNameText == ''){
               alert('ネームを入力してください。')
+            } else if(!reg.test(this.optionCustomNameText)){
+              alert('ネームは英数字で入力してください。')
             }
             return false
           }

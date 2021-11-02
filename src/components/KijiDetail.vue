@@ -9,7 +9,8 @@
     <div class="option-detail-bottom d-flex flex-column justify-content-between">
       <div class="option-detail-name">
         <span class="option-detail-catename">{{kijiDetailData.brand_name}}</span>
-        <span class="option-detail-optionname">{{kijiDetailData.name}}</span>
+        <span class="option-detail-optionname" v-if="kijiDetailData.name">{{kijiDetailData.name}}</span>
+        <span class="option-detail-optionname" v-if="!kijiDetailData.name">{{kijiDetailData.sub_name}}</span>
       </div>
       <div class="option-detail-confirm d-flex justify-content-between">
         <div class="option-detail-moreinfo d-flex justify-content-between flex-column">
@@ -20,7 +21,7 @@
             v-for="(compo, id) in kijiDetailData.composition" :key="id">{{compo}} / </span>
           </div>
           <div class="option-detail-moreinfo-price">
-            <span class="option-detail-price" v-if="initialData.shop_kind == 2">カスタマイズ価格：{{kijiDetailData.price}}円</span>
+            <span class="option-detail-price">カスタマイズ価格：{{moneyTypeShow01(getCombinePrice())}}円</span>
           </div>
         </div>
         <div class="option-detail-descript d-flex justify-content-between flex-column">
@@ -48,11 +49,34 @@ export default {
     };
   },
   methods: {
+    moneyTypeShow01(number){
+      return new Intl.NumberFormat().format(number)
+    },
     closeKijiDetail: function(){
       this.$emit("close-detail")
     },
     kijiConfirmDetail: function(){
       this.$emit("kiji-confirm", {"id": this.kijiDetailData.id, "img": this.kijiDetailData.img})
+    },
+    getCombinePrice: function(){
+      let shop_kind = this.initialData.shop_kind
+      let rank = 0
+      if(this.kijiDetailData.id){
+        rank = (shop_kind != 2) ? this.kijiDetailData.ua_retail_price : ((shop_kind == 2) ? this.kijiDetailData.gl_retail_price : 0)
+      }
+      console.log(this.combinePriceData)
+      console.log(this.itemCombineObj)
+      console.log(rank)
+      let combinePriceIndex = this.combinePriceData.findIndex(item => 
+        item.model == this.modelSelected
+        && item.combineId == this.itemCombineObj.id
+        && item.rank == rank
+      )
+      if(combinePriceIndex !== -1){
+        return this.combinePriceData[combinePriceIndex].price
+      } else{
+        return 0
+      }
     }
   },
   props: ['kiji_img_path', 'kijiDetailData'],
@@ -63,8 +87,25 @@ export default {
     ...mapGetters([
       'main_path',
       'kiji_img_path',
-      'initialData'
+      'initialData',
+      'modelSelected',
+      'orderNowId',
+      'itemData',
+      'combinePriceData'
+
     ]),
+    itemDataActive: function(){
+        if(this.itemData.length && this.itemData.filter(item => item.orderId == this.orderNowId).length){
+          return this.itemData.filter(item => item.orderId == this.orderNowId)[0]
+        } else{
+          return null
+        }
+      },
+    itemCombineObj: function(){
+        if(this.itemDataActive){
+          return this.itemDataActive.items
+        }
+    },
   }
 };
 </script>

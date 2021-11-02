@@ -23,8 +23,8 @@
               <ul class="searchkiji-brand-list d-flex justify-content-between align-items-center flex-wrap">
                 <li class="searchkiji-brand-item" v-for="(Color, id) in kijiSearchData.color" :key="id">
                   <input class="fancy-radio" hidden :id="'color-' + Color.id" name="color" type="checkbox" :value="Color.id" v-model="colorSelected">
-                  <label class="fancy-radio-label" :for="'color-' + Color.id">
-                      <span class="fancy-label--text searchkiji-brand-name">{{Color.name}}</span>
+                  <label class="fancy-radio-label fancy-radio-label-color" :for="'color-' + Color.id">
+                      <span class="fancy-label--text searchkiji-brand-name"><span class="searchkiji-color-fixed" :style="'background-color:' + getFixedColor(Color.id)"></span>{{Color.name}}</span>
                       <span class="fancy-checkbox">
                           <span class="radiobutton-dot"></span>
                       </span>
@@ -77,17 +77,17 @@ export default {
   data() {
     return {
       isLoading: false,
-      // colorFix: [
-      //   {id: 1, code: '#0009ef'},
-      //   {id: 2, code: '#010458'},
-      //   {id: 3, code: '#676665'},
-      //   {id: 4, code: '#282828'},
-      //   {id: 5, code: '#381800'},
-      //   {id: 6, code: '#000000'},
-      //   {id: 7, code: '#ffffff'},
-      //   {id: 8, code: '#003313'},
-      //   {id: 9, code: '#444444'}
-      // ]
+      colorFix: [
+        {id: 1, code: '#0009ef'},
+        {id: 2, code: '#010458'},
+        {id: 3, code: '#676665'},
+        {id: 4, code: '#282828'},
+        {id: 5, code: '#381800'},
+        {id: 6, code: '#000000'},
+        {id: 7, code: '#ffffff'},
+        {id: 8, code: '#003313'},
+        {id: 9, code: '#444444'}
+      ]
     };
   },
   methods: {
@@ -135,6 +135,13 @@ export default {
 
       this.searchKijiBrandResult = ret
       setTimeout(() => this.isLoading = false, 100)
+    },
+    getFixedColor(id){
+      if(this.colorFix.findIndex(item => item.id == id) !== -1){
+        return this.colorFix.find(item => item.id == id).code
+      } else{
+        return '#ccc'
+      }
     }
   },
   props: ['seasonSelected', 'colorSelected', 'patternSelected'],

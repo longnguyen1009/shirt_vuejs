@@ -12,8 +12,14 @@
                 <div class="simu-confirm-kiji-detail d-flex flex-column justify-content-between">
                   <p class="">
                     <span class="simu-confirm-kiji-code">{{kijiObj(OrderTemp.product_id).code}}</span><br>
-                    <span class="simu-confirm-kiji-name">{{kijiObj(OrderTemp.product_id).name}}</span><br>
-                    <span class="simu-confirm-kiji-name">c/# 09</span>
+                    <span class="simu-confirm-kiji-name" v-if="kijiObj(OrderTemp.product_id).name">
+                      {{kijiObj(OrderTemp.product_id).name}}
+                    </span>
+                    <span class="simu-confirm-kiji-name" v-if="!kijiObj(OrderTemp.product_id).name">
+                      {{kijiObj(OrderTemp.product_id).sub_name}}
+                    </span>
+                    <br>
+                    <span class="simu-confirm-kiji-name">{{kijiObj(OrderTemp.product_id).fabric_color}}</span>
                   </p>
                   <button class="simu-common-btn"
                   @click="showSizeDetail(OrderTemp.id)">サイズ詳細</button>
@@ -101,11 +107,11 @@
           <li class="dropdown-item" @click="doSaveOrderTemp(3)">履歴川作成</li>
         </ul>
       </div>
-      <button id="simu-confirm-btn" class="simu-common-btn"
+      <button class="simu-common-btn btnSize02"
       @click="confirmModalShow"
       v-if="orderTempItem.length > 0">オーダー完了</button>
 
-      <button id="simu-confirm-btn" class="simu-common-btn"
+      <button class="simu-common-btn btnSize01"
         v-if="orderTempItem.length == 0"
         @click="goToTop">TOP</button>
     </div>
@@ -131,8 +137,8 @@
                 <div class="measure-sub" v-if="correction_selected_id">
                   <ul class="measure-sub-list">
                     <li class="measure-sub-item" v-for="correctDetailItem in correctDetailActive" :key="correctDetailItem.id">
-                      <span class="fancy-input">
-                        <input class="fancy-radio black" hidden 
+                      <span class="fancy-input black">
+                        <input class="fancy-radio" hidden 
                           :id="'correctDetailItem-' + correctDetailItem.id" 
                           :name="'correctDetailItem' + correction_selected_id" 
                           type="radio" 
@@ -192,7 +198,7 @@
       <div class="modal-mask" v-if="orderConfirmCheck">
         <div class="modal-wrapper">
           <div class="modal-container">
-              <div class="modal-body">
+              <div class="modal-body center">
                 <span class="order-confirm-question">オーダーを完了しますか？</span>
               </div>
               <div class="modal-footer justify-content-center">
@@ -207,20 +213,20 @@
       <div class="modal-mask" v-if="orderRemoveCheck != null">
         <div class="modal-wrapper">
           <div class="modal-container">
-              <div class="modal-body">
+              <div class="modal-body center">
                 <span class="order-confirm-question">このオーダーアイテムを削除しますか？</span>
               </div>
               <div class="modal-footer justify-content-center">
                 <slot name="footer">
                   <button class="simu-common-btn" @click="confirmModalClose">戻る</button>
-                  <button class="simu-common-btn" @click="removeOrderTemp(orderRemoveCheck)">確認</button>
+                  <button class="simu-common-btn gray" @click="removeOrderTemp(orderRemoveCheck)">確認</button>
                 </slot>
               </div>
           </div>
         </div>
       </div>
 
-      <div class="modal-mask" v-if="HcErrorLogin" id="model-error">
+      <!-- <div class="modal-mask" v-if="HcErrorLogin" id="model-error">
         <div class="modal-wrapper">
           <div class="modal-container">
               <div class="modal-body">
@@ -233,7 +239,7 @@
               </div>
           </div>
         </div>
-      </div>
+      </div> -->
 
     </transition>
 
@@ -262,7 +268,7 @@ export default {
       correction_selected_item_id: 0,
       loaddingDataCorrectDetail: false,
       tempCorrectDetailId: null,
-      HcErrorLogin: false
+      // HcErrorLogin: false
     }
   },
   methods: {
@@ -402,14 +408,29 @@ export default {
       await this.saveOrderTemp().then((response) => {
       if(response !== null){
           this.$store.dispatch('handleChangeLoaddingData', false)
-          if(savetype == 1){
+          if(savetype == 1 || savetype == 2){
+            let orderClone = Object.assign({}, this.orderTempItem[0])
+            this.$store.dispatch('handleUpdateOrderTemp',{
+              id: 0,
+              category_select: orderClone.category_select,
+              product_id: null,
+              style: orderClone.style,
+              model: orderClone.model,
+              item: orderClone.item,
+              option_selected: orderClone.option_selected.map(item =>{
+                let optionClone = Object.assign({}, {...item, orderId: 0})
+                return optionClone
+              }),
+              combineId: orderClone.combineId,
+              quantity: 1,
+              //size and correction
+              size_selected: [],
+              correct_selected: [],
+              stock: 0
+            })
             this.$store.dispatch('handleChangeOrder', 0)
             this.$store.dispatch('handleChangeStep', this.step - 1)
-            this.$store.dispatch('handleUpdateStockSelectedData', null)
-          } else if(savetype == 2){
-            this.$store.dispatch('handleChangeOrder', 0)
-            this.$store.dispatch('handleRemoveSizeData', null)
-            this.$store.dispatch('handleChangeStep', this.step - 1)
+            this.$store.dispatch('handleRemoveSizeData')
             this.$store.dispatch('handleUpdateStockSelectedData', null)
           } else if(savetype == 3){
             window.location.href = this.main_path + "myshop/";
@@ -665,18 +686,19 @@ export default {
         correct_selected: this.correctSelectedData.filter(item => item.order_id == this.orderNowId),
         stock: this.stockSelectedData.find(item => item.orderId == this.orderNowId).stockVal
       })
-    }
-    //show modal loginerror
-    if(!this.initialData.customer_id){
-      setTimeout(this.HcErrorLogin = true, 1000)
     } else{
+      this.$store.dispatch('handleChangeIniData', {...this.initialData, orderCart: null})
+    }
+
+    console.log(this.initialData)
+
+    //show modal loginerror
+    if(this.initialData.customer_id){
       this.updateOrderItemList()
     }
-    
+
     //Hide Cart button
     $('.header-cart-btn').css("display", "none");
-
-    
   },
   props: [],
   watch: {

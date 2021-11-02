@@ -43,21 +43,20 @@
           </div>
         </div>
         <div class="barCode-showBtn d-flex align-items-center justify-content-center">
-          <button class="simu-common-btn" @click="showBarCode">バーコードを表示</button>
+          <button class="simu-common-btn btnSize02" @click="showBarCode">バーコードを表示</button>
         </div>
       </div>
     </div>
     <div class="simu-comfirm-nav d-flex align-items-center justify-content-center">
-      <button id="simu-confirm-btn" class="simu-common-btn"
-      @click="goToTop">TOP</button>
+      <button class="simu-common-btn btnSize02" @click="goToTop">TOP</button>
     </div>
 
     <!-- Modal -->
     <transition name="modal">
-      <div class="modal-mask modal-container-white" v-if="barCodeShow" id="barCodeModal">
+      <div class="modal-mask" v-if="barCodeShow" id="barCodeModal">
         <div class="modal-wrapper">
-          <div class="modal-container">
-              <div class="modal-body">
+          <div class="modal-container white">
+              <div class="modal-body overflow">
                 <div class="barCodeLists">
                   <div class="barCodeItem">
                     <p class="barCodeName">HCバーコード</p>
@@ -88,7 +87,7 @@
               </div>
               <div class="modal-footer justify-content-center">
                 <slot name="footer">
-                  <button class="simu-common-btn" @click="barCodeModalClose">戻る</button>
+                  <button class="simu-common-btn white btnSize02" @click="barCodeModalClose">戻る</button>
                 </slot>
               </div>
           </div>

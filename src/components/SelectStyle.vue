@@ -8,15 +8,15 @@
               <img :src="style_img_path + Item.image" alt="">
               <div class="simu-styleItem-label">
                 <h2 class="simu-styleItem-name">{{Item.name}}</h2>
-                <h3 class="simu-styleItem-productname">{{Item.category}}&nbsp;&nbsp;</h3>
+                <h3 class="simu-styleItem-productname">{{moneyTypeShow01(Item.product_price)}}円&nbsp;&nbsp;</h3>
               </div>
-              <button class="simu-styleItem-btn">MORE DETAILS</button>
+              <!-- <button class="simu-styleItem-btn">MORE DETAILS</button> -->
             </div>
             <div class="simu-styleItem-detail" :class="{active: styleActive == Item.id}">
               <span class="closeBtn" @click="styleClose(Item.id)"><img :src="main_path + 'html/user_data/assets/img/common/header_close.svg'" alt=""></span>
               <div class="simu-styleItem-detailTop">
                 <h2 class="simu-styleItem-name">{{Item.name}}</h2>
-                <p class="simu-styleItem-description">{{Item.detail}}</p>
+                <p class="simu-styleItem-description"><pre>{{Item.detail}}</pre></p>
               </div>
               <div class="simu-styleItem-model">
                 <ul class="simu-styleItem-modelList">
@@ -67,6 +67,10 @@ export default {
     };
   },
   methods: {
+    //3500 -> 3,500
+    moneyTypeShow01(number){
+      return new Intl.NumberFormat().format(number)
+    },
     styleClick(id, disable){
       if(!disable){
         this.styleActive = id

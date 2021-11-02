@@ -128,7 +128,7 @@
             <p class="simuright-prices-total">お支払い金額: <span class="totalPayment"><span v-if="sumPayment > 0">{{moneyTypeShow01(sumPayment)}}</span>円</span></p>
           </div>
           <div class="simuright-price-right d-flex justify-content-between flex-column">
-            <p class="delivery-date">仕上がり予定日：12月12日</p>
+            <p class="delivery-date" v-if="deli_date">仕上がり予定日：{{deli_date}}</p>
             <div class="simu-nav-confirm d-flex justify-content-between">
               <button type="button" class="simu-common-btn btnSize01" @click="doBack">戻る</button>
               <button type="button" class="simu-common-btn btnSize01 gray" @click="doOrderComfirm">決定</button>
@@ -259,7 +259,8 @@ export default {
           ],
           correction_selected_id: 0,
           tempCorrectDetailId: null,
-          loaddingDataCorrectDetail: false
+          loaddingDataCorrectDetail: false,
+          deli_date: ''
         }
     },
     props: [],
@@ -291,7 +292,6 @@ export default {
       changeItem: function(){
         // this.$store.dispatch('handleChangeDesign', this.designActiveSplit())
       },
-      
       //Promise to fetch Kiji
       getKijiFromAPI: async function(){
         let ret = null
@@ -404,7 +404,12 @@ export default {
                       item.parent_id == parent_id
           )
         if(option_selected_index !== -1){
-          let ret = this.optionSelectedData[option_selected_index].name
+          let ret = ''
+          if(this.optionSelectedData[option_selected_index].cate_name){
+            ret += this.optionSelectedData[option_selected_index].cate_name + '/'
+          }
+          ret += this.optionSelectedData[option_selected_index].name
+
           if(parent_id == 35){
             if(this.optionSelectedData[option_selected_index].custom_name_color_id){
               ret += '/' + this.optionSelectedData[option_selected_index].custom_name_color_name
@@ -424,6 +429,7 @@ export default {
         new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(number)
       },
       doOrderComfirm(){
+        console.log(this.orderTempItem)
         if(!this.kijiActive){
           alert('生地を選択してください。')
         } else if(!this.initialData.customer_id){
@@ -545,6 +551,36 @@ export default {
       changeStepOneMeasure: function(){
         $('.container-onemeasure').addClass('show')
         this.$store.dispatch('handleChangeStep', 'onemeasure')
+      },
+      getDeliverySchedule: async function(){
+        let ret = null
+        if(Object.keys(this.kijiObjectActive).length > 0){
+          await this.axios.request({
+            url: this.main_path + 'myshop/getdeliveryscheduledate/',
+            method: 'post',
+            headers: {'X-Requested-With': 'XMLHttpRequest'},
+            data: {
+              'shop_kind': this.initialData.shop_kind,
+              'category': this.category_select,
+              'style': this.styleSelected,
+              'kiji_kind': this.kijiObjectActive.fabric_kind
+            }
+          })
+          .then(response => {
+            ret = response.data.data
+          })
+          .catch(error => {
+            console.log(error)
+          })
+        }
+        return ret
+      },
+      updateDeliverySchedule: async function(){
+        await this.getDeliverySchedule().then(response => {
+          if(response){
+            this.deli_date = response
+          }
+        })
       }
     },
     mounted() {
@@ -557,6 +593,13 @@ export default {
 
       //Hide Cart button
       $('.header-cart-btn').css("display", "block");
+
+      if(this.kijiActive){
+        this.updateDeliverySchedule()
+      } else{
+        let deli_date_temp = new Date(new Date().getTime()+(30*24*60*60*1000));
+        this.deli_date = deli_date_temp.getFullYear()+'年'+(deli_date_temp.getMonth() + 1) +'月'+deli_date_temp.getDate()+'日'
+      }
 
       if(this.kijiActive && this.kijiData.length && !(this.kijiData.find(item => item.id == this.kijiActive))){
         this.$store.dispatch('handleChangeKiji', null)
@@ -655,6 +698,9 @@ export default {
 
           this.$store.dispatch('handleUpdateCorrectSelectedData', [tempCorrectionItem])
         }
+      },
+      kijiActive: function(){
+        this.updateDeliverySchedule()
       }
     },
     computed: {
@@ -682,7 +728,9 @@ export default {
         'sizeSelectedData',
         'correctDetailData',
         'correctSelectedData',
-        'stockSelectedData'
+        'stockSelectedData',
+        'category_select',
+        'orderTempItem'
       ]),
       kijiObjectActive: function(){
         if(this.kijiData.length && this.kijiData.findIndex((item) => item.id === this.kijiActive) !== -1){
@@ -737,6 +785,8 @@ export default {
       itemCombineObj: function(){
         if(this.itemDataActive){
           return this.itemDataActive.items
+        } else{
+          return {}
         }
       },
       designData: function(){

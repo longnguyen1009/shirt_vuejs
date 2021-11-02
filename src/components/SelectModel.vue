@@ -49,26 +49,13 @@
                       </span>
                   </label>
                 </span>
-
-                <!-- <label class="toggle">
-                  <input type="checkbox" :id="'itemId-' + item.id" class="toggle__input"
-                    v-model="itemSelectedTemp" 
-                    :value="item.id"
-                    
-                  >
-                  <span class="toggle__label">
-                    <span class="toggle__text">
-                      {{ ((Items.items.length == 1) && (Items.item_type_id != 1) && (Items.item_type_id != 2)) ? Items.item_type_name : item.name}}
-                    </span>
-                  </span>
-                </label>  -->
               </div>  
             </div>
           </li>
         </ul>
         <span class="simu-error-message" v-if="!checkErrorSelect">アイテム組み合わせが見つかりません。</span>
         <div class="simu-model-order d-flex justify-content-between align-items-end">
-          <p class="simu-model-price">{{moneyTypeShow02(modelDetail.price)}}</p>
+          <p class="simu-model-price">{{moneyTypeShow02(modelDetail.price)}}〜</p>
           <div class="simu-nav-confirm d-flex justify-content-between">
             <button type="button" class="simu-common-btn btnSize01" @click="doBack">戻る</button>
             <button type="button" class="simu-common-btn btnSize01 gray" @click="doOrder" :disabled="!checkErrorSelect">決定</button>

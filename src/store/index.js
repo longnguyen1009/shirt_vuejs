@@ -388,6 +388,7 @@ export default new Vuex.Store({
           element.size_selected = JSON.parse(element.size_selected)
           element.correct_selected = JSON.parse(element.correct_selected)
           element.stock = Number(element.stock)
+          element.arrive_date = new Date(element.arrive_date)
           state.orderTempItem.push(element)
         }
       })
@@ -405,9 +406,9 @@ export default new Vuex.Store({
         state.itemSelected = OrderNow.item
       }
     },
-    changeCategorySelect(state, category){
-      state.category_select = category
-    },
+    // changeCategorySelect(state, category){
+    //   state.category_select = category
+    // },
     updateOrderTempAllData(state){
       state.orderTempItem.forEach((element, index) => {
         //update selected option
@@ -534,9 +535,6 @@ export default new Vuex.Store({
         if(KijiNowIndex !== -1){
           state.stockSelectedData[stockSelectedNowIndex].kiji = state.kijiActive
           let KijiNow = state.kijiData[KijiNowIndex]
-          // if(KijiNow.stock_unlimited){
-          //   state.stockSelectedData[stockSelectedNowIndex].stockVal = 0
-          // } else{
             let stockValTemp = 0
             let stockItemTemp = itemDataNow.stock.find(item => (item.design_id == itemDataNow.stock_design && item.size_id == sizeSelectedNow.id))
             if(KijiNow.fabric_kind == 1){
@@ -545,7 +543,6 @@ export default new Vuex.Store({
               stockValTemp = stockItemTemp ? (stockItemTemp.bichikusei_scale ? stockItemTemp.bichikusei_scale : 0) : 0
             }
             state.stockSelectedData[stockSelectedNowIndex].stockVal = stockValTemp
-          // }
         } else{
           state.stockSelectedData[stockSelectedNowIndex].kiji = null,
           state.stockSelectedData[stockSelectedNowIndex].stockVal = 0
@@ -694,9 +691,9 @@ export default new Vuex.Store({
     handleChangeOrder(context, orderId){
       context.commit('changeOrder', orderId)
     },
-    handleChangeCategoryOrder(context, category){
-      context.commit('changeCategorySelect', category)
-    },
+    // handleChangeCategoryOrder(context, category){
+    //   context.commit('changeCategorySelect', category)
+    // },
     handleUpdateOrderTempAllData(context, data){
       context.commit('updateOrderTempAllData')
     },

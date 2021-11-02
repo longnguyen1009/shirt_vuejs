@@ -431,11 +431,11 @@ export default {
     this.setInitialData()
     this.setKijiData()
 
-    window.setInterval(() => {
-      if((this.step == 2 || this.step == 3) && !this.initialData.customer_id && !this.HcErrorLogin && !this.HCSearchPopup){
-          this.HcErrorLogin = true
-      }
-    }, 20000)
+    // window.setInterval(() => {
+    //   if((this.step == 2 || this.step == 3) && !this.initialData.customer_id && !this.HcErrorLogin && !this.HCSearchPopup){
+    //       this.HcErrorLogin = true
+    //   }
+    // }, 20000)
   },
   computed: {
     ...mapGetters([

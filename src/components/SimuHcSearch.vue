@@ -16,27 +16,29 @@
         <div class="hcsearch-form">
           <div class="hcsearch-form-top">
             <dl class="hcsearch-form-item">
-              <dt class="hcsearch-for-label">HC番号</dt>
-              <dd class="hcsearch-for-input"><input type="text" v-model="hcSearchData.hc_no"></dd>
+              <dt class="hcsearch-for-label">HC番号（数字10桁）</dt>
+              <dd class="hcsearch-for-input">
+                <input type="text" v-model="hcSearchData.hc_no">
+                <span v-if="hcSearchError.hc_no">{{hcSearchError.hc_no}}</span>
+              </dd>
             </dl>
             <dl class="hcsearch-form-item">
-              <dt class="hcsearch-for-label">氏(カナ)</dt>
-              <dd class="hcsearch-for-input"><input type="text" v-model="hcSearchData.hc_name01"></dd>
-            </dl>
-            <dl class="hcsearch-form-item">
-              <dt class="hcsearch-for-label">名(カナ)</dt>
-              <dd class="hcsearch-for-input"><input type="text" v-model="hcSearchData.hc_name02"></dd>
+              <dt class="hcsearch-for-label">お客様名（苗字カナ）</dt>
+              <dd class="hcsearch-for-input">
+                <input type="text" v-model="hcSearchData.hc_name01">
+                <span v-if="hcSearchError.hc_name01">{{hcSearchError.hc_name01}}</span>
+              </dd>
             </dl>
             <dl class="hcsearch-form-item">
               <dt class="hcsearch-for-label">電話番号（下4桁）</dt>
-              <dd class="hcsearch-for-input"><input type="text" v-model="hcSearchData.hc_phone"></dd>
-            </dl>
-            <dl class="hcsearch-form-item">
-              <dt class="hcsearch-for-label">携帯電話番号（下4桁）</dt>
-              <dd class="hcsearch-for-input"><input type="text" v-model="hcSearchData.hc_mobilephone"></dd>
+              <dd class="hcsearch-for-input">
+                <input type="text" v-model="hcSearchData.hc_phone">
+                <span v-if="hcSearchError.hc_phone">{{hcSearchError.hc_phone}}</span>
+              </dd>
             </dl>
           </div>
           <div class="hcsearch-form-bottom d-flex align-items-center justify-content-center">
+            <button class="simu-common-btn btnSize01 white" @click="doClearSeachHc">クリア</button>
             <button class="simu-common-btn gray btnSize01" @click="doSeachHc">検索</button>
           </div>
         </div>
@@ -56,9 +58,9 @@
                 <template v-if="arrHcResult.length > 0">
                   <tr v-for="(HC, id) in getHcItems" :key="id">
                       <td scope="row" class="">{{HC.kaiinNo}}</td>
-                      <td>{{HC.nameKj1}}</td>
+                      <td>{{HC.nameKn1}}</td>
                       <td>{{HC.tel3}}</td>
-                      <td>1970/08/19 16:53</td>
+                      <td>{{getDateFomat(HC.birthDate)}}</td>
                       <td>
                           <button class="simu-common-btn gray btnSize01" @click="HcConfirm(HC)">選択</button>
                       </td>
@@ -83,7 +85,8 @@
             :page-range="5"
             :last-button-text="'最後へ'"
             hide-prev-next="true"
-            v-if="arrHcResult.length > 0"
+            break-view-class="break"
+            v-if="getPageCount > 1"
           />
         </div>
       </div>
@@ -101,6 +104,7 @@ export default {
   data() {
     return {
       hcSearchData:{},
+      hcSearchError:{},
       loaddingDataHcSearch: false,
       arrHcResult: [],
       searchFinish: false,
@@ -114,21 +118,59 @@ export default {
     closeModal: function(){
       this.$emit('closeHcModal')
     },
+    getDateFomat(date){
+      let date_string = date ? new Date(date * 1000) : new Date()
+      return Intl.DateTimeFormat("ja-JP").format(date_string)
+    },
+    checkErrors: function(){
+      Object.keys(this.hcSearchError).forEach(key => {
+        delete this.hcSearchError[key]
+      })
+      //HC番号 : max_length 10
+      if(this.hcSearchData.hasOwnProperty('hc_no') && (this.hcSearchData.hc_no.length > 10 || isNaN(this.hcSearchData.hc_phone))){
+        this.hcSearchError.hc_no = '10数字まで入力してください。'
+      }
+      let reg_kana = new RegExp(/^[ァ-ンヴー]*$/);
+      if(this.hcSearchData.hasOwnProperty('hc_name01') && !reg_kana.test(this.hcSearchData.hc_name01)){
+        this.hcSearchError.hc_name01 = '全角カタカナで入力してください。'
+      }
+      // if(this.hcSearchData.hasOwnProperty('hc_name02') && !reg_kana.test(this.hcSearchData.hc_name02)){
+      //   this.hcSearchError.hc_name02 = '全角カタカナで入力してください。'
+      // }
+      if(this.hcSearchData.hasOwnProperty('hc_phone') && (this.hcSearchData.hc_phone.length > 4 || isNaN(this.hcSearchData.hc_phone))){
+        this.hcSearchError.hc_phone = '下4桁の数字で入力してください。'
+      }
+      // if(this.hcSearchData.hasOwnProperty('hc_mobilephone') && (this.hcSearchData.hc_mobilephone.length > 4 || isNaN(this.hcSearchData.hc_mobilephone))){
+      //   this.hcSearchError.hc_mobilephone = '下4桁の数字で入力してください。'
+      // }
+
+      return Object.keys(this.hcSearchError).length > 0 ? true : false
+    },
+    doClearSeachHc: function(){
+      Object.keys(this.hcSearchData).forEach(key => {
+        this.hcSearchData[key] = ''
+      })
+    },
     doSeachHc: async function(){
       this.loaddingDataHcSearch = true
+
       //check error input
-      
-      //get HcSeach result form API
-      await this.getHcSeachFromApi().then(response => {
-        if(response){
-          if(response.status_code == 0){
-            this.arrHcResult = response.kaiinInfos
-          } else{
-            this.arrHcResult = []
+      if(!this.checkErrors()){
+        //get HcSeach result form API
+        await this.getHcSeachFromApi().then(response => {
+          if(response){
+            if(response.status_code == 0){
+              this.arrHcResult = response.kaiinInfos
+            } else{
+              this.arrHcResult = []
+            }
+            this.loaddingDataHcSearch = false
           }
-          this.loaddingDataHcSearch = false
-        }
-      })
+        })
+      } else{
+        this.arrHcResult = []
+        this.loaddingDataHcSearch = false
+      }
     },
     getHcSeachFromApi: async function(){
         let ret = null
@@ -202,6 +244,8 @@ export default {
     getPageCount: function() {
       return Math.ceil(this.arrHcResult.length / this.perPage);
     }
+  },
+  watch: {
   }
 };
 </script>

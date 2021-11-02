@@ -8,7 +8,7 @@
     </div>
     <div class="option-detail-bottom d-flex flex-column justify-content-between">
       <div class="option-detail-name">
-        <span class="option-detail-catename">NUT</span>
+        <span class="option-detail-catename" v-if="cateCurrObj != null">{{cateCurrObj.cate_name}}</span>
         <span class="option-detail-optionname">{{OptionDetailData.name}}</span>
       </div>
       <div class="option-detail-confirm d-flex justify-content-between">
@@ -52,9 +52,8 @@ export default {
       this.$emit("option-confirm", {"id": this.OptionDetailData.id, "img": this.OptionDetailData.img})
     }
   },
-  props: ['OptionDetailData'],
+  props: ['OptionDetailData', 'cateCurrObj'],
   mounted() {
-    
   },
   computed: {
     ...mapGetters([
