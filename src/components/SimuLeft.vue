@@ -50,7 +50,7 @@
       <span class="sumi-left-downbtn" @click="doSaveTemp">
         <img :src="main_path + 'html/user_data/assets/img/common/icon_save.png'" alt="">
       </span>
-      <button class="sumi-left-allbody simu-common-btn" @click="changeViewMode" :class="{on : viewMode == 1}">全身ON/OFF</button>
+      <button class="sumi-left-allbody simu-common-btn" @click="changeViewMode" :class="{gray : viewMode == 1}">全身ON/OFF</button>
       <div class="loadding_bl">
         <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
       </div>
@@ -67,7 +67,8 @@ export default {
   data() {
     return {
       //全身ON/OFF
-      viewMode: 0
+      viewMode: 0,
+      firstLoaded: false
     };
   },
   props: [],
@@ -165,6 +166,7 @@ export default {
           'combineId': this.combineIdActive,
           'option_selected' : this.optionSelectedData.filter(item => item.orderId == this.orderNowId),
           'size_selected' : this.sizeSelectedData.filter(item => item.orderId == this.orderNowId),
+          'necksize' : this.neckSelectedData.filter(item => item.orderId == this.orderNowId),
           'correct_selected' : this.correctSelectedData.filter(item => item.order_id == this.orderNowId),
           'quantity': 1,
           'stock': stockTemp
@@ -194,18 +196,29 @@ export default {
           }
         })
       }
+    },
+    SuitCheck: function(){
+      if(this.designData && this.designData.findIndex(item => item.item_id == 2 || item.item_id == 4) != -1){
+        return true
+      } else{
+        return false
+      }
     }
   },
   watch: {
-    designActive: function(){
-      this.viewMode = this.viewMode = 0
+    designActive: function(newDesign, oldDesign){
+      if(!this.firstLoaded && this.SuitCheck()){
+        this.firstLoaded = true
+        this.viewMode = 1
+      } else{
+        this.viewMode = 0
+      }
     },
     designActive_path: function(){
       $(".loadding_bl").addClass("on");
-    }
+    },
   },
   mounted() {
-    // this.defaultLoaded();
   },
   computed: {
     ...mapGetters([
@@ -234,7 +247,8 @@ export default {
         'sizeSelectedData',
         'correctSelectedData',
         'stockSelectedData',
-        'correct_detail_id_now'
+        'correct_detail_id_now',
+        'neckSelectedData'
       ]),
     //design path
     design: function() {
@@ -317,13 +331,19 @@ export default {
       return optionSavedList
     },
     itemDataActive(){
-      if(this.itemData.length && this.itemData.filter(item => item.orderId == this.orderNowId).length){
-        return this.itemData.filter(item => item.orderId == this.orderNowId)[0]
+      if(this.itemData.length && this.itemData.filter(item => item.orderId == this.orderNowId) != -1){
+        return this.itemData.find(item => item.orderId == this.orderNowId)
       } else{
         return null
       }
     },
-    
+    designData: function(){
+      if(this.itemDataActive){
+        return this.itemDataActive.design
+      } else{
+        return null
+      }
+    }
   },
 };
 </script>

@@ -152,7 +152,7 @@ ul, ol, dl{
   width: 100%;
   height: 100%;
   z-index: 1;
-  background-color: rgba(0, 0, 0, .8);
+  background-color: rgba(255, 255, 255, .7);
   pointer-events: none;
   content: '';
 }
@@ -367,7 +367,7 @@ pre{
 .fancy-radio-label {
   line-height: 24px;
   padding-left: 28px;
-  margin-right: 20px;
+  margin-right: 15px;
   position: relative;
   -webkit-user-select: no-select;
      -moz-user-select: no-select;
@@ -492,21 +492,16 @@ pre{
   position: absolute;
   font-size: 13px;
   padding: 10px 12.5px;
-  border: 1px solid #fff !important;
   z-index: 4;
-}
-.sumi-left-allbody.on{
-  background-color: #676665;
+  top: 30px;
+  right: 30px;
+  border: 1px solid #fff !important;
 }
 .sumi-left-downbtn{
   position: absolute;
   bottom: 30px;
   right: 30px;
   cursor: pointer;
-}
-.sumi-left-allbody{
-  top: 30px;
-  right: 30px;
 }
 
 .simuleft-sample img,
@@ -527,6 +522,7 @@ pre{
 /*  SimuRight */
 .container-simuright{
   width: 50%;
+  height: 100%;
   position: relative;
   background-color: #444444;
   color: #fff;
@@ -551,6 +547,7 @@ pre{
   font-size: 13px;
   padding: 0 15px;
   border-radius: 0;
+  height: 36px;
 }
 
 .simuright-price{
@@ -569,8 +566,8 @@ pre{
   font-size: 17px;
 }
 .simuright-options{
-  flex-grow: 1;
-  height: 100%;
+  /* flex-grow: 1; */
+  height: calc(100% - 215px);
   width: 100%;
   overflow: hidden;
   font-size: 13px;
@@ -600,6 +597,15 @@ pre{
   max-height: 100%;
   transition: max-height 0.25s ease-in;
 }
+.simuright-optionLists-size .simuright-optionLists-sizeleft{
+  flex-grow: 1;
+  width: calc(100% - 115px);
+}
+.simuright-optionLists-size .simuright-optionLists-sizeright{
+  width: 105px;
+  margin-left: 10px;
+}
+
 .simuright-options-sizeDown{
   background-color: #3A3A3A;
 }
@@ -607,14 +613,6 @@ pre{
   margin: 0 24px;
   position: relative;
   padding: 13px 6px;
-}
-.simuright-optionLists-sizeright{
-  margin-top: 20px;
-}
-.simuright-optionLists-sizeright .btn{
-  color: #fff;
-  border-color: #fff;
-  font-size: 13px;
 }
 
 .optionLv1, .optionLv2{
@@ -761,7 +759,7 @@ pre{
   width: 102px;
 }
 .simu-common-btn.btnSize02{
-  width: 240px;
+  width: 220px;
 }
 .simu-common-btn.btnSize03{
   width: 100%;
@@ -771,9 +769,15 @@ pre{
 }
 .simu-common-btn:hover{
   background-color: #676665;
+  color: #fff;
 }
 .simu-common-btn.gray:hover{
   background-color: #4a4948;
+  color: #fff;
+}
+.simu-common-btn.white:hover{
+  background-color: #4a4948;
+  color: #fff;
 }
 .simu-common-btn:disabled{
   pointer-events: none;
@@ -938,6 +942,7 @@ pre{
   height: 100%;
   justify-content: start;
   align-content: flex-start;
+  background-color: #3A3A3A;
 }
 .simuright-sub-result .optionItem{
   width: 33.3%;
@@ -966,12 +971,17 @@ pre{
 .simuright-kiji-list .kijiItem .kijiitem-img{
   width: 100%;
   height: 110px;
+  display: block;
+}
+.simuright-kiji-list .kijiItem .kijiitem-img img{
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 .simuright-kiji-list .simuright-kiji-text{
   font-size: 11px;
   font-weight: bold;
-  background-color: #676665;
+  background-color: #444444;
 }
 .simuright-kiji-name{
   display: block;
@@ -1044,6 +1054,7 @@ pre{
 }
 .optionParentCurrent{
   height: 70px;
+  background-color: #3A3A3A;
 }
 .simuright-sub-result .optionitem-img{
   width: 100%;
@@ -1053,7 +1064,7 @@ pre{
 .simuright-sub-result .simuright-option-text{
   font-size: 11px;
   font-weight: bold;
-  background-color: #676665;
+  background-color: #444444;
 }
 .simuright-option-icon{
   font-size: 15px;
@@ -1357,6 +1368,10 @@ pre{
   border-top: 1px solid #676665;
   padding: 25px 0;
 }
+.modal-container.white .modal-footer{
+  border-top: 1px solid #dee2e6;
+}
+
 
 /* Simu-complete */
 #container-complete .simu-confirm-card{
@@ -1365,11 +1380,7 @@ pre{
 .barCode-showBtn{
   padding: 40px 0;
 }
-.modal-container-white .modal-container{
-  background-color: #fff;
-  color: #000;
-  padding: 0;
-}
+
 .container-confirm .modal-container-sizeconfirm{
   width: 70%;
   height: 85vh;
@@ -1377,12 +1388,7 @@ pre{
   overflow: hidden;
 }
 .modal-sizeconfirm-content{
-  position: absolute;
   height: 100%;
-  width: 100%;
-  top: 0;
-  overflow-y: auto;
-  left: 0;
 }
 .modal-container-sizeconfirm .measure-sub{
   background-color: #999;
@@ -1601,10 +1607,8 @@ pre{
   margin: 10px 0;
 }
 .onemeasure-iniinfo-btn button{
-  width: 296px;
-  height: 50px;
   font-size: 14px;
-  margin: 5px 0;
+  margin: 10px;
 }
 .onemeasure-notice{
   display: block;

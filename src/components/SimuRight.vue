@@ -46,7 +46,7 @@
               <div class="simuright-options-name"></div>
             </div>
             <div class="simuright-options-rowDown simuright-options-sizeDown">
-              <div class="simuright-optionLists simuright-optionLists-size">
+              <div class="simuright-optionLists simuright-optionLists-size d-flex align-items-center justify-content-between">
                 <div class="simuright-optionLists-sizeleft">
                   <span v-for="Size in sizeSortData" :key="Size.id">
                     <input class="fancy-radio" hidden :id="'size-' + Size.id" name="size" type="radio" :value="Size.id" v-model="sizeSelectedValue">
@@ -60,7 +60,29 @@
                   <span v-if="sizeSortData.length == 0">サイズがありません</span>
                 </div>
                 <div class="simuright-optionLists-sizeright">
-                  <button type="button" class="btn btn-outline-secondary" @click="changeStepOneMeasure">OneMeasure</button>
+                  <button type="button" class="simu-common-btn gray btnSize01" @click="changeStepOneMeasure">OneMeasure</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="simuright-options-row" v-if="category_select == shirt_cate">
+            <div class="simuright-options-rowTop optionLv1 d-flex align-items-center" @click="showOptionParent($event)">
+              <span class="simuright-options-label">ネックサイズ</span>
+              <div class="simuright-options-name"></div>
+            </div>
+            <div class="simuright-options-rowDown simuright-options-sizeDown">
+              <div class="simuright-optionLists simuright-optionLists-size">
+                <div class="simuright-optionLists-sizeleft">
+                  <span v-for="Size in neckSizeData" :key="Size.id">
+                    <input class="fancy-radio" hidden :id="'neck-' + Size.id" name="neck" type="radio" :value="Size.id" v-model="neckSelectedValue">
+                    <label class="fancy-radio-label" :for="'neck-' + Size.id">
+                        <span class="fancy-label--text">{{Size.name}}</span>
+                        <span class="fancy-checkbox">
+                            <span class="radiobutton-dot"></span>
+                        </span>
+                    </label>
+                  </span>
+                  <span v-if="sizeSortData.length == 0">サイズがありません</span>
                 </div>
               </div>
             </div>
@@ -128,13 +150,31 @@
             <p class="simuright-prices-total">お支払い金額: <span class="totalPayment"><span v-if="sumPayment > 0">{{moneyTypeShow01(sumPayment)}}</span>円</span></p>
           </div>
           <div class="simuright-price-right d-flex justify-content-between flex-column">
-            <p class="delivery-date" v-if="deli_date">仕上がり予定日：{{deli_date}}</p>
+            <p class="delivery-date"><span v-if="deli_date">仕上がり予定日：{{deli_date}}</span></p>
             <div class="simu-nav-confirm d-flex justify-content-between">
               <button type="button" class="simu-common-btn btnSize01" @click="doBack">戻る</button>
               <button type="button" class="simu-common-btn btnSize01 gray" @click="doOrderComfirm">決定</button>
             </div>
           </div>
       </div>
+
+      <transition name="modal">
+        <div class="modal-mask" v-if="doBackShowModal">
+          <div class="modal-wrapper">
+            <div class="modal-container">
+                <div class="modal-body center">
+                  <span class="order-confirm-question">現在作成中のデータが消去されますがよろしいですか？</span>
+                </div>
+                <div class="modal-footer justify-content-center">
+                  <slot name="footer">
+                    <button class="simu-common-btn" @click="doBackShowModal = false">いええ</button>
+                    <button class="simu-common-btn" @click="doBackConfirm">はい</button>
+                  </slot>
+                </div>
+            </div>
+          </div>
+        </div>
+      </transition>
 
       <transition name="transitionRightToLeft">
         <div class="simuright-sub" 
@@ -167,6 +207,8 @@ export default {
         return {
           designActiveId: null,
           sizeSelectedValue: null,
+          neckSelectedValue: null,
+
           optionParentDataTemp: {},
           genreData: {},
 
@@ -260,12 +302,20 @@ export default {
           correction_selected_id: 0,
           tempCorrectDetailId: null,
           loaddingDataCorrectDetail: false,
-          deli_date: ''
+          deli_date: '',
+
+          shirt_cate: 14,
+          doBackShowModal: false,
+
+          firstShowCorrect: false
         }
     },
     props: [],
     methods: {
       doBack(){
+        this.doBackShowModal = true
+      },
+      doBackConfirm(){
         this.$store.dispatch('handleChangeModelTemp', {styleId: this.styleSelected, modelId: this.modelSelected})
         this.$store.dispatch('handleChangePage', 2)
         this.$store.dispatch('handleChangeStep', 1)
@@ -328,7 +378,8 @@ export default {
             data: {
               'items' : this.itemSelected,
               'model' : this.modelSelected,
-              'style' : this.styleSelected
+              'style' : this.styleSelected,
+              'category' : this.category_select
             }
           })
           .then(response => {
@@ -353,6 +404,7 @@ export default {
               stock: response.stock,
               stock_design: response.stock_design,
               size: response.size,
+              necksize: response.necksize,
               correction: response.correction
             })
             this.$store.dispatch('handleChangeLoaddingData', false)
@@ -432,14 +484,20 @@ export default {
         console.log(this.orderTempItem)
         if(!this.kijiActive){
           alert('生地を選択してください。')
-        } else if(!this.initialData.customer_id){
+        }
+        else if(!this.initialData.customer_id){
           alert('HC番号をを設定ください。')
         } 
         else if(!this.sizeSelectedCheck){
           alert('サイズを選択してください。')
-        } else if(!this.allOptionSelectedCheck()){
+        } 
+        else if(!this.allOptionSelectedCheck()){
           alert('オプションを全て選択してください。')
-        } else{
+        } 
+        else if(this.category_select == this.shirt_cate && !this.neckSelectedValue){
+          alert('ネックサイズを選択してください。')
+        } 
+        else{
           this.$store.dispatch('handleChangeStep', 3)
         }
       },
@@ -577,18 +635,13 @@ export default {
       },
       updateDeliverySchedule: async function(){
         await this.getDeliverySchedule().then(response => {
-          if(response){
             this.deli_date = response
-          }
         })
       }
     },
     mounted() {
       this.$store.dispatch('handleChangeOptionDetailActive', null)
       this.designActiveId = 0
-      // if(!this.itemDataActive){
-      //   this.setItemData()
-      // }
       this.setKijiData()
 
       //Hide Cart button
@@ -596,14 +649,15 @@ export default {
 
       if(this.kijiActive){
         this.updateDeliverySchedule()
-      } else{
-        let deli_date_temp = new Date(new Date().getTime()+(30*24*60*60*1000));
-        this.deli_date = deli_date_temp.getFullYear()+'年'+(deli_date_temp.getMonth() + 1) +'月'+deli_date_temp.getDate()+'日'
-      }
-
+      } 
+      // else{
+      //   let deli_date_temp = new Date(new Date().getTime()+(30*24*60*60*1000));
+      //   this.deli_date = deli_date_temp.getFullYear()+'年'+(deli_date_temp.getMonth() + 1) +'月'+deli_date_temp.getDate()+'日'
+      // }
       if(this.kijiActive && this.kijiData.length && !(this.kijiData.find(item => item.id == this.kijiActive))){
         this.$store.dispatch('handleChangeKiji', null)
       }
+      
     },
     watch: {
       designActiveSplit: function(){
@@ -634,6 +688,14 @@ export default {
         } else{
           this.sizeSelectedValue = null
         }
+
+        //set initial value neck size
+        if(this.neckSelectedData.length && this.neckSelectedData.findIndex(item => item.orderId == this.orderNowId) !== -1){
+          this.neckSelectedValue = this.neckSelectedData.find(item => item.orderId == this.orderNowId).id
+        } else{
+          this.neckSelectedValue = null
+        }
+
       },
       itemCombineObj: function(){
         this.$store.dispatch('handleChangeCombineActive', this.itemCombineObj.id)
@@ -661,14 +723,24 @@ export default {
         }
         console.log(this.stockSelectedDataNow)
       },
+      neckSelectedValue: function(){
+        if(this.neckSelectedValue && this.neckSizeData.findIndex(item => item.id == this.neckSelectedValue) !== -1){
+          let neckObject = this.neckSizeData.find(item => item.id == this.neckSelectedValue)
+          this.$store.dispatch('handleUpdateNeckSelectedData', 
+            {orderId: this.orderNowId, id: neckObject.id, name: neckObject.name}
+          )
+        }
+      },
       correction_selected_id: function(){
         if(this.correction_selected_id && this.correctDetailData.findIndex(item => item.correct_id == this.correction_selected_id) == -1){
           this.getCorrectionDetailData(this.correction_selected_id)
         }
         this.$store.dispatch('handleChangeCorrectionSelectedId', this.correction_selected_id)
+
       },
       //correct detail change
-      tempCorrectDetailId: function(){
+      tempCorrectDetailId: function(newval, oldval){
+
         let tempCorrectDetailIndex = this.correctDetailActive.findIndex(item => item.id == this.tempCorrectDetailId)
         let correctDetailIndexNow = this.correctSelectedDataActive.findIndex(item => (
           item.order_id == this.orderNowId
@@ -697,6 +769,11 @@ export default {
           }
 
           this.$store.dispatch('handleUpdateCorrectSelectedData', [tempCorrectionItem])
+
+        }
+        
+        if(tempCorrectDetailIndex != -1 && (oldval == null || this.correctDetailActive.findIndex(item => item.id == oldval) != -1)){
+          this.correction_selected_id = 0
         }
       },
       kijiActive: function(){
@@ -730,7 +807,8 @@ export default {
         'correctSelectedData',
         'stockSelectedData',
         'category_select',
-        'orderTempItem'
+        'orderTempItem',
+        'neckSelectedData'
       ]),
       kijiObjectActive: function(){
         if(this.kijiData.length && this.kijiData.findIndex((item) => item.id === this.kijiActive) !== -1){
@@ -796,11 +874,17 @@ export default {
           return null
         }
       },
-
       //size
       sizeData: function(){
         if(this.itemDataActive){
           return this.itemDataActive.size
+        } else{
+          return null
+        }
+      },
+      neckSizeData: function(){
+        if(this.itemDataActive){
+          return this.itemDataActive.necksize
         } else{
           return null
         }

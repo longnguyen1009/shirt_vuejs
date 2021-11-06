@@ -16,7 +16,7 @@
         <div class="option-detail-moreinfo d-flex justify-content-between flex-column">
           <div class="option-detail-moreinfo-top">
             <span class="option-detail-val">{{kijiDetailData.code}}</span>
-            <span class="option-detail-val">{{kijiDetailData.fabric_color}}</span>
+            <span class="option-detail-val">C/{{kijiDetailData.fabric_color}}</span>
             <span class="option-detail-val option-detail-val-composition" 
             v-for="(compo, id) in kijiDetailData.composition" :key="id">{{compo}} / </span>
           </div>
@@ -59,14 +59,7 @@ export default {
       this.$emit("kiji-confirm", {"id": this.kijiDetailData.id, "img": this.kijiDetailData.img})
     },
     getCombinePrice: function(){
-      let shop_kind = this.initialData.shop_kind
-      let rank = 0
-      if(this.kijiDetailData.id){
-        rank = (shop_kind != 2) ? this.kijiDetailData.ua_retail_price : ((shop_kind == 2) ? this.kijiDetailData.gl_retail_price : 0)
-      }
-      console.log(this.combinePriceData)
-      console.log(this.itemCombineObj)
-      console.log(rank)
+      let rank = this.kijiDetailData.rank
       let combinePriceIndex = this.combinePriceData.findIndex(item => 
         item.model == this.modelSelected
         && item.combineId == this.itemCombineObj.id
@@ -91,8 +84,8 @@ export default {
       'modelSelected',
       'orderNowId',
       'itemData',
-      'combinePriceData'
-
+      'combinePriceData',
+      'styleSelected'
     ]),
     itemDataActive: function(){
         if(this.itemData.length && this.itemData.filter(item => item.orderId == this.orderNowId).length){

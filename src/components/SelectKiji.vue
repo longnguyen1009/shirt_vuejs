@@ -19,8 +19,9 @@
           <template v-for="Kiji in kijiSortResult">
             <div class="kijiItem" v-if="checkStyleAndStockKiji(Kiji.id)" :key="Kiji.id"
             :class="{active: (Kiji.id == kijiSelected)}">
-              <img class="kijiitem-img" :src="kiji_img_path + Kiji.img" alt=""
-                @click="kijiChange(Kiji.id, Kiji.img_simu)">
+              <span class="kijiitem-img" @click="kijiChange(Kiji.id, Kiji.img_simu)">
+                <img class="kijiitem-img" :src="kiji_img_path + Kiji.img" alt="">
+              </span>
               <span class="simuright-kiji-icon" @click="showKijiDetail(Kiji.id)">
                 <img :src="main_path + 'html/user_data/assets/img/common/icon_info.png'" alt="">
               </span>
@@ -141,13 +142,14 @@ export default {
           headers: {'X-Requested-With': 'XMLHttpRequest'},
           data: {
             kiji: kijiId,
-            stock: stock
+            stock: stock,
+            stock_old_id: this.stock_old_id
           }
         })
         .then(response => {
           // console.log(response)
           ret = response.data.data
-           this.isLoading = false
+          this.isLoading = false
         })
         .catch(error => {
           this.isLoading = false
@@ -159,32 +161,36 @@ export default {
     kijiConfirm: function(){
       if(this.kijiSelected && this.kijiData.find(item => item.id == this.kijiSelected)){
         let Kiji = this.kijiData.find(item => item.id == this.kijiSelected)
-        if(Kiji.stock_unlimited){
-          this.$store.dispatch('handleChangeKiji', this.kijiSelected)
-          this.closeOption()
-        } else{
-          let requireStock = 0
+        let requireStock = 0
+
+        if(!Kiji.stock_unlimited){
           if(Kiji.fabric_kind == 1) {
               requireStock = this.stockSelectedDataNow.bichikusei_min
           } else if(Kiji.fabric_kind == 2){
               requireStock = this.stockSelectedDataNow.sensei_min
           }
-
-          this.saveKijiStockApi(this.kijiSelected, requireStock).then(response => {
-            if(response){
-              if(response == 'nostock'){
-                this.$store.dispatch('handleChangeErrorCode', 7)
-                this.setKijiData()
-              } else{
-                this.$store.dispatch('handleChangeKiji', this.kijiSelected)
-                this.closeOption()
-              }
-            } else{
-              this.$store.dispatch('handleChangeErrorCode', 2)
-              this.setKijiData()
-            }
-          })
         }
+        
+        this.saveKijiStockApi(this.kijiSelected, requireStock).then(response => {
+          if(response){
+            if(response == 'nostock'){
+              this.$store.dispatch('handleChangeErrorCode', 7)
+              this.setKijiData()
+            } else{
+              if(Number.isInteger(response)){
+                this.$store.dispatch('handleUpdateStockOldId', response)
+              } else{
+                this.$store.dispatch('handleUpdateStockOldId', false)
+              }
+              this.$store.dispatch('handleChangeKiji', this.kijiSelected)
+              this.closeOption()
+            }
+          } else{
+            this.$store.dispatch('handleChangeErrorCode', 2)
+            this.setKijiData()
+          }
+        })
+
       } else{
         alert('生地を選択してください')
       }
@@ -277,7 +283,8 @@ export default {
       'kijiData',
       'stockSelectedData',
       'orderNowId',
-      'styleSelected'
+      'styleSelected',
+      'stock_old_id'
     ]),
     kijiDetailData: function(){
       if(this.kijiDetailId != 0){

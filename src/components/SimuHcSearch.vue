@@ -30,10 +30,24 @@
               </dd>
             </dl>
             <dl class="hcsearch-form-item">
+              <dt class="hcsearch-for-label">お客様名（苗字カナ）</dt>
+              <dd class="hcsearch-for-input">
+                <input type="text" v-model="hcSearchData.hc_name02">
+                <span v-if="hcSearchError.hc_name02">{{hcSearchError.hc_name02}}</span>
+              </dd>
+            </dl>
+            <dl class="hcsearch-form-item">
               <dt class="hcsearch-for-label">電話番号（下4桁）</dt>
               <dd class="hcsearch-for-input">
                 <input type="text" v-model="hcSearchData.hc_phone">
                 <span v-if="hcSearchError.hc_phone">{{hcSearchError.hc_phone}}</span>
+              </dd>
+            </dl>
+            <dl class="hcsearch-form-item">
+              <dt class="hcsearch-for-label">携帯電話番号（下4桁）</dt>
+              <dd class="hcsearch-for-input">
+                <input type="text" v-model="hcSearchData.hc_mobilephone">
+                <span v-if="hcSearchError.hc_mobilephone">{{hcSearchError.hc_mobilephone}}</span>
               </dd>
             </dl>
           </div>
@@ -58,8 +72,8 @@
                 <template v-if="arrHcResult.length > 0">
                   <tr v-for="(HC, id) in getHcItems" :key="id">
                       <td scope="row" class="">{{HC.kaiinNo}}</td>
-                      <td>{{HC.nameKn1}}</td>
-                      <td>{{HC.tel3}}</td>
+                      <td>{{HC.nameKn1}}{{HC.nameKn2}}</td>
+                      <td>{{HC.tel3 ? HC.tel3.slice(HC.tel3.length - 4) : HC.keiTelNo3.slice(HC.keiTelNo3.length - 4)}}</td>
                       <td>{{getDateFomat(HC.birthDate)}}</td>
                       <td>
                           <button class="simu-common-btn gray btnSize01" @click="HcConfirm(HC)">選択</button>
@@ -134,15 +148,15 @@ export default {
       if(this.hcSearchData.hasOwnProperty('hc_name01') && !reg_kana.test(this.hcSearchData.hc_name01)){
         this.hcSearchError.hc_name01 = '全角カタカナで入力してください。'
       }
-      // if(this.hcSearchData.hasOwnProperty('hc_name02') && !reg_kana.test(this.hcSearchData.hc_name02)){
-      //   this.hcSearchError.hc_name02 = '全角カタカナで入力してください。'
-      // }
+      if(this.hcSearchData.hasOwnProperty('hc_name02') && !reg_kana.test(this.hcSearchData.hc_name02)){
+        this.hcSearchError.hc_name02 = '全角カタカナで入力してください。'
+      }
       if(this.hcSearchData.hasOwnProperty('hc_phone') && (this.hcSearchData.hc_phone.length > 4 || isNaN(this.hcSearchData.hc_phone))){
         this.hcSearchError.hc_phone = '下4桁の数字で入力してください。'
       }
-      // if(this.hcSearchData.hasOwnProperty('hc_mobilephone') && (this.hcSearchData.hc_mobilephone.length > 4 || isNaN(this.hcSearchData.hc_mobilephone))){
-      //   this.hcSearchError.hc_mobilephone = '下4桁の数字で入力してください。'
-      // }
+      if(this.hcSearchData.hasOwnProperty('hc_mobilephone') && (this.hcSearchData.hc_mobilephone.length > 4 || isNaN(this.hcSearchData.hc_mobilephone))){
+        this.hcSearchError.hc_mobilephone = '下4桁の数字で入力してください。'
+      }
 
       return Object.keys(this.hcSearchError).length > 0 ? true : false
     },
@@ -211,11 +225,7 @@ export default {
           method: 'post',
           headers: {'X-Requested-With': 'XMLHttpRequest'},
           data: {
-            'id': HC.kaiinNo,
-            'name01': HC.nameKj1,
-            'name02': HC.nameKj2,
-            'phone': HC.tel3 ? HC.tel3 : HC.keiTelNo3,
-            'lastbuy': HC.birthDate ? new Date(HC.birthDate * 1000) : new Date(),
+            hcData: HC
           }
         })
         .then(response => {

@@ -29,7 +29,10 @@
                   </div>
                 </div>
                 <div class="onemeasure-iniinfo-btn">
-                  <button type="button" class="btn btn-dark" onclick="doNext(2);">採寸する</button>
+                  <span class="d-flex justify-content-between align-items-center">
+                    <button type="button" class="simu-common-btn white btnSize02" @click="doBackToSimuNotFinish">オーダー画面に戻る</button>
+                    <button type="button" class="simu-common-btn black btnSize02" onclick="doNext(2);">採寸する</button>
+                  </span>
                   <span class="onemeasure-notice">カメラが起動します</span>
                 </div>
               </div>
@@ -123,6 +126,7 @@
                 <div class="onemeasure-iniinfo">
                   <div id="sizeTableResult" class="d-flex justify-content-between align-items-center flex-wrap"></div>
                   <span class="onemeasure-result-hidden hidden_button"></span>
+                  <span class="onemeasure-result-alldata hidden_button"></span>
                 </div>
                 <div class="onemeasure-iniinfo-btn">
                   <button type="button" class="btn btn-dark" onclick="doResetMeasure();">もう一度撮影する</button>
@@ -240,6 +244,7 @@ export default {
 
       calSizeResult: [],
       measureData: [],
+      measureAllData: []
       // measureData: [{"code":"msize04_020","name":"首周り","unit":"cm","imageUrl":"https://www.emtailor.com/imeas_asset/icon/icon190102/msize04_020.png","meaValue":"34.76","type":""},{"code":"msize03_010","name":"肩幅","unit":"cm","imageUrl":"https://www.emtailor.com/imeas_asset/icon/icon190102/msize03_010.png","meaValue":"43.86","type":""},{"code":"msize01_010","name":"胸囲","unit":"cm","imageUrl":"https://www.emtailor.com/imeas_asset/icon/icon190102/msize01_010.png","meaValue":"84.89","type":"kyoui"},{"code":"msize08_012","name":"ゆき丈","unit":"cm","imageUrl":"https://www.emtailor.com/imeas_asset/icon/icon190102/msize08_012.png","meaValue":"83.81","type":""},{"code":"msize01_030","name":"ウエスト","unit":"cm","imageUrl":"https://www.emtailor.com/imeas_asset/icon/icon190102/msize01_030.png","meaValue":"66.66","type":"west"},{"code":"msize01_040","name":"ヒップ","unit":"cm","imageUrl":"https://www.emtailor.com/imeas_asset/icon/icon190102/msize01_040.png","meaValue":"88.75","type":"hip"},{"code":"msize11_030","name":"ズボン総丈","unit":"cm","imageUrl":"https://www.emtailor.com/imeas_asset/icon/icon190102/msize11_030.png","meaValue":"99.14","type":""},{"code":"msize11_051","name":"股下","unit":"cm","imageUrl":"https://www.emtailor.com/imeas_asset/icon/icon190102/msize11_051.png","meaValue":"Available in pro version","type":""}]
     };
   },
@@ -309,9 +314,16 @@ export default {
       this.resultMeasureShow = true
       this.measureData = JSON.parse($('.onemeasure-result-hidden').html())
       this.calSizeMeasure()
+      this.measureAllData = JSON.parse($('.onemeasure-result-alldata').html())
     },
     doBackToSimu: function(){
         this.updateSiseFromMeasure()
+        $('.container-onemeasure').removeClass('show')
+        this.resultMeasureShow = false
+        this.$store.dispatch('handleChangeStep', 2)
+        this.$store.dispatch('handleUpdateOneMeasureData', this.measureData)
+    },
+    doBackToSimuNotFinish: function(){
         $('.container-onemeasure').removeClass('show')
         this.resultMeasureShow = false
         this.$store.dispatch('handleChangeStep', 2)

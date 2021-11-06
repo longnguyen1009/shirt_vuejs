@@ -130,9 +130,9 @@
           </div>
         </div>
       </div>
-      <div class="modal-mask modal-container-white" v-if="orderSizeActive !== null">
+      <div class="modal-mask" v-if="orderSizeActive !== null">
         <div class="modal-wrapper">
-          <div class="modal-container modal-container-sizeconfirm">
+          <div class="modal-container white modal-container-sizeconfirm">
             <transition name="transitionRightToLeftHalfWidth">
                 <div class="measure-sub" v-if="correction_selected_id">
                   <ul class="measure-sub-list">
@@ -165,7 +165,7 @@
                 </div>
             </transition>
             <div class="measure-sub-fade" v-if="correction_selected_id" @click="closeCorrectionDetail"></div>
-            <div class="modal-sizeconfirm-content">
+            <div class="modal-sizeconfirm-content d-flex flex-column justify-content-center">
               <div class="modal-body">
                 <div v-for="(Design, id) in designData(orderSizeActive)" :key="id" class="modal-sizeconfirm-designItem">
                   <h4 class="modal-sizeconfirm-designName">{{Design.design_label}}</h4>
@@ -187,8 +187,8 @@
               </div>
               <div class="modal-footer justify-content-center">
                 <slot name="footer">
-                  <button class="simu-common-btn" @click="doBack(orderSizeActive)">シミュレーターに戻る</button>
-                  <button class="simu-common-btn" @click="confirmModalClose">オーダー確認画面に戻る</button>
+                  <button class="simu-common-btn white btnSize02 btnSizeHalf" @click="doBack(orderSizeActive)">シミュレーターに戻る</button>
+                  <button class="simu-common-btn gray btnSize02 btnSizeHalf" @click="confirmModalClose">オーダー確認画面に戻る</button>
                 </slot>
               </div>
             </div>
@@ -335,6 +335,7 @@ export default {
       this.orderIdActive = null
     },
     doBack(orderId){
+      console.log(this.orderTempItem)
       this.$store.dispatch('handleChangeOrder', orderId)
       this.$store.dispatch('handleChangeStep', this.step - 1)
       this.$store.dispatch('handleUpdateStockSelectedData', null)
@@ -359,6 +360,7 @@ export default {
         data: {
           orderitem: this.orderTempItem,
           delivery_id: this.deliActive,
+          measureData: this.measureData ? this.measureData : null,
           cartTempId: this.initialData.cartItemId
         }
       })
@@ -420,6 +422,10 @@ export default {
               option_selected: orderClone.option_selected.map(item =>{
                 let optionClone = Object.assign({}, {...item, orderId: 0})
                 return optionClone
+              }),
+              necksize: orderClone.necksize.map(item =>{
+                let neckSizeClone = Object.assign({}, {...item, orderId: 0})
+                return neckSizeClone
               }),
               combineId: orderClone.combineId,
               quantity: 1,
@@ -597,6 +603,7 @@ export default {
         ret = response.data.data
       })
       .catch(error => {
+        this.$store.dispatch('handleChangeErrorCode', 8)
         console.log(error)
       })
       return ret
@@ -680,7 +687,7 @@ export default {
         option_selected: this.optionSelectedData.filter(item => item.orderId == this.orderNowId),
         combineId: this.combineIdActive,
         quantity: 1,
-  
+        necksize: this.neckSelectedData.filter(item => item.orderId == this.orderNowId),
         //size and correction
         size_selected: this.sizeSelectedData.filter(item => item.orderId == this.orderNowId),
         correct_selected: this.correctSelectedData.filter(item => item.order_id == this.orderNowId),
@@ -766,7 +773,9 @@ export default {
       'sizeSelectedData',
       'correctSelectedData',
       'stockSelectedData',
-      'correctDetailData'
+      'correctDetailData',
+      'neckSelectedData',
+      'measureData'
     ]),
     sizeDetailActive: function(){
       if(this.orderSizeActive !== null){

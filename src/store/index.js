@@ -19,12 +19,18 @@ export default new Vuex.Store({
     page: 1, //page 2 is model page
 
     main_path: 'https://ua.coremobile.win/',
-    simu_img_path: "/html/upload/simu_model/",
-    style_img_path: "/html/upload/save_image/",
-    model_img_path: "/html/upload/save_image/",
-    kiji_img_path: "/html/upload/save_image/",
-    option_img_path: "/html/upload/save_image/",
-    correct_detail_img_path: "/html/upload/correct_detail/",
+    simu_img_path: "https://ua.coremobile.win/html/upload/simu_model/",
+    style_img_path: "https://s3-ap-northeast-1.amazonaws.com/ua-dev-backet/upload/save_image/",
+    model_img_path: "https://s3-ap-northeast-1.amazonaws.com/ua-dev-backet/upload/save_image/",
+    kiji_img_path: "https://s3-ap-northeast-1.amazonaws.com/ua-dev-backet/upload/save_image/",
+    option_img_path: "https://s3-ap-northeast-1.amazonaws.com/ua-dev-backet/upload/save_image/",
+    correct_detail_img_path: "https://s3-ap-northeast-1.amazonaws.com/ua-dev-backet/upload/correct_detail/",
+    // simu_img_path: "/html/upload/simu_model/",
+    // style_img_path: "/html/upload/save_image/",
+    // model_img_path: "/html/upload/save_image/",
+    // kiji_img_path: "/html/upload/save_image/",
+    // option_img_path: "/html/upload/save_image/",
+    // correct_detail_img_path: "/html/upload/correct_detail/",
 
     // styleData load from server
     styleData: [], //[{id, name, brand, detail, img, model[], product_price}]
@@ -87,6 +93,7 @@ export default new Vuex.Store({
       {errorCode: 5, text: 'オーダー完了しました。'},
       {errorCode: 6, text: 'アイテム組み合わせが見つかりません。もう一度確認してください。'},
       {errorCode: 7, text: 'この生地は在庫がなくなりました。もう一度確認してください。'},
+      {errorCode: 8, text: '在庫情報はありません。'},
     ],
     loaddingData: false,
     combinePriceData: [], //{model, combineid, price}
@@ -106,7 +113,13 @@ export default new Vuex.Store({
 
     sizeSelectedData: [],// {orderId, size_id, item_id, name, base_val...}
     correctSelectedData: [], //{order_id, size_id, design_id, correct_id, correct_name, size_link, base_val, correct_detail_id, correct_detail_name, correct_detail_val, correct_result}
-    correct_detail_id_now: 0
+    correct_detail_id_now: 0,
+
+    //necksize
+    neckSelectedData: [], //{orderId, id , name},
+
+    measureData: null,
+    stock_old_id: null
   },
   getters: {
     //step
@@ -170,6 +183,10 @@ export default new Vuex.Store({
     stockSelectedData: state => state.stockSelectedData,
     main_path: state => state.main_path,
     correct_detail_id_now: state => state.correct_detail_id_now,
+
+    neckSelectedData: state => state.neckSelectedData,
+    measureData: state => state.measureData,
+    stock_old_id: state => state.stock_old_id
   },
   mutations: {
     changeStep(state, newStep){
@@ -300,7 +317,10 @@ export default new Vuex.Store({
       // state.kijiData = [],
       // state.itemData = [],
 
-      state.optionSelectedData = state.optionSelectedData.filter(item => item.orderId != state.orderTempItem), // list of {combine_id, item_id, design_id, parent_id, option_id, cate_id, option_img: simu_img, name}
+      state.optionSelectedData = state.optionSelectedData.filter(item => item.orderId != state.orderTempItem)
+      state.sizeSelectedData = state.sizeSelectedData.filter(item => item.orderId != state.orderTempItem)
+      state.correctSelectedData = state.correctSelectedData.filter(item => item.order_id != state.orderTempItem)
+      state.neckSelectedData = state.neckSelectedData.filter(item => item.orderId != state.orderTempItem)
       state.optionDetailActive = null,
 
       //raw html for option change img temp
@@ -347,6 +367,7 @@ export default new Vuex.Store({
       state.itemSelected = (data.item) ? JSON.parse(data.item) : []
       state.optionSelectedData = (data.option_selected) ? JSON.parse(data.option_selected) : []
       state.sizeSelectedData = (data.size_selected) ? JSON.parse(data.size_selected) : []
+      state.neckSelectedData = (data.necksize) ? JSON.parse(data.necksize) : []
       state.correctSelectedData = (data.correct_selected) ? JSON.parse(data.correct_selected) : []
       state.category_select = (data.category_select) ? Number(data.category_select) : null
       state.deliActive = (data.shipping) ? data.shipping: 0
@@ -374,6 +395,8 @@ export default new Vuex.Store({
       state.orderTempItem = [...state.orderTempItem]
     },
     changeOrderTempItem(state, arrOrderTemp){
+      console.log("changeOrderTempItem")
+      console.log(arrOrderTemp)
       state.orderTempItem = state.orderTempItem.filter(item => item.id != 0)
       arrOrderTemp.forEach(element => {
         const existOrderTemp = state.orderTempItem.findIndex(item => item.id == element.id)
@@ -386,12 +409,15 @@ export default new Vuex.Store({
           element.item = JSON.parse(element.item)
           element.option_selected = JSON.parse(element.option_selected)
           element.size_selected = JSON.parse(element.size_selected)
+          element.necksize = JSON.parse(element.necksize)
           element.correct_selected = JSON.parse(element.correct_selected)
           element.stock = Number(element.stock)
-          element.arrive_date = new Date(element.arrive_date)
+          element.arrive_date = element.arrive_date ? (new Date(element.arrive_date)) : null
           state.orderTempItem.push(element)
         }
       })
+      console.log(state.orderTempItem)
+
       state.orderTempItem = [...state.orderTempItem]
     },
     changeOrder(state, orderId){
@@ -415,6 +441,7 @@ export default new Vuex.Store({
         state.orderTempItem[index].option_selected = state.optionSelectedData.filter(item => item.orderId == element.id)
         state.orderTempItem[index].correct_selected = state.correctSelectedData.filter(item => item.order_id == element.id)
         state.orderTempItem[index].design = state.itemData.find(item => item.orderId == element.id).design
+        state.orderTempItem[index].necksize = state.neckSelectedData.filter(item => item.orderId == element.id)
       })
       state.orderTempItem = [...state.orderTempItem]
     },
@@ -594,6 +621,21 @@ export default new Vuex.Store({
     },
     changeCorrectionSelectedId(state, id){
       state.correct_detail_id_now = id
+    },
+    updateNeckSelectedData(state, neckData){
+      let neckIndex = state.neckSelectedData.findIndex(item => item.orderId == neckData.orderId)
+      if(neckIndex !== -1){
+        state.neckSelectedData[neckIndex] = neckData
+      } else{
+        state.neckSelectedData.push(neckData)
+      }
+      state.neckSelectedData = [...state.neckSelectedData]
+    },
+    updateOneMeasureData(state, measureData){
+      state.measureData = measureData
+    },
+    updateStockOldId(state, value){
+      state.stock_old_id = value
     }
   },
   actions: {
@@ -749,6 +791,15 @@ export default new Vuex.Store({
     
     handleChangeCorrectionSelectedId(context, id){
       context.commit('changeCorrectionSelectedId', id)
+    },
+    handleUpdateNeckSelectedData(context, neckData){
+      context.commit('updateNeckSelectedData', neckData)
+    },
+    handleUpdateOneMeasureData(context, measureData){
+      context.commit('updateOneMeasureData', measureData)
+    },
+    handleUpdateStockOldId(context, value){
+      context.commit('updateStockOldId', value)
     }
   }
 })

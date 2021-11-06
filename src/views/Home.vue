@@ -178,7 +178,7 @@ export default {
           }
         })
     },
-    getItemData: async function(item_selected, model_selected, style_selected){
+    getItemData: async function(item_selected, model_selected, style_selected, category_select){
         this.$store.dispatch('handleChangeLoaddingData', true)
         let ret = null
         if(item_selected){
@@ -189,7 +189,8 @@ export default {
             data: {
               'items' : item_selected,
               'model' : model_selected,
-              'style' : style_selected
+              'style' : style_selected,
+              'category': category_select
             }
           })
           .then(response => {
@@ -205,8 +206,8 @@ export default {
         }
         return ret
       },
-    setItemData: async function(item_selected, model_selected, style_selected){
-      await this.getItemData(item_selected, model_selected, style_selected).then(response => {
+    setItemData: async function(item_selected, model_selected, style_selected, category_select){
+      await this.getItemData(item_selected, model_selected, style_selected, category_select).then(response => {
         if(response){
           this.$store.dispatch('handleChangeItemData', {
             orderId: this.orderNowId,
@@ -215,13 +216,14 @@ export default {
             stock: response.stock,
             stock_design: response.stock_design,
             size: response.size,
+            necksize: response.necksize,
             correction: response.correction
           })
         }
       })
     },
-    updateItemData: async function(id, item, model, style){
-      await this.getItemData(item, model, style).then(response => {
+    updateItemData: async function(id, item, model, style, category_select){
+      await this.getItemData(item, model, style, category_select).then(response => {
         if(response){
           this.$store.dispatch('handleChangeItemData', {
             orderId: id,
@@ -230,6 +232,7 @@ export default {
             stock: response.stock,
             stock_design: response.stock_design,
             size: response.size,
+            necksize: response.necksize,
             correction: response.correction
           })
         }
@@ -359,6 +362,11 @@ export default {
         })
       }
     },
+    updateNeckSizeData: function(id, neckSizeData){
+      neckSizeData.forEach(element => {
+        this.$store.dispatch('handleUpdateNeckSelectedData', {orderId: id, id: element.id, name: element.name})
+      })
+    },
     getModelData: async function(){
       let ret = null
       if(this.modelSelected){
@@ -391,19 +399,23 @@ export default {
   watch: {
     itemSelected: function(){
       if(this.itemSelected.length){
-        this.setItemData(this.itemSelected, this.modelSelected, this.styleSelected)
+        this.setItemData(this.itemSelected, this.modelSelected, this.styleSelected, this.category_select)
       }
     },
     //load data from history change
     orderTempItem: function(){
       this.orderTempItem.forEach(element => {
         if(this.itemData.findIndex(item => item.orderId == element.id) == -1){
-          this.updateItemData(element.id, element.item, element.model, element.style)
+          this.updateItemData(element.id, element.item, element.model, element.style, element.category_select)
         }
         this.updateOptionSelectedData(element.option_selected)
         this.updateSizeSelectedData(element.size_selected)
         this.updateCorrectSelectedData(element.correct_selected)
         this.updateCombineData(element.model, element.combineId)
+
+        if(element.necksize.length){
+          this.updateNeckSizeData(element.id, element.necksize)
+        }
       })
     },
     itemData: function(){
