@@ -13,7 +13,7 @@
                   <p class="">
                     <span class="simu-confirm-kiji-code">{{getKijiObj(Item.product_id).code}}</span><br>
                     <span class="simu-confirm-kiji-name">{{getKijiObj(Item.product_id).name}}</span><br>
-                    <span class="simu-confirm-kiji-name">c/# 09</span>
+                    <span class="simu-confirm-kiji-name">C/# 09</span>
                   </p>
                 </div>
               </div>

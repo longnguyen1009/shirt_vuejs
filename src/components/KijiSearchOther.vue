@@ -24,7 +24,7 @@
                 <li class="searchkiji-brand-item" v-for="(Color, id) in kijiSearchData.color" :key="id">
                   <input class="fancy-radio" hidden :id="'color-' + Color.id" name="color" type="checkbox" :value="Color.id" v-model="colorSelected">
                   <label class="fancy-radio-label fancy-radio-label-color" :for="'color-' + Color.id">
-                      <span class="fancy-label--text searchkiji-brand-name"><span class="searchkiji-color-fixed" :style="'background-color:' + getFixedColor(Color.id)"></span>{{Color.name}}</span>
+                      <span class="fancy-label--text searchkiji-brand-name"><span class="searchkiji-color-fixed" :style="'background-color:' + getFixedColor(id)"></span>{{Color.name}}</span>
                       <span class="fancy-checkbox">
                           <span class="radiobutton-dot"></span>
                       </span>
@@ -78,15 +78,15 @@ export default {
     return {
       isLoading: false,
       colorFix: [
-        {id: 1, code: '#0009ef'},
-        {id: 2, code: '#010458'},
-        {id: 3, code: '#676665'},
-        {id: 4, code: '#282828'},
-        {id: 5, code: '#381800'},
-        {id: 6, code: '#000000'},
-        {id: 7, code: '#ffffff'},
-        {id: 8, code: '#003313'},
-        {id: 9, code: '#444444'}
+        {id: 0, code: 'rgb(255,255,255)'},
+        {id: 1, code: 'rgb(0,0,0)'},
+        {id: 2, code: 'rgb(191,191,191)'},
+        {id: 3, code: 'rgb(95,95,95)'},
+        {id: 4, code: 'rgb(117,51,51)'},
+        {id: 5, code: 'rgb(0,163,87)'},
+        {id: 6, code: 'rgb(0,97,194)'},
+        {id: 7, code: 'rgb(0,73,112)'},
+        {id: 8, code: 'rgb(255,255,255)'}
       ]
     };
   },

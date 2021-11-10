@@ -16,9 +16,10 @@
         <div class="option-detail-moreinfo d-flex justify-content-between flex-column">
           <div class="option-detail-moreinfo-top">
             <span class="option-detail-val">{{kijiDetailData.code}}</span>
-            <span class="option-detail-val">C/{{kijiDetailData.fabric_color}}</span>
+            <span class="option-detail-val">C/#{{kijiDetailData.fabric_color}}</span>
             <span class="option-detail-val option-detail-val-composition" 
             v-for="(compo, id) in kijiDetailData.composition" :key="id">{{compo}} / </span>
+            <span class="option-detail-val" v-if="kijiDetailData.sensor">WEIGHT {{kijiDetailData.sensor}}g</span>
           </div>
           <div class="option-detail-moreinfo-price">
             <span class="option-detail-price">カスタマイズ価格：{{moneyTypeShow01(getCombinePrice())}}円</span>
@@ -59,11 +60,10 @@ export default {
       this.$emit("kiji-confirm", {"id": this.kijiDetailData.id, "img": this.kijiDetailData.img})
     },
     getCombinePrice: function(){
-      let rank = this.kijiDetailData.rank
       let combinePriceIndex = this.combinePriceData.findIndex(item => 
         item.model == this.modelSelected
         && item.combineId == this.itemCombineObj.id
-        && item.rank == rank
+        && item.rank == this.kijiDetailData.rank
       )
       if(combinePriceIndex !== -1){
         return this.combinePriceData[combinePriceIndex].price

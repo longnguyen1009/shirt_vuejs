@@ -217,7 +217,8 @@ export default {
             stock_design: response.stock_design,
             size: response.size,
             necksize: response.necksize,
-            correction: response.correction
+            correction: response.correction,
+            factory_id: response.factory_id
           })
         }
       })
@@ -233,7 +234,8 @@ export default {
             stock_design: response.stock_design,
             size: response.size,
             necksize: response.necksize,
-            correction: response.correction
+            correction: response.correction,
+            factory_id: response.factory_id
           })
         }
       })

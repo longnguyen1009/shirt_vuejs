@@ -13,40 +13,44 @@
             </div>
           </div>
         </div>
+        <div class="hcsearch-guide">
+          <span>HC番号または</span><br>
+          <span>HC番号以外の場合は２項目入力してください。</span><br>
+        </div>
         <div class="hcsearch-form">
           <div class="hcsearch-form-top">
             <dl class="hcsearch-form-item">
               <dt class="hcsearch-for-label">HC番号（数字10桁）</dt>
               <dd class="hcsearch-for-input">
-                <input type="text" v-model="hcSearchData.hc_no">
-                <span v-if="hcSearchError.hc_no">{{hcSearchError.hc_no}}</span>
+                <input type="text" v-model="hcSearchData.hc_no" maxlength="10">
+                <span class="hcsearch-error" v-if="hcSearchError.hc_no">{{hcSearchError.hc_no}}</span>
               </dd>
             </dl>
             <dl class="hcsearch-form-item">
-              <dt class="hcsearch-for-label">お客様名（苗字カナ）</dt>
+              <dt class="hcsearch-for-label">氏(カナ)</dt>
               <dd class="hcsearch-for-input">
-                <input type="text" v-model="hcSearchData.hc_name01">
-                <span v-if="hcSearchError.hc_name01">{{hcSearchError.hc_name01}}</span>
+                <input type="text" v-model="hcSearchData.hc_name01" maxlength="10">
+                <span class="hcsearch-error" v-if="hcSearchError.hc_name01">{{hcSearchError.hc_name01}}</span>
               </dd>
             </dl>
             <dl class="hcsearch-form-item">
-              <dt class="hcsearch-for-label">お客様名（苗字カナ）</dt>
+              <dt class="hcsearch-for-label">名(カナ)</dt>
               <dd class="hcsearch-for-input">
-                <input type="text" v-model="hcSearchData.hc_name02">
-                <span v-if="hcSearchError.hc_name02">{{hcSearchError.hc_name02}}</span>
+                <input type="text" v-model="hcSearchData.hc_name02" maxlength="10">
+                <span class="hcsearch-error" v-if="hcSearchError.hc_name02">{{hcSearchError.hc_name02}}</span>
               </dd>
             </dl>
             <dl class="hcsearch-form-item">
               <dt class="hcsearch-for-label">電話番号（下4桁）</dt>
               <dd class="hcsearch-for-input">
-                <input type="text" v-model="hcSearchData.hc_phone">
-                <span v-if="hcSearchError.hc_phone">{{hcSearchError.hc_phone}}</span>
+                <input type="text" v-model="hcSearchData.hc_phone" maxlength="4">
+                <span class="hcsearch-error" v-if="hcSearchError.hc_phone">{{hcSearchError.hc_phone}}</span>
               </dd>
             </dl>
             <dl class="hcsearch-form-item">
               <dt class="hcsearch-for-label">携帯電話番号（下4桁）</dt>
               <dd class="hcsearch-for-input">
-                <input type="text" v-model="hcSearchData.hc_mobilephone">
+                <input type="text" v-model="hcSearchData.hc_mobilephone" maxlength="4">
                 <span v-if="hcSearchError.hc_mobilephone">{{hcSearchError.hc_mobilephone}}</span>
               </dd>
             </dl>
@@ -141,20 +145,48 @@ export default {
         delete this.hcSearchError[key]
       })
       //HC番号 : max_length 10
-      if(this.hcSearchData.hasOwnProperty('hc_no') && (this.hcSearchData.hc_no.length > 10 || isNaN(this.hcSearchData.hc_phone))){
+
+      if(Object.values(this.hcSearchData).filter(item => item).length == 0){
+        this.hcSearchError.hc_no = '入力してください。'
+        this.hcSearchError.hc_name01 = '入力してください。'
+        this.hcSearchError.hc_name02 = '入力してください。'
+        this.hcSearchError.hc_phone = '入力してください。'
+        this.hcSearchError.hc_mobilephone = '入力してください。'
+      }
+      let reg_number = new RegExp(/^\d+$/);
+      if(this.hcSearchData.hc_no && (this.hcSearchData.hc_no.length > 10 || !reg_number.test(this.hcSearchData.hc_no))){
         this.hcSearchError.hc_no = '10数字まで入力してください。'
       }
+
+      if((this.hcSearchData.hc_name01 || this.hcSearchData.hc_name02 || this.hcSearchData.hc_phone || this.hcSearchData.hc_mobilephone) 
+        && Object.values(this.hcSearchData).filter(item => item).length < 2
+        && !this.hcSearchError.hc_no
+      ){
+        if(!this.hcSearchData.hc_name01){
+          this.hcSearchError.hc_name01 = '入力してください。'
+        }
+        if(!this.hcSearchData.hc_name02){
+          this.hcSearchError.hc_name02 = '入力してください。'
+        }
+        if(!this.hcSearchData.hc_phone){
+          this.hcSearchError.hc_phone = '入力してください。'
+        }
+        if(!this.hcSearchData.hc_mobilephone){
+          this.hcSearchError.hc_mobilephone = '入力してください。'
+        }
+      }
+
       let reg_kana = new RegExp(/^[ァ-ンヴー]*$/);
-      if(this.hcSearchData.hasOwnProperty('hc_name01') && !reg_kana.test(this.hcSearchData.hc_name01)){
+      if(this.hcSearchData.hc_name01 && !reg_kana.test(this.hcSearchData.hc_name01)){
         this.hcSearchError.hc_name01 = '全角カタカナで入力してください。'
       }
-      if(this.hcSearchData.hasOwnProperty('hc_name02') && !reg_kana.test(this.hcSearchData.hc_name02)){
+      if(this.hcSearchData.hc_name02 && !reg_kana.test(this.hcSearchData.hc_name02)){
         this.hcSearchError.hc_name02 = '全角カタカナで入力してください。'
       }
-      if(this.hcSearchData.hasOwnProperty('hc_phone') && (this.hcSearchData.hc_phone.length > 4 || isNaN(this.hcSearchData.hc_phone))){
+      if(this.hcSearchData.hhc_phone && (this.hcSearchData.hc_phone.length > 4 || isNaN(this.hcSearchData.hc_phone))){
         this.hcSearchError.hc_phone = '下4桁の数字で入力してください。'
       }
-      if(this.hcSearchData.hasOwnProperty('hc_mobilephone') && (this.hcSearchData.hc_mobilephone.length > 4 || isNaN(this.hcSearchData.hc_mobilephone))){
+      if(this.hcSearchData.hc_mobilephone && (this.hcSearchData.hc_mobilephone.length > 4 || isNaN(this.hcSearchData.hc_mobilephone))){
         this.hcSearchError.hc_mobilephone = '下4桁の数字で入力してください。'
       }
 

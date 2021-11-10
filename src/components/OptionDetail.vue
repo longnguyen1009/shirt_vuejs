@@ -14,10 +14,13 @@
       <div class="option-detail-confirm d-flex justify-content-between">
         <div class="option-detail-moreinfo d-flex justify-content-between flex-column">
           <div class="option-detail-moreinfo-top">
-            <span class="option-detail-val">{{OptionDetailData.color_code}}</span>
+            <span class="option-detail-val" v-if="OptionDetailData.color_code && (optionParent.type == 'button' || optionParent.type == 'uraji')">C/#{{OptionDetailData.color_code}}</span>
+            <span class="option-detail-val" v-if="optionParent.type == 'uraji' && OptionDetailData.composition">
+              {{OptionDetailData.composition}}
+            </span>
           </div>
           <div class="option-detail-moreinfo-price">
-            <span class="option-detail-price" v-if="initialData.shop_kind == 2">カスタマイズ価格：{{OptionDetailData.cost}}円</span>
+            <span class="option-detail-price" v-if="initialData.shop_kind == 2">カスタマイズ価格：{{OptionDetailData.price}}円</span>
           </div>
         </div>
         <div class="option-detail-descript d-flex justify-content-between flex-column">
@@ -52,7 +55,7 @@ export default {
       this.$emit("option-confirm", {"id": this.OptionDetailData.id, "img": this.OptionDetailData.img})
     }
   },
-  props: ['OptionDetailData', 'cateCurrObj'],
+  props: ['OptionDetailData', 'cateCurrObj', 'optionParent'],
   mounted() {
   },
   computed: {

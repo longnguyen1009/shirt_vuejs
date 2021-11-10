@@ -9,7 +9,7 @@
                   <div class="onemeasure-iniinfo-row">
                     <p class="onemeasure-iniinfo-label">性別</p>
                     <div class="onemeasure-iniinfo-input d-flex justify-content-center align-items-center">
-                      <select id="userGender" >
+                      <select id="userGender" class="form-select">
                           <option id="selectMale" value="male">男性</option>
                           <option id="selectFemale" value="female">女性</option>
                       </select>

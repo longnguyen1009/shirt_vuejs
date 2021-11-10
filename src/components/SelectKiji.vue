@@ -229,7 +229,7 @@ export default {
     },
     checkStyleAndStockKiji: function(id){
       let Kiji = this.kijiData.find(item => item.id == id)
-      if(Kiji.style.length == 0 || Kiji.style.findIndex(item => item == this.styleSelected) == -1){
+      if(Kiji.style.length == 0 || Kiji.style.findIndex(item => item.style_id == this.styleSelected) == -1){
         return false
       }
       if(Kiji.stock_unlimited){
@@ -288,7 +288,14 @@ export default {
     ]),
     kijiDetailData: function(){
       if(this.kijiDetailId != 0){
-        return this.kijiData.filter((item) => item.id === this.kijiDetailId)[0];
+        let KijiTemp = this.kijiData.find(item => item.id === this.kijiDetailId)
+        let styleIndex = KijiTemp.style.findIndex(item => item.style_id == this.styleSelected)
+        if(styleIndex !== -1){
+          KijiTemp.rank = KijiTemp.style[styleIndex].rank
+        } else{
+          KijiTemp.rank = 0
+        }
+        return KijiTemp
       }
     },
     stockSelectedDataNow: function(){

@@ -19,7 +19,7 @@
                       {{kijiObj(OrderTemp.product_id).sub_name}}
                     </span>
                     <br>
-                    <span class="simu-confirm-kiji-name">{{kijiObj(OrderTemp.product_id).fabric_color}}</span>
+                    <span class="simu-confirm-kiji-name" v-if="kijiObj(OrderTemp.product_id).fabric_color">C/#{{kijiObj(OrderTemp.product_id).fabric_color}}</span>
                   </p>
                   <button class="simu-common-btn"
                   @click="showSizeDetail(OrderTemp.id)">サイズ詳細</button>
@@ -154,6 +154,11 @@
                       </span>
                     </li>
                   </ul>
+                  <div class="matashita-correct-input" v-if="hasCorrectCustom && tempCorrectDetailId">
+                    <input type="text" v-model="correctCustomValue"><br>
+                    <span v-if="correctCustomError">数字で入力してください</span>
+                    <span class="simu-common-btn btnSize01" @click="correctCustomConfirm">決定</span>
+                  </div>
                   <div class="loaddingDataIo" v-if="loaddingDataCorrectDetail">
                     <div class="loadingio-spinner-spinner-482naetb3m">
                       <div class="ldio-2vyxc9gibh9">
@@ -176,6 +181,7 @@
                       <span class="modal-sizeconfirm-label">{{CorrectDetailItem.correct_name}}</span>
                       <span class="modal-sizeconfirm-result flex-grow-1">
                         <span v-if="CorrectDetailItem.correct_detail_id">補正：{{CorrectDetailItem.correct_detail_name}}</span><br>
+                        <span v-if="CorrectDetailItem.correct_custom_value">({{CorrectDetailItem.correct_custom_value}}cm)</span>
                         <span v-if="CorrectDetailItem.correct_result != null">仕上：{{CorrectDetailItem.correct_result}}cm</span>
                       </span>
                       <button type="button" class="simu-confirm-detail-change btn btn-outline-dark"
@@ -269,6 +275,9 @@ export default {
       loaddingDataCorrectDetail: false,
       tempCorrectDetailId: null,
       // HcErrorLogin: false
+      correctCustomValue: '',
+      correctCustomArr :[25, 26],
+      correctCustomError: false
     }
   },
   methods: {
@@ -518,12 +527,17 @@ export default {
     getPriceOrder(orderId){
       let OrderTemp = this.orderTempItem.find(item => item.id == orderId)
       let kijiObjTempIndex = this.kijiData.findIndex(item => item.id == OrderTemp.product_id)
-      let kijiRank = 0
+      let rank = 0
+
       if(kijiObjTempIndex !== -1){
-        kijiRank = this.rankOfKiji(this.kijiData[kijiObjTempIndex].id)
+        let styleIndex = this.kijiData[kijiObjTempIndex].style.findIndex(item => item.style_id == OrderTemp.style)
+        if(styleIndex !== -1){
+          rank = this.kijiData[kijiObjTempIndex].style[styleIndex].rank
+        }
       }
+
       let combinePriceIndex = this.combinePriceData.findIndex(item => (
-        item.model == OrderTemp.model && item.combineId == OrderTemp.combineId && item.rank == kijiRank
+        item.model == OrderTemp.model && item.combineId == OrderTemp.combineId && item.rank == rank
       ))
       let combinePrice = 0
       if(combinePriceIndex !== -1){
@@ -532,11 +546,6 @@ export default {
       let optionPriceTemp = this.optionPrice(orderId)
       this.$store.dispatch('handleUpdatePriceOfOrder', {orderId: orderId, price: optionPriceTemp + combinePrice})
       return optionPriceTemp + combinePrice
-    },
-    rankOfKiji(kijiId){
-      const shop_kind = this.initialData.shop_kind
-      let kijiObj = this.kijiData.find(item => (item.id == kijiId))
-      return (shop_kind == 1) ? kijiObj.ua_retail_price : ((shop_kind == 2) ? kijiObj.gl_retail_price : 0)
     },
     getSumPrice: function(){
       let SumPrice = 0
@@ -664,13 +673,67 @@ export default {
         ))
         if(correctDetailIndexNow !== -1){
           this.tempCorrectDetailId = this.correctSelectedDataActive[correctDetailIndexNow].correct_detail_id
+          if(this.hasCorrectCustom){
+            this.correctCustomValue = this.correctSelectedDataActive[correctDetailIndexNow].correct_custom_value ? this.correctSelectedDataActive[correctDetailIndexNow].correct_custom_value : ''
+          }
         } else{
           this.tempCorrectDetailId = null
         }
     },
     closeCorrectionDetail : function(){
-      this.correction_selected_id = 0
+      if(!this.hasCorrectCustom){
+          this.correction_selected_id = 0
+        } else{
+          return false
+        }
     },
+    correctCustomConfirm: function(){
+        if(this.tempCorrectDetailId){
+            let tempCorrectDetailIndex = this.correctDetailActive.findIndex(item => item.id == this.tempCorrectDetailId)
+            let correctDetailIndexNow = this.correctSelectedDataActive.findIndex(item => (
+              item.order_id == this.orderSizeActive
+              && item.design_id == this.correction_selected_design_id
+              && item.item_id == this.correction_selected_item_id
+              && item.correct_id == this.correction_selected_id
+            ))
+
+            if(tempCorrectDetailIndex !== -1 && correctDetailIndexNow !== -1){
+              let tempCorrectDetailItem = this.correctDetailActive[tempCorrectDetailIndex]
+              let tempCorrectionItem = this.correctSelectedDataActive[correctDetailIndexNow]
+              tempCorrectionItem['correct_detail_id'] = tempCorrectDetailItem.id
+              tempCorrectionItem['correct_detail_name'] = tempCorrectDetailItem.text
+              tempCorrectionItem['correct_detail_val'] = tempCorrectDetailItem.value
+              tempCorrectionItem['code'] = tempCorrectDetailItem.code
+              
+              if(tempCorrectionItem['base_val'] == null) {
+                tempCorrectionItem['correct_result'] = null
+              } else{
+                  if(tempCorrectDetailItem.value < 0){
+                      tempCorrectionItem['correct_result'] = eval(tempCorrectionItem['base_val'] + tempCorrectDetailItem.value)
+                  } else if(tempCorrectDetailItem.value > 0){
+                    tempCorrectionItem['correct_result'] = eval(tempCorrectionItem['base_val'] + '+' + tempCorrectDetailItem.value)
+                  } else{
+                    tempCorrectionItem['correct_result'] = tempCorrectionItem['base_val']
+                  }
+              }
+              if(tempCorrectDetailItem.text.includes('無し')){
+                this.correction_selected_id = 0
+              } else{
+                if(this.correctCustomValue != '' && !isNaN(this.correctCustomValue) && this.correctCustomValue > 0){
+                  console.log(this.correctCustomValue)
+                  tempCorrectionItem['correct_custom_value'] = this.correctCustomValue 
+                  this.$store.dispatch('handleUpdateCorrectSelectedData', [tempCorrectionItem])
+                  this.correction_selected_id = 0
+                  this.correctCustomError = false
+                }
+                else{
+                  this.correctCustomError = true
+                }
+              }
+            }
+        }
+    }
+
   },
   mounted(){
     this.deli_id = this.deliActive
@@ -697,8 +760,6 @@ export default {
       this.$store.dispatch('handleChangeIniData', {...this.initialData, orderCart: null})
     }
 
-    console.log(this.initialData)
-
     //show modal loginerror
     if(this.initialData.customer_id){
       this.updateOrderItemList()
@@ -717,8 +778,9 @@ export default {
         && this.correctDetailData.findIndex(item => item.correct_id == this.correction_selected_id) == -1){
         this.getCorrectionDetailData(this.correction_selected_id)
       }
+      this.correctCustomError = false
     },
-    tempCorrectDetailId: function(){
+    tempCorrectDetailId: function(newval, oldval){
       let tempCorrectDetailIndex = this.correctDetailActive.findIndex(item => item.id == this.tempCorrectDetailId)
       let correctDetailIndexNow = this.correctSelectedDataActive.findIndex(item => (
           item.order_id == this.orderSizeActive
@@ -745,7 +807,26 @@ export default {
               tempCorrectionItem['correct_result'] = tempCorrectionItem['base_val']
             }
         }
-        this.$store.dispatch('handleUpdateCorrectSelectedData', [tempCorrectionItem])
+
+        if(!this.hasCorrectCustom){
+          this.$store.dispatch('handleUpdateCorrectSelectedData', [tempCorrectionItem])
+        } else{
+          tempCorrectionItem['correct_custom_value'] = null
+          if(tempCorrectDetailItem.text.includes('無し')){
+            this.$store.dispatch('handleUpdateCorrectSelectedData', [tempCorrectionItem])
+          }
+        }
+      }
+
+      if(!this.hasCorrectCustom){
+        if(tempCorrectDetailIndex != -1 && (oldval == null || this.correctDetailActive.findIndex(item => item.id == oldval) != -1)){
+          this.correction_selected_id = 0
+        }
+      } else if(tempCorrectDetailIndex != -1){
+        let tempCorrectDetailItem2 = this.correctDetailActive[tempCorrectDetailIndex]
+        if(tempCorrectDetailItem2.text.includes('無し')){
+          this.correction_selected_id = 0
+        }
       }
     }
   },
@@ -806,6 +887,13 @@ export default {
         item.order_id == this.orderSizeActive
       ))
     },
+    hasCorrectCustom: function(){
+      if(this.correctCustomArr.indexOf(this.correction_selected_id) !== -1){
+        return true
+      } else{
+        return false
+      }
+    }
   }
 };
 </script>

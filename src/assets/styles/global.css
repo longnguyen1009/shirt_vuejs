@@ -360,93 +360,7 @@ pre{
   padding-left: 0;
 }
 
-/* RADIO STYLE */
-.fancy-input{
-  display: inline-block;
-}
-.fancy-radio-label {
-  line-height: 24px;
-  padding-left: 28px;
-  margin-right: 15px;
-  position: relative;
-  -webkit-user-select: no-select;
-     -moz-user-select: no-select;
-      -ms-user-select: no-select;
-          user-select: no-select;
-  cursor: pointer;
-}
 
-.fancy-label--text {
-  position: relative;
-}
-/* .fancy-radio:checked + .fancy-radio-label {
-  color: #000;
-} */
-.fancy-radio:disabled ~ .fancy-radio-label{
-  opacity: 0.4;
-  cursor: not-allowed;
-  user-select: none;
-}
-.fancy-radio:checked + .fancy-radio-label .fancy-label--text::before {
-  transition: transform 0.15s;
-  transform: scaleX(1);
-}
-.fancy-radio:checked + .fancy-radio-label .radiobutton-dot {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
-  transition: opacity 0.15s, transform 0.15s;
-}
-.fancy-checkbox,
-.fancy-radiobutton {
-  border: solid 1px #fff;
-  color: #fff;
-  display: block;
-  height: 20px;
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 20px;
-  border-radius: 3px;
-}
-
-.fancy-input.black .fancy-checkbox,
-.fancy-input.black .fancy-radiobutton{
-  border: solid 1px #000;
-  color: #000;
-}
-.fancy-checkbox {
-  border-radius: 3px;
-}
-.fancy-radiobutton {
-  border-radius: 50%;
-}
-.radiobutton-dot {
-  background-color: currentColor;
-  height: 8px;
-  opacity: 0;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%) scale(0);
-  width: 8px;
-}
-.fancy-radiobutton .radiobutton-dot{
-  border-radius: 50%;
-}
-.checkmark {
-  height: 20px;
-  opacity: 1;
-  width: 100%;
-}
-.checkmark .checkmark-path {
-  stroke: darkorange;
-  stroke-width: 2px;
-  transform-origin: 50% 50%;
-  stroke-miterlimit: 10;
-  opacity: 1;
-  stroke-dasharray: 48;
-  stroke-dashoffset: 48;
-}
 
 /* END RADIO STYLE */
 
@@ -503,9 +417,21 @@ pre{
   right: 30px;
   cursor: pointer;
 }
-
+.simuleft-sample.hide{
+  display: none;
+}
 .simuleft-sample img,
 .simuleft-sample object{
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  height: 100%;
+  object-fit: cover;
+}
+.correct_detail_img img{
+  background-color: #cdcdcd;
   position: absolute;
   top: 0;
   left: 50%;
@@ -630,7 +556,7 @@ pre{
 }
 .optionLv1::before, .optionLv2::before{
   position: absolute;
-  background-image: url(https://ua.coremobile.win/html/user_data/assets/img/common/icon_arrow_right.png);
+  background-image: url(https://stg-personalorder.united-arrows.co.jp/html/user_data/assets/img/common/icon_arrow_right.png);
   background-repeat: no-repeat;
   content: "";
   top: 50%;
@@ -641,7 +567,7 @@ pre{
   transition: transform 150ms ease;
 }
 .optionLv1.codeMode::before, .optionLv2.codeMode::before{
-  background-image: url(https://ua.coremobile.win/html/user_data/assets/img/common/icon_scan.png);
+  background-image: url(https://stg-personalorder.united-arrows.co.jp/html/user_data/assets/img/common/icon_scan.png);
   background-size: 100% 100%;
   background-repeat: no-repeat;
   width: 20px;
@@ -730,64 +656,6 @@ pre{
   font-size: 13px;
 }
 
-/* simu-common-btn */
-.simu-common-btn{
-  border: 1px solid #676665;
-  background-color: transparent;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 40px;
-  font-size: 13px;
-  color: #fff;
-  max-width: 100%;
-  margin: 0 5px;
-}
-.simu-common-btn.gray{
-  background-color: #676665;
-}
-.simu-common-btn.black{
-  background-color: #000;
-  color: #fff;
-}
-.simu-common-btn.white{
-  background-color: #fff;
-  border: 1px solid #676665;
-  color: #000;
-}
-.simu-common-btn.btnSize01{
-  width: 102px;
-}
-.simu-common-btn.btnSize02{
-  width: 220px;
-}
-.simu-common-btn.btnSize03{
-  width: 100%;
-}
-.simu-common-btn.btnSizeHalf{
-  max-width: 40%;
-}
-.simu-common-btn:hover{
-  background-color: #676665;
-  color: #fff;
-}
-.simu-common-btn.gray:hover{
-  background-color: #4a4948;
-  color: #fff;
-}
-.simu-common-btn.white:hover{
-  background-color: #4a4948;
-  color: #fff;
-}
-.simu-common-btn:disabled{
-  pointer-events: none;
-  cursor: not-allowed;
-  opacity: 0.65;
-  filter: alpha(opacity=65);
-  -webkit-box-shadow: none;
-  box-shadow: none;
-}
-
 /* simuright-sub */
 .simu-subpage{
   position: absolute;
@@ -863,7 +731,6 @@ pre{
 .measure-sub-item .fancy-input{
   width: 100%;
 }
-
 .measure-sub-item .fancy-radio-label{
   width: 100%;
   height: 100%;
@@ -892,6 +759,15 @@ pre{
   transform-origin: 2px 15px;
 }
 
+.matashita-correct-input{
+  width: 80%;
+  margin: 20px auto;
+}
+.matashita-correct-input input{
+  width: 100%;
+  font-size: 13px;
+  line-height: 20px;
+}
 
 /* SimuKiji */
 
@@ -967,6 +843,9 @@ pre{
   width: 33.3%;
   position: relative;
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 .simuright-kiji-list .kijiItem .kijiitem-img{
   width: 100%;
@@ -982,6 +861,7 @@ pre{
   font-size: 11px;
   font-weight: bold;
   background-color: #444444;
+  flex-grow: 1;
 }
 .simuright-kiji-name{
   display: block;
@@ -1588,6 +1468,9 @@ pre{
 .onemeasure-iniinfo-label{
   padding: 5px;
   font-size: 14px;
+}
+.onemeasure-iniinfo-input #userGender{
+  width: 200px;
 }
 .onemeasure-iniinfo-input input{
   width: 296px;

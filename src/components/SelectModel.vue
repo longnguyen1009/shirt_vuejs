@@ -1,10 +1,6 @@
 <template>
   <div class="container-selectmodel d-flex justify-content-between align-items-stretch">
     <div class="simu-model-left">
-      <div class="simu-model-intro">
-        <h3>Sihlouette:</h3>
-        <p>着丈を短くすることで、軽快な印象を強調</p>
-      </div>
       <div class="simu-model-imgList">
         <carousel v-bind="settings" v-if="hasImg">
           <slide>
@@ -55,7 +51,7 @@
         </ul>
         <span class="simu-error-message" v-if="!checkErrorSelect">アイテム組み合わせが見つかりません。</span>
         <div class="simu-model-order d-flex justify-content-between align-items-end">
-          <p class="simu-model-price"><span v-if="initialData.shop_kind == 2">{{moneyTypeShow02(modelDetail.price)}}〜</span></p>
+          <p class="simu-model-price"><span v-if="initialData.shop_kind == 2">参考価格 {{moneyTypeShow02(modelDetail.price)}}〜（税込）</span></p>
           <div class="simu-nav-confirm d-flex justify-content-between">
             <button type="button" class="simu-common-btn btnSize01" @click="doBack">戻る</button>
             <button type="button" class="simu-common-btn btnSize01 gray" @click="doOrder" :disabled="!checkErrorSelect">決定</button>

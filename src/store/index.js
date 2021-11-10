@@ -19,18 +19,19 @@ export default new Vuex.Store({
     page: 1, //page 2 is model page
 
     main_path: 'https://ua.coremobile.win/',
-    simu_img_path: "https://ua.coremobile.win/html/upload/simu_model/",
-    style_img_path: "https://s3-ap-northeast-1.amazonaws.com/ua-dev-backet/upload/save_image/",
-    model_img_path: "https://s3-ap-northeast-1.amazonaws.com/ua-dev-backet/upload/save_image/",
-    kiji_img_path: "https://s3-ap-northeast-1.amazonaws.com/ua-dev-backet/upload/save_image/",
-    option_img_path: "https://s3-ap-northeast-1.amazonaws.com/ua-dev-backet/upload/save_image/",
-    correct_detail_img_path: "https://s3-ap-northeast-1.amazonaws.com/ua-dev-backet/upload/correct_detail/",
-    // simu_img_path: "/html/upload/simu_model/",
-    // style_img_path: "/html/upload/save_image/",
-    // model_img_path: "/html/upload/save_image/",
-    // kiji_img_path: "/html/upload/save_image/",
-    // option_img_path: "/html/upload/save_image/",
-    // correct_detail_img_path: "/html/upload/correct_detail/",
+    // simu_img_path: "https://ua.coremobile.win/html/upload/simu_model/",
+    // style_img_path: "https://s3-ap-northeast-1.amazonaws.com/ua-dev-backet/upload/save_image/",
+    // model_img_path: "https://s3-ap-northeast-1.amazonaws.com/ua-dev-backet/upload/save_image/",
+    // kiji_img_path: "https://s3-ap-northeast-1.amazonaws.com/ua-dev-backet/upload/save_image/",
+    // option_img_path: "https://s3-ap-northeast-1.amazonaws.com/ua-dev-backet/upload/save_image/",
+    // correct_detail_img_path: "https://s3-ap-northeast-1.amazonaws.com/ua-dev-backet/upload/correct_detail/",
+
+    simu_img_path: "/html/upload/simu_model/",
+    style_img_path: "/html/upload/save_image/",
+    model_img_path: "/html/upload/save_image/",
+    kiji_img_path: "/html/upload/save_image/",
+    option_img_path: "/html/upload/save_image/",
+    correct_detail_img_path: "/html/upload/correct_detail/",
 
     // styleData load from server
     styleData: [], //[{id, name, brand, detail, img, model[], product_price}]
@@ -312,16 +313,18 @@ export default new Vuex.Store({
       state.modelSelected = 0,
       state.itemSelected = [],
       state.optionMode = 2,
-      state.designActive = {}, //{combine_id, design_id, item_id}
+      Object.keys(state.designActive).forEach(key => {
+        state.designActive[key] = ''
+      }),
+      //state.designActive = {}, //{combine_id, design_id, item_id}
       state.kijiActive = null,
-      // state.kijiData = [],
-      // state.itemData = [],
 
       state.optionSelectedData = state.optionSelectedData.filter(item => item.orderId != state.orderTempItem)
       state.sizeSelectedData = state.sizeSelectedData.filter(item => item.orderId != state.orderTempItem)
       state.correctSelectedData = state.correctSelectedData.filter(item => item.order_id != state.orderTempItem)
       state.neckSelectedData = state.neckSelectedData.filter(item => item.orderId != state.orderTempItem)
       state.optionDetailActive = null,
+      state.itemData = state.itemData.filter(item => item.orderId != this.orderNowId)
 
       //raw html for option change img temp
       state.optionTemp = null,
@@ -416,8 +419,6 @@ export default new Vuex.Store({
           state.orderTempItem.push(element)
         }
       })
-      console.log(state.orderTempItem)
-
       state.orderTempItem = [...state.orderTempItem]
     },
     changeOrder(state, orderId){

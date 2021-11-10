@@ -17,15 +17,19 @@
             <div class="simuright-options-rowTop d-flex optionLv1 align-items-center" :class="{codeMode : (optionMode == 1)}"
               @click="openDetailOption('kiji')">
               <span class="simuright-options-label">生地</span>
-              <div class="simuright-options-name"
-              v-if="kijiActive && kijiObjectActive">{{kijiObjectActive.code}}</div>
+              <div class="simuright-options-name">
+                <span v-if="kijiActive && kijiObjectActive">{{kijiObjectActive.code}}</span>
+              </div>
             </div>
           </div>
           <div class="simuright-options-row" 
             v-for="Genre in genreData" :key="Genre.genre_id">
             <div class="simuright-options-rowTop optionLv1 d-flex align-items-center" @click="showOptionParent($event)">
               <span class="simuright-options-label">{{Genre.genre_name}}</span>
-              <div class="simuright-options-name"></div>
+              <div class="simuright-options-name">
+                <span v-if="checkOptionComplete(Genre.genre_id)"><i class="fas fa-check-double"></i>&nbsp;選択済み</span>
+                <span v-if="!checkOptionComplete(Genre.genre_id) && checkAction"><i class="fas fa-exclamation-triangle"></i>&nbsp;残っています</span>
+              </div>
             </div>
             <div class="simuright-options-rowDown">
               <ul class="simuright-optionLists">
@@ -40,10 +44,38 @@
               </ul>
             </div>
           </div>
+          <div class="simuright-options-row" v-if="category_select == shirt_cate">
+            <div class="simuright-options-rowTop optionLv1 d-flex align-items-center" @click="showOptionParent($event)">
+              <span class="simuright-options-label">ネックサイズ</span>
+              <div class="simuright-options-name">
+                <span v-if="neckObject && neckObject.name"><i class="fas fa-check-double"></i>&nbsp;{{neckObject.name}}</span>
+              </div>
+            </div>
+            <div class="simuright-options-rowDown simuright-options-sizeDown">
+              <div class="simuright-optionLists simuright-optionLists-size">
+                <div class="simuright-optionLists-sizeleft">
+                  <span v-for="Size in neckSizeData" :key="Size.id">
+                    <input class="fancy-radio" hidden :id="'neck-' + Size.id" name="neck" type="radio" :value="Size.id" v-model="neckSelectedValue">
+                    <label class="fancy-radio-label" :for="'neck-' + Size.id">
+                        <span class="fancy-label--text">{{Size.name}}</span>
+                        <span class="fancy-checkbox">
+                            <span class="radiobutton-dot"></span>
+                        </span>
+                    </label>
+                  </span>
+                  <span v-if="sizeSortData.length == 0">サイズがありません</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
           <div class="simuright-options-row">
             <div class="simuright-options-rowTop optionLv1 d-flex align-items-center" @click="showOptionParent($event)">
               <span class="simuright-options-label">サイズ</span>
-              <div class="simuright-options-name"></div>
+              <div class="simuright-options-name">
+                <span v-if="sizeItemDataActive.name"><i class="fas fa-check-double"></i>&nbsp;{{sizeItemDataActive.name}}</span>
+                <span v-if="!sizeItemDataActive.name && checkAction"><i class="fas fa-exclamation-triangle"></i>&nbsp;残っています</span>
+              </div>
             </div>
             <div class="simuright-options-rowDown simuright-options-sizeDown">
               <div class="simuright-optionLists simuright-optionLists-size d-flex align-items-center justify-content-between">
@@ -65,32 +97,13 @@
               </div>
             </div>
           </div>
-          <div class="simuright-options-row" v-if="category_select == shirt_cate">
-            <div class="simuright-options-rowTop optionLv1 d-flex align-items-center" @click="showOptionParent($event)">
-              <span class="simuright-options-label">ネックサイズ</span>
-              <div class="simuright-options-name"></div>
-            </div>
-            <div class="simuright-options-rowDown simuright-options-sizeDown">
-              <div class="simuright-optionLists simuright-optionLists-size">
-                <div class="simuright-optionLists-sizeleft">
-                  <span v-for="Size in neckSizeData" :key="Size.id">
-                    <input class="fancy-radio" hidden :id="'neck-' + Size.id" name="neck" type="radio" :value="Size.id" v-model="neckSelectedValue">
-                    <label class="fancy-radio-label" :for="'neck-' + Size.id">
-                        <span class="fancy-label--text">{{Size.name}}</span>
-                        <span class="fancy-checkbox">
-                            <span class="radiobutton-dot"></span>
-                        </span>
-                    </label>
-                  </span>
-                  <span v-if="sizeSortData.length == 0">サイズがありません</span>
-                </div>
-              </div>
-            </div>
-          </div>
           <div class="simuright-options-row">
             <div class="simuright-options-rowTop optionLv1 d-flex align-items-center" @click="showOptionParent($event)">
               <span class="simuright-options-label">採寸</span>
-              <div class="simuright-options-name"></div>
+              <div class="simuright-options-name">
+                <span v-if="checkCorrectComplete()"><i class="fas fa-check-double"></i>&nbsp;選択済み</span>
+                <span v-if="!checkCorrectComplete() && checkAction"><i class="fas fa-exclamation-triangle"></i>&nbsp;残っています</span>
+              </div>
             </div>
             <div class="simuright-options-rowDown simuright-options-measureDown">
               <ul class="simuright-optionLists">
@@ -103,6 +116,7 @@
                     <div class="simuright-options-measureValue">
                       <span v-if="correctSelectedItem.base_val != null">スペック：{{ correctSelectedItem.base_val ? correctSelectedItem.base_val : 0 }}cm</span>
                       <span v-if="correctSelectedItem.correct_detail_id">補正：{{correctSelectedItem.correct_detail_name}}</span>
+                      <span v-if="correctSelectedItem.correct_custom_value">({{correctSelectedItem.correct_custom_value}}cm)</span>
                       <span v-if="correctSelectedItem.correct_result != null && correctSelectedItem.correct_detail_id">仕上：{{correctSelectedItem.correct_result}}cm</span>
                     </div>
                   </li>
@@ -132,6 +146,11 @@
                 </label>
               </li>
             </ul>
+            <div class="matashita-correct-input" v-if="hasCorrectCustom && tempCorrectDetailId">
+              <input type="text" v-model="correctCustomValue"><br>
+              <span v-if="correctCustomError">数字で入力してください</span>
+              <span class="simu-common-btn btnSize01" @click="correctCustomConfirm">決定</span>
+            </div>
             <div class="loaddingDataIo" v-if="loaddingDataCorrectDetail">
               <div class="loadingio-spinner-spinner-482naetb3m">
                 <div class="ldio-2vyxc9gibh9">
@@ -168,7 +187,7 @@
                 <div class="modal-footer justify-content-center">
                   <slot name="footer">
                     <button class="simu-common-btn" @click="doBackShowModal = false">いええ</button>
-                    <button class="simu-common-btn" @click="doBackConfirm">はい</button>
+                    <button class="simu-common-btn gray" @click="doBackConfirm">はい</button>
                   </slot>
                 </div>
             </div>
@@ -307,7 +326,11 @@ export default {
           shirt_cate: 14,
           doBackShowModal: false,
 
-          firstShowCorrect: false
+          // checkStatus
+          checkAction: false,
+          correctCustomValue: '',
+          correctCustomArr :[25, 26],
+          correctCustomError: false
         }
     },
     props: [],
@@ -405,7 +428,8 @@ export default {
               stock_design: response.stock_design,
               size: response.size,
               necksize: response.necksize,
-              correction: response.correction
+              correction: response.correction,
+              factory_id: response.factory_id
             })
             this.$store.dispatch('handleChangeLoaddingData', false)
           }
@@ -486,18 +510,30 @@ export default {
           alert('生地を選択してください。')
         }
         else if(!this.initialData.customer_id){
+          this.checkAction = true
           alert('HC番号をを設定ください。')
         } 
-        else if(!this.sizeSelectedCheck){
+        else if(this.sizeSelectedCheck.length){
+          this.checkAction = true
+          console.log(this.sizeSelectedCheck)
           alert('サイズを選択してください。')
         } 
-        else if(!this.allOptionSelectedCheck()){
+        else if(this.allOptionSelectedCheck.length){
+          this.checkAction = true
+          console.log(this.allOptionSelectedCheck)
           alert('オプションを全て選択してください。')
         } 
+        else if(this.allCorrectSelectedCheck.length){
+          this.checkAction = true
+          console.log(this.allCorrectSelectedCheck)
+          alert('採寸を全て選択してください。')
+        } 
         else if(this.category_select == this.shirt_cate && !this.neckSelectedValue){
+          this.checkAction = true
           alert('ネックサイズを選択してください。')
         } 
         else{
+          this.checkAction = false
           this.$store.dispatch('handleChangeStep', 3)
         }
       },
@@ -574,6 +610,9 @@ export default {
         ))
         if(correctDetailIndexNow !== -1){
           this.tempCorrectDetailId = this.correctSelectedDataActive[correctDetailIndexNow].correct_detail_id
+          if(this.hasCorrectCustom){
+            this.correctCustomValue = this.correctSelectedDataActive[correctDetailIndexNow].correct_custom_value ? this.correctSelectedDataActive[correctDetailIndexNow].correct_custom_value : ''
+          }
         } else{
           this.tempCorrectDetailId = null
         }
@@ -586,25 +625,11 @@ export default {
         }
       },
       closeCorrectionDetail : function(){
-        this.correction_selected_id = 0
-      },
-      allOptionSelectedCheck: function(){
-        // return true
-        return this.designData.every(design => {
-          let allParents = this.optionParentData.find(item => item.design_id == design.design_id).parentData
-          let ret = true
-          allParents.forEach(parent => {
-            if(this.optionSelectedData.filter(
-              item2 => (item2.orderId == this.orderNowId
-              && item2.item_id == design.item_id
-              && item2.design_id == design.design_id
-              && item2.parent_id == parent.parent_id)).length == 0){
-                console.log(design.design_label + '-' + parent.name)
-                ret = false
-              }
-          })
-          return ret
-        })
+        if(!this.hasCorrectCustom){
+          this.correction_selected_id = 0
+        } else{
+          return false
+        }
       },
       changeStepOneMeasure: function(){
         $('.container-onemeasure').addClass('show')
@@ -621,7 +646,7 @@ export default {
               'shop_kind': this.initialData.shop_kind,
               'category': this.category_select,
               'style': this.styleSelected,
-              'kiji_kind': this.kijiObjectActive.fabric_kind
+              'kiji_kind': this.kijiObjectActive.kiji_kind_id
             }
           })
           .then(response => {
@@ -637,6 +662,74 @@ export default {
         await this.getDeliverySchedule().then(response => {
             this.deli_date = response
         })
+      },
+      checkOptionComplete: function(genre_id){
+        let ret = this.optionParentSortData[genre_id].filter(item => 
+            this.allOptionSelectedCheck.findIndex(item2 => 
+              item2.design_id == this.designActive.design_id 
+              && item2.item_id == this.designActive.item_id 
+              && item2.parent_id == item.parent_id) !== -1)
+
+        return ret.length ? false : true
+      },
+      checkCorrectComplete: function(){
+        let ret = false
+        if(this.sizeSelectedValue){
+          let sortArr = this.allCorrectSelectedCheck.filter(item => 
+            item.design_id == this.designActive.design_id
+            && item.item_id == this.designActive.item_id
+          )
+          if(!sortArr.length){
+            ret = true
+          }
+        }
+        return ret
+      },
+      correctCustomConfirm: function(){
+        if(this.tempCorrectDetailId){
+            let tempCorrectDetailIndex = this.correctDetailActive.findIndex(item => item.id == this.tempCorrectDetailId)
+            let correctDetailIndexNow = this.correctSelectedDataActive.findIndex(item => (
+              item.order_id == this.orderNowId
+              && item.design_id == this.designActive.design_id
+              && item.size_id == this.sizeItemDataActive.id
+              && item.correct_id == this.correction_selected_id
+            ))
+
+            if(tempCorrectDetailIndex !== -1 && correctDetailIndexNow !== -1){
+              let tempCorrectDetailItem = this.correctDetailActive[tempCorrectDetailIndex]
+              let tempCorrectionItem = this.correctSelectedDataActive[correctDetailIndexNow]
+              tempCorrectionItem['correct_detail_id'] = tempCorrectDetailItem.id
+              tempCorrectionItem['correct_detail_name'] = tempCorrectDetailItem.text
+              tempCorrectionItem['correct_detail_val'] = tempCorrectDetailItem.value
+              tempCorrectionItem['code'] = tempCorrectDetailItem.code
+              
+              if(tempCorrectionItem['base_val'] == null) {
+                tempCorrectionItem['correct_result'] = null
+              } else{
+                  if(tempCorrectDetailItem.value < 0){
+                      tempCorrectionItem['correct_result'] = eval(tempCorrectionItem['base_val'] + tempCorrectDetailItem.value)
+                  } else if(tempCorrectDetailItem.value > 0){
+                    tempCorrectionItem['correct_result'] = eval(tempCorrectionItem['base_val'] + '+' + tempCorrectDetailItem.value)
+                  } else{
+                    tempCorrectionItem['correct_result'] = tempCorrectionItem['base_val']
+                  }
+              }
+              if(tempCorrectDetailItem.text.includes('無し')){
+                this.correction_selected_id = 0
+              } else{
+                if(this.correctCustomValue != '' && !isNaN(this.correctCustomValue) && this.correctCustomValue > 0){
+                  console.log(this.correctCustomValue)
+                  tempCorrectionItem['correct_custom_value'] = this.correctCustomValue 
+                  this.$store.dispatch('handleUpdateCorrectSelectedData', [tempCorrectionItem])
+                  this.correction_selected_id = 0
+                  this.correctCustomError = false
+                }
+                else{
+                  this.correctCustomError = true
+                }
+              }
+            }
+        }
       }
     },
     mounted() {
@@ -731,12 +824,13 @@ export default {
           )
         }
       },
+
       correction_selected_id: function(){
         if(this.correction_selected_id && this.correctDetailData.findIndex(item => item.correct_id == this.correction_selected_id) == -1){
           this.getCorrectionDetailData(this.correction_selected_id)
         }
         this.$store.dispatch('handleChangeCorrectionSelectedId', this.correction_selected_id)
-
+        this.correctCustomError = false
       },
       //correct detail change
       tempCorrectDetailId: function(newval, oldval){
@@ -748,6 +842,7 @@ export default {
           && item.size_id == this.sizeItemDataActive.id
           && item.correct_id == this.correction_selected_id
         ))
+
         if(tempCorrectDetailIndex !== -1 && correctDetailIndexNow !== -1){
           let tempCorrectDetailItem = this.correctDetailActive[tempCorrectDetailIndex]
           let tempCorrectionItem = this.correctSelectedDataActive[correctDetailIndexNow]
@@ -768,12 +863,25 @@ export default {
               }
           }
 
-          this.$store.dispatch('handleUpdateCorrectSelectedData', [tempCorrectionItem])
-
+          if(!this.hasCorrectCustom){
+            this.$store.dispatch('handleUpdateCorrectSelectedData', [tempCorrectionItem])
+          } else{
+            tempCorrectionItem['correct_custom_value'] = null
+            if(tempCorrectDetailItem.text.includes('無し')){
+              this.$store.dispatch('handleUpdateCorrectSelectedData', [tempCorrectionItem])
+            }
+          }
         }
-        
-        if(tempCorrectDetailIndex != -1 && (oldval == null || this.correctDetailActive.findIndex(item => item.id == oldval) != -1)){
-          this.correction_selected_id = 0
+
+        if(!this.hasCorrectCustom){
+          if(tempCorrectDetailIndex != -1 && (oldval == null || this.correctDetailActive.findIndex(item => item.id == oldval) != -1)){
+            this.correction_selected_id = 0
+          }
+        } else if(tempCorrectDetailIndex != -1){
+          let tempCorrectDetailItem2 = this.correctDetailActive[tempCorrectDetailIndex]
+          if(tempCorrectDetailItem2.text.includes('無し')){
+            this.correction_selected_id = 0
+          }
         }
       },
       kijiActive: function(){
@@ -812,7 +920,14 @@ export default {
       ]),
       kijiObjectActive: function(){
         if(this.kijiData.length && this.kijiData.findIndex((item) => item.id === this.kijiActive) !== -1){
-          return this.kijiData.find((item) => item.id === this.kijiActive)
+          let KijiTemp = this.kijiData.find(item => item.id === this.kijiActive)
+          let styleIndex = KijiTemp.style.findIndex(item => item.style_id == this.styleSelected)
+          if(styleIndex !== -1){
+            KijiTemp.rank = KijiTemp.style[styleIndex].rank
+          } else{
+            KijiTemp.rank = 0
+          }
+          return KijiTemp
         } else{
           return {}
         }
@@ -916,30 +1031,30 @@ export default {
 
         if(hasCorrectedData == -1 && Object.keys(this.sizeItemDataActive).length){
           if(this.correctionData){
-            const arrNotCorrectData = this.correctFixedDataActive.filter(item => (
-              this.correctionDataActive.findIndex(item2 => item2.size_link == item.column_name) == -1
-            ))
+            // const arrNotCorrectData = this.correctFixedDataActive.filter(item => (
+            //   this.correctionDataActive.findIndex(item2 => item2.size_link == item.column_name) == -1
+            // ))
 
-            //list of correct fixed but has not registed
-            arrNotCorrectData.forEach(element => {
-              initCorrectedData.push(
-                {
-                  order_id: this.orderNowId,
-                  size_id: this.sizeItemDataActive.id,
-                  design_id: this.designActive.design_id,
-                  item_id: this.designActive.item_id,
-                  correct_id: element.column_name,
-                  correct_name: element.name,
-                  size_link: element.column_name,
-                  base_val: this.sizeItemDataActive[element.column_name],
-                  correct_detail_id: null,
-                  correct_detail_name: null,
-                  correct_detail_val: null,
-                  code: null,
-                  correct_result: this.sizeItemDataActive[element.column_name]
-                }
-              )
-            })
+            // //list of correct fixed but has not registed
+            // arrNotCorrectData.forEach(element => {
+            //   initCorrectedData.push(
+            //     {
+            //       order_id: this.orderNowId,
+            //       size_id: this.sizeItemDataActive.id,
+            //       design_id: this.designActive.design_id,
+            //       item_id: this.designActive.item_id,
+            //       correct_id: element.column_name,
+            //       correct_name: element.name,
+            //       size_link: element.column_name,
+            //       base_val: this.sizeItemDataActive[element.column_name],
+            //       correct_detail_id: null,
+            //       correct_detail_name: null,
+            //       correct_detail_val: null,
+            //       code: null,
+            //       correct_result: this.sizeItemDataActive[element.column_name]
+            //     }
+            //   )
+            // })
 
             //list of correct registed
             this.correctionDataActive.forEach(correct => {
@@ -972,6 +1087,7 @@ export default {
           && item.design_id == this.designActive.design_id
           && item.item_id == this.designActive.item_id
           && item.size_id == this.sizeItemDataActive.id
+          && this.correctionData.findIndex(item2 => item2.id == item.correct_id) !== -1
         ))
       },
       //correction
@@ -1004,15 +1120,10 @@ export default {
 
       //combine
       combinePrice: function(){
-        const shop_kind = this.initialData.shop_kind
-        let rank = 0
-        if(this.kijiActive){
-         rank = (shop_kind != 2) ? this.kijiObjectActive.ua_retail_price : ((shop_kind == 2) ? this.kijiObjectActive.gl_retail_price : 0)
-        }
         let combinePriceIndex = this.combinePriceData.findIndex(item => 
           item.model == this.modelSelected
           && item.combineId == this.itemCombineObj.id
-          && item.rank == rank
+          && item.rank == this.kijiObjectActive.rank
         )
         if(combinePriceIndex !== -1){
           return this.combinePriceData[combinePriceIndex].price
@@ -1031,16 +1142,70 @@ export default {
         return this.stockSelectedData.find(item => item.orderId == this.orderNowId)
       },
       sizeSelectedCheck: function(){
-        let ret = true
+        let ret = []
         this.designData.forEach(element => {
           let sizeDataOfDesign = this.sizeData.filter(item => item.design == element.design_id)
           let sizeSelectedOfDesign = this.sizeSelectedData.findIndex(item => item.orderId == this.orderNowId && item.design == element.design_id)
           if(sizeDataOfDesign.length > 0 && (sizeSelectedOfDesign == -1 || !(this.sizeSelectedData[sizeSelectedOfDesign].id))){
-            ret = false
+            ret.push({design_id: element.design_id, item_id: element.item_id, design_name: element.design_label})
           }
         })
         return ret
       },
+
+      allOptionSelectedCheck: function(){
+        let ret = []
+        this.designData.forEach(design => {
+          let allParents = this.optionParentData.find(item => item.design_id == design.design_id)
+          if(allParents){
+            allParents.parentData.forEach(parent => {
+              if(this.optionSelectedData.findIndex(
+                item2 => (item2.orderId == this.orderNowId
+                && item2.item_id == design.item_id
+                && item2.design_id == design.design_id
+                && item2.parent_id == parent.parent_id)) == -1){
+                  ret.push({design_id: design.design_id, design_name: design.design_label, item_id: design.item_id, parent_id: parent.parent_id, parent_name: parent.name})
+                }
+            })
+          }
+        })
+        return ret
+      },
+
+      allCorrectSelectedCheck: function(){
+        let ret = []
+        if(this.designData){
+          this.designData.forEach(design => {
+            let allCorrects = this.correctionData.filter(item => item.design_id == design.design_id)
+            allCorrects.forEach(correction => {
+              if(this.correctSelectedData.findIndex(
+                item2 => (item2.order_id == this.orderNowId
+                && item2.item_id == design.item_id
+                && item2.design_id == design.design_id
+                && item2.correct_id == correction.id
+                && item2.correct_detail_id == null
+                )) !== -1){
+                  ret.push({design_id: design.design_id, item_id: design.item_id, correct_id: correction.id, correct_name: correction.name})
+                }
+            })
+          })
+        }
+        return ret
+      },
+      neckObject: function(){
+        if(this.neckSelectedValue && this.neckSizeData.findIndex(item => item.id == this.neckSelectedValue) !== -1){
+          return this.neckSizeData.find(item => item.id == this.neckSelectedValue)
+        } else{
+          return null
+        }
+      },
+      hasCorrectCustom: function(){
+        if(this.correctCustomArr.indexOf(this.correction_selected_id) !== -1){
+          return true
+        } else{
+          return false
+        }
+      }
     },
 };
 </script>
