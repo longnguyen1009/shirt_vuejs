@@ -27,17 +27,19 @@
             <div class="simuright-options-rowTop optionLv1 d-flex align-items-center" @click="showOptionParent($event)">
               <span class="simuright-options-label">{{Genre.genre_name}}</span>
               <div class="simuright-options-name">
-                <span v-if="checkOptionComplete(Genre.genre_id)"><i class="fas fa-check-double"></i>&nbsp;選択済み</span>
-                <span v-if="!checkOptionComplete(Genre.genre_id) && checkAction"><i class="fas fa-exclamation-triangle"></i>&nbsp;残っています</span>
+                <span v-if="checkAllOptionComplete(Genre.genre_id)"><i class="fas fa-check-double"></i>&nbsp;選択済み</span>
+                <span v-if="!checkAllOptionComplete(Genre.genre_id) && checkAction" class="simu-alert"><i class="fas fa-exclamation-triangle"></i>&nbsp;残っています</span>
               </div>
             </div>
             <div class="simuright-options-rowDown">
               <ul class="simuright-optionLists">
                 <li class="optionLv2 d-flex align-items-center"
-                :class="{codeMode : (optionMode == 1)}"
+                :class="{codeMode : (optionMode == 1), notComplete: checkOptionNotComplete(Option.parent_id)}"
                 v-for="Option in optionParentSortData[Genre.genre_id]" :key="Option.parent_id"
                 @click="openDetailOption(Option.parent_id)">
-                  <!-- <span class="simuright-options-img"><img :src="option_img_path+Option.img" alt=""></span> -->
+                  <span class="simuright-options-notcomplete simu-alert" v-if="checkOptionNotComplete(Option.parent_id)">
+                    <i class="fas fa-exclamation-triangle"></i>
+                  </span>
                   <span class="simuright-options-label">{{Option.name}}</span>
                   <div class="simuright-options-name">{{optionSelectedValue(Option.parent_id)}}</div>
                 </li>
@@ -49,6 +51,7 @@
               <span class="simuright-options-label">ネックサイズ</span>
               <div class="simuright-options-name">
                 <span v-if="neckObject && neckObject.name"><i class="fas fa-check-double"></i>&nbsp;{{neckObject.name}}</span>
+                <span v-if="checkAction && !neckObject" class="simu-alert"><i class="fas fa-exclamation-triangle"></i>&nbsp;残っています</span>
               </div>
             </div>
             <div class="simuright-options-rowDown simuright-options-sizeDown">
@@ -63,7 +66,7 @@
                         </span>
                     </label>
                   </span>
-                  <span v-if="sizeSortData.length == 0">サイズがありません</span>
+                  <span v-if="!neckSizeData || neckSizeData.length == 0">サイズがありません</span>
                 </div>
               </div>
             </div>
@@ -74,7 +77,7 @@
               <span class="simuright-options-label">サイズ</span>
               <div class="simuright-options-name">
                 <span v-if="sizeItemDataActive.name"><i class="fas fa-check-double"></i>&nbsp;{{sizeItemDataActive.name}}</span>
-                <span v-if="!sizeItemDataActive.name && checkAction"><i class="fas fa-exclamation-triangle"></i>&nbsp;残っています</span>
+                <span v-if="!sizeItemDataActive.name && checkAction" class="simu-alert"><i class="fas fa-exclamation-triangle"></i>&nbsp;残っています</span>
               </div>
             </div>
             <div class="simuright-options-rowDown simuright-options-sizeDown">
@@ -101,17 +104,21 @@
             <div class="simuright-options-rowTop optionLv1 d-flex align-items-center" @click="showOptionParent($event)">
               <span class="simuright-options-label">採寸</span>
               <div class="simuright-options-name">
-                <span v-if="checkCorrectComplete()"><i class="fas fa-check-double"></i>&nbsp;選択済み</span>
-                <span v-if="!checkCorrectComplete() && checkAction"><i class="fas fa-exclamation-triangle"></i>&nbsp;残っています</span>
+                <span v-if="checkAllCorrectComplete()"><i class="fas fa-check-double"></i>&nbsp;選択済み</span>
+                <span v-if="!checkAllCorrectComplete() && checkAction" class="simu-alert"><i class="fas fa-exclamation-triangle"></i>&nbsp;残っています</span>
               </div>
             </div>
             <div class="simuright-options-rowDown simuright-options-measureDown">
               <ul class="simuright-optionLists">
                 <template v-for="correctSelectedItem in correctSelectedDataActive" >
                   <li class="optionLv2 d-flex align-items-center"
+                  :class="{notComplete: checkCorrectNotComplete(correctSelectedItem.correct_id)}"
                   v-if="!isNaN(correctSelectedItem.correct_id)"
                   :key="correctSelectedItem.correct_id"
                   @click="showCorrectionDetail(correctSelectedItem.correct_id)">
+                    <span class="simuright-options-notcomplete simu-alert" v-if="checkCorrectNotComplete(correctSelectedItem.correct_id)">
+                      <i class="fas fa-exclamation-triangle"></i>
+                    </span>
                     <span class="simuright-options-label">{{correctSelectedItem.correct_name}}</span>
                     <div class="simuright-options-measureValue">
                       <span v-if="correctSelectedItem.base_val != null">スペック：{{ correctSelectedItem.base_val ? correctSelectedItem.base_val : 0 }}cm</span>
@@ -339,9 +346,9 @@ export default {
         this.doBackShowModal = true
       },
       doBackConfirm(){
-        this.$store.dispatch('handleChangeModelTemp', {styleId: this.styleSelected, modelId: this.modelSelected})
-        this.$store.dispatch('handleChangePage', 2)
         this.$store.dispatch('handleChangeStep', 1)
+        this.$store.dispatch('handleChangePage', 2)
+        this.$store.dispatch('handleChangeModelTemp', {styleId: this.styleSelected, modelId: this.modelSelected})
       },
       openDetailOption: function(optionid){
         this.$store.dispatch('handleChangeOptionDetailActive', optionid)
@@ -510,7 +517,6 @@ export default {
           alert('生地を選択してください。')
         }
         else if(!this.initialData.customer_id){
-          this.checkAction = true
           alert('HC番号をを設定ください。')
         } 
         else if(this.sizeSelectedCheck.length){
@@ -663,7 +669,7 @@ export default {
             this.deli_date = response
         })
       },
-      checkOptionComplete: function(genre_id){
+      checkAllOptionComplete: function(genre_id){
         let ret = this.optionParentSortData[genre_id].filter(item => 
             this.allOptionSelectedCheck.findIndex(item2 => 
               item2.design_id == this.designActive.design_id 
@@ -672,7 +678,7 @@ export default {
 
         return ret.length ? false : true
       },
-      checkCorrectComplete: function(){
+      checkAllCorrectComplete: function(){
         let ret = false
         if(this.sizeSelectedValue){
           let sortArr = this.allCorrectSelectedCheck.filter(item => 
@@ -730,6 +736,25 @@ export default {
               }
             }
         }
+      },
+      checkOptionNotComplete: function(option_parent_id){
+        if(this.checkAction && this.allOptionSelectedCheck.findIndex(item => item.design_id == this.designActive.design_id 
+          && item.item_id == this.designActive.item_id 
+          && item.parent_id == option_parent_id) !== -1
+        ){
+          return true
+        } else{
+          return false
+        }
+      },
+      checkCorrectNotComplete: function(correct_id){
+        if(this.checkAction && this.allCorrectSelectedCheck.findIndex(item => item.design_id == this.designActive.design_id
+          && item.item_id == this.designActive.item_id
+          && item.correct_id == correct_id) !== -1){
+            return true
+          } else{
+            return false
+          }
       }
     },
     mounted() {
@@ -757,6 +782,11 @@ export default {
         this.$store.dispatch('handleChangeDesign', this.designActiveSplit)
       },
       designActive: function(){
+        //remove option show menu
+        $('.simuright-options-row').removeClass('show')
+        this.correction_selected_id = 0
+        this.tempCorrectDetailId = null
+
         let optionParentIndex = this.optionParentData.findIndex(
           (item) => item.design_id == this.designActive.design_id
         )

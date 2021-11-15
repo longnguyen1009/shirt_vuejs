@@ -13,7 +13,7 @@
               <!-- <button class="simu-styleItem-btn">MORE DETAILS</button> -->
             </div>
             <div class="simu-styleItem-detail" :class="{active: styleActive == Item.id}">
-              <span class="closeBtn" @click="styleClose(Item.id)"><img :src="main_path + 'html/user_data/assets/img/common/header_close.svg'" alt=""></span>
+              <span class="closeBtn" @click="styleClose(Item.id)"><img :src="main_path + 'html/user_data/assets/img/common/header_close_white.png'" alt=""></span>
               <div class="simu-styleItem-detailTop">
                 <h2 class="simu-styleItem-name">{{Item.name}}</h2>
                 <p class="simu-styleItem-description"><pre>{{Item.detail}}</pre></p>

@@ -32,6 +32,7 @@ export default new Vuex.Store({
     kiji_img_path: "/html/upload/save_image/",
     option_img_path: "/html/upload/save_image/",
     correct_detail_img_path: "/html/upload/correct_detail/",
+    option_shirt_svg_path: "/html/upload/simu_model/option_shirt/",
 
     // styleData load from server
     styleData: [], //[{id, name, brand, detail, img, model[], product_price}]
@@ -94,7 +95,8 @@ export default new Vuex.Store({
       {errorCode: 5, text: 'オーダー完了しました。'},
       {errorCode: 6, text: 'アイテム組み合わせが見つかりません。もう一度確認してください。'},
       {errorCode: 7, text: 'この生地は在庫がなくなりました。もう一度確認してください。'},
-      {errorCode: 8, text: '在庫情報はありません。'},
+      {errorCode: 8, text: '原価情報はエラーが発生されました。'},
+      {errorCode: 9, text: 'メール送信はエラーが発生されました。'},
     ],
     loaddingData: false,
     combinePriceData: [], //{model, combineid, price}
@@ -134,6 +136,7 @@ export default new Vuex.Store({
     kiji_img_path: state => state.kiji_img_path,
     option_img_path: state => state.option_img_path,
     correct_detail_img_path: state => state.correct_detail_img_path,
+    option_shirt_svg_path: state => state.option_shirt_svg_path,
 
     //
     styleSelected: state => state.styleSelected,
@@ -313,18 +316,28 @@ export default new Vuex.Store({
       state.modelSelected = 0,
       state.itemSelected = [],
       state.optionMode = 2,
-      Object.keys(state.designActive).forEach(key => {
-        state.designActive[key] = ''
-      }),
-      //state.designActive = {}, //{combine_id, design_id, item_id}
+      // Object.keys(state.designActive).forEach(key => {
+      //   state.designActive[key] = ''
+      // }),
+      state.designActive = {}, //{combine_id, design_id, item_id}
       state.kijiActive = null,
 
       state.optionSelectedData = state.optionSelectedData.filter(item => item.orderId != state.orderTempItem)
+      state.optionSelectedData = [...state.optionSelectedData]
+
       state.sizeSelectedData = state.sizeSelectedData.filter(item => item.orderId != state.orderTempItem)
+      state.sizeSelectedData = [...state.sizeSelectedData]
+
       state.correctSelectedData = state.correctSelectedData.filter(item => item.order_id != state.orderTempItem)
+      state.correctSelectedData = [...state.correctSelectedData]
+
       state.neckSelectedData = state.neckSelectedData.filter(item => item.orderId != state.orderTempItem)
+      state.neckSelectedData = [...state.neckSelectedData]
+
       state.optionDetailActive = null,
+      
       state.itemData = state.itemData.filter(item => item.orderId != this.orderNowId)
+      state.itemData = [...state.itemData]
 
       //raw html for option change img temp
       state.optionTemp = null,

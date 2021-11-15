@@ -3,13 +3,13 @@
     <div class="simu-model-left">
       <div class="simu-model-imgList">
         <carousel v-bind="settings" v-if="hasImg">
-          <slide>
+          <slide v-if="modelDetail.images.img1">
             <div class="simu-model-img"><img :src="model_img_path + modelDetail.images.img1" alt=""></div>
           </slide>
-          <slide>
+          <slide v-if="modelDetail.images.sub_images1">
             <div class="simu-model-img"><img :src="model_img_path + modelDetail.images.sub_images1" alt=""></div>
           </slide>
-          <slide>
+          <slide v-if="modelDetail.images.sub_images2">
             <div class="simu-model-img"><img :src="model_img_path + modelDetail.images.sub_images2" alt=""></div>
           </slide>
         </carousel>
@@ -51,7 +51,7 @@
         </ul>
         <span class="simu-error-message" v-if="!checkErrorSelect">アイテム組み合わせが見つかりません。</span>
         <div class="simu-model-order d-flex justify-content-between align-items-end">
-          <p class="simu-model-price"><span v-if="initialData.shop_kind == 2">参考価格 {{moneyTypeShow02(modelDetail.price)}}〜（税込）</span></p>
+          <p class="simu-model-price"><span v-if="initialData.shop_kind == 2">参考価格 {{moneyTypeShow02(modelDetail.price)}}（税込）</span></p>
           <div class="simu-nav-confirm d-flex justify-content-between">
             <button type="button" class="simu-common-btn btnSize01" @click="doBack">戻る</button>
             <button type="button" class="simu-common-btn btnSize01 gray" @click="doOrder" :disabled="!checkErrorSelect">決定</button>

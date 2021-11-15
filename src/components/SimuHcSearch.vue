@@ -2,7 +2,7 @@
   <div class="container-hcsearch">
     <div class="hcsearch-fade" @click="closeModal"></div>
     <div class="hcsearch-content">
-      <span class="closeBtn" @click="closeModal"><img :src="main_path + 'html/user_data/assets/img/common/header_close.svg'" alt=""></span>
+      <span class="closeBtn" @click="closeModal"><img :src="main_path + 'html/user_data/assets/img/common/header_close_white.png'" alt=""></span>
       <div class="hcsearch-header d-flex align-items-center justify-content-center">HC情報を検索</div>
       <div class="hcsearch-body">
         <div class="loaddingDataIo" v-if="loaddingDataHcSearch">

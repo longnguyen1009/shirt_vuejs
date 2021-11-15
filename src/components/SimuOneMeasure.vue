@@ -41,10 +41,12 @@
             <!--camera view, take pictures of front/side pose-->
             <div id="tozCameraView" class="toz-camera-container toz-container" style="display: none">
                 <div class="onemeasure-nav d-flex justify-content-between align-items-center">
-                  <span class="onemeasure-nav-prev" onClick="doPrev();"><i class="fas fa-chevron-left"></i></span>
+                  <span class="onemeasure-nav-prev" onClick="doPrev();"><img :src="main_path + 'html/user_data/assets/img/common/icon-arrow-left-black.png'" alt=""></span>
                   <span class="onemeasure-nav-title" v-if="oneStep == 2">正面を撮影</span>
                   <span class="onemeasure-nav-title" v-if="oneStep == 3">側面を撮影</span>
-                  <span class="onemeasure-nav-detail" @click="showOneGuide"><i class="fas fa-info-circle"></i></span>
+                  <span class="onemeasure-nav-detail" @click="showOneGuide">
+                    <img :src="main_path + 'html/user_data/assets/img/common/icon-info-black.png'" alt="">
+                  </span>
                 </div>
                 <div class="cameraBox">
                   <div class="cameraBox-camera">
@@ -55,28 +57,30 @@
                           <button id="captureImage"><span></span></button><br>
                           <span class="hidden_button" id="nexttostep2" @click="OneNextStep(2)">Next to step 2</span>
                           <span class="hidden_button" id="nexttostep3" @click="OneNextStep(3)">Next to step 3</span>
-                          <span class="hidden_button" id="nexttostep4" @click="OneNextStep(4)">Next to step 3</span>
+                          <span class="hidden_button" id="nexttostep4" @click="OneNextStep(4)">Next to step 4</span>
                           <span class="hidden_button" id="backtostep1" @click="OnePrevStep(1)">Back to step 1</span>
                           <span class="hidden_button" id="backtostep2" @click="OnePrevStep(2)">Back to step 2</span>
                           <span class="hidden_button" id="backtostep3" @click="OnePrevStep(3)">Back to step 3</span>
                       </div>
                   </div>
                   <div class="onemeasure-camera-sample">
-                    <img :src="this.main_path + '/html/user_data/assets/img/common/onemeasure-model-01.svg'" alt="" v-if="oneStep == 2">
-                    <img :src="this.main_path + '/html/user_data/assets/img/common/onemeasure-model-02.svg'" alt="" v-if="oneStep == 3">
+                    <img :src="main_path + '/html/user_data/assets/img/common/onemeasure-model-01.svg'" alt="" v-if="oneStep == 2">
+                    <img :src="main_path + '/html/user_data/assets/img/common/onemeasure-model-02.svg'" alt="" v-if="oneStep == 3">
                   </div>
                   <div class="onemeasure-camera-result">
-                        <img id="frontThumbnail" :src="this.main_path + '/html/user_data/assets/img/common/onemeasure-model-front.png'">
+                        <img id="frontThumbnail" :src="main_path + '/html/user_data/assets/img/common/onemeasure-model-front.png'">
                   </div>
                   <transition name="modal">
                     <div class="modal-mask onemeasure-modal-mask" v-if="guide_show_flg && oneStep == 2">
                       <div class="modal-wrapper">
-                        <div class="modal-container">
-                            <span class="onemeasure-modal-closebtn" @click="closeOneGuide"><i class="fas fa-times"></i></span>
+                        <div class="modal-container white">
+                            <span class="onemeasure-modal-closebtn closeBtn" @click="closeOneGuide"><img :src="main_path + 'html/user_data/assets/img/common/header_close_black.png'" alt=""></span>
+                            <div class="modal-header">
+                              <span>側面を撮影</span>
+                            </div>
                             <div class="modal-body">
-                              <div class="onemeasure-modal-title d-flex justify-content-center align-items-center">側面を撮影</div>
                               <div class="onemeasure-modal-img">
-                                <img :src="this.main_path + '/html/user_data/assets/img/common/onemeasure-guide-01.png'" alt="">
+                                <img :src="main_path + '/html/user_data/assets/img/common/onemeasure-guide-01.png'" alt="">
                               </div>
                               <div class="onemeasure-modal-textbox">
                                 <ul class="onemeasure-guide-list">
@@ -94,11 +98,13 @@
                     <div class="modal-mask onemeasure-modal-mask" v-if="guide_show_flg && oneStep == 3">
                       <div class="modal-wrapper">
                         <div class="modal-container">
-                            <span class="onemeasure-modal-closebtn" @click="closeOneGuide"><i class="fas fa-times"></i></span>
+                            <span class="onemeasure-modal-closebtn closeBtn" @click="closeOneGuide"><img :src="main_path + 'html/user_data/assets/img/common/header_close_black.png'" alt=""></span>
+                            <div class="modal-header">
+                              <span>側面を撮影</span>
+                            </div>
                             <div class="modal-body">
-                              <div class="onemeasure-modal-title d-flex justify-content-center align-items-center">側面を撮影</div>
                               <div class="onemeasure-modal-img">
-                                <img :src="this.main_path + '/html/user_data/assets/img/common/onemeasure-guide-02.png'" alt="">
+                                <img :src="main_path + '/html/user_data/assets/img/common/onemeasure-guide-02.png'" alt="">
                               </div>
                               <div class="onemeasure-modal-textbox">
                                 <ul class="onemeasure-guide-list">
@@ -149,8 +155,8 @@
             <transition name="modal">
               <div id="modal-measure-result" class="modal-mask" v-if="resultMeasureShow">
                   <div class="modal-wrapper">
-                    <div class="modal-container">
-                        <div class="modal-close-btn" @click="resultMeasureShow = false"><i class="fas fa-times"></i></div>
+                    <div class="modal-container white">
+                        <span class="closeBtn" @click="resultMeasureShow = false"><img :src="main_path + 'html/user_data/assets/img/common/header_close_black.png'" alt=""></span>
                         <div class="modal-header">推奨ゲージサイズ</div>
                         <div class="modal-body">
                           <ul class="modal-measure-list">

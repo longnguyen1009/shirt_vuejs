@@ -68,7 +68,7 @@
             </div>
             <span class="simu-confirm-removeBtn closeBtn" 
             @click="removeConfirmOrderTemp(OrderTemp.id)">
-            <img :src="main_path + 'html/user_data/assets/img/common/header_close.svg'" alt="">
+            <img :src="main_path + 'html/user_data/assets/img/common/header_close_white.png'" alt="">
             </span>
           </div>
           <div class="simu-confirm-payment d-flex justify-content-between">
@@ -496,7 +496,9 @@ export default {
         if(response && response.length){
          this.$store.dispatch('handleChangeOrderTemp', response)
         }
-        this.doStuffAsync()
+        if(this.isStaff){
+          this.doStuffAsync()
+        }
       })
     },
     doStuffAsync: async function(){

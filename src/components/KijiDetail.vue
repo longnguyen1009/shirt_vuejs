@@ -3,7 +3,7 @@
     <div class="option-detail-top flex-grow-1">
         <img class="option-detail-img" alt="" :src="kiji_img_path + kijiDetailData.img">
         <span class="closeBtn option-detail-closeBtn" @click="closeKijiDetail">
-          <img :src="main_path + 'html/user_data/assets/img/common/header_close.svg'" alt="">
+          <img :src="main_path + 'html/user_data/assets/img/common/header_close_white.png'" alt="">
         </span>
     </div>
     <div class="option-detail-bottom d-flex flex-column justify-content-between">

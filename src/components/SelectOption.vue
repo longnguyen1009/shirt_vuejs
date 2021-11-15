@@ -23,11 +23,11 @@
           <div v-for="Option in optionCurrLists" :key="Option.id" class="optionItem"
             :class="{active: (Option.id == optionSelected)}">
             <img :src="option_img_path + Option.img" alt="" class="optionitem-img"
-              @click="optionChange(Option.id, Option.simu_img, optionParent.type)">
+              @click="optionChange(Option.id, Option.simu_img, Option.option_shirt_svg, Option.option_shirt_shadow, optionParent.type)">
             <span class="simuright-option-icon" @click="showOptionDetail(Option.id)">
               <img :src="main_path + 'html/user_data/assets/img/common/icon_info.png'" alt="">
             </span>
-            <div class="simuright-option-text" @click="optionChange(Option.id, Option.simu_img, optionParent.type)">
+            <div class="simuright-option-text" @click="optionChange(Option.id, Option.simu_img, Option.option_shirt_svg, Option.option_shirt_shadow, optionParent.type)">
               <div class="simuright-kiji-text-top d-flex justify-content-between align-items-center">
                 <span class="simuright-kiji-code">{{Option.name}}</span><br>
               </div>
@@ -44,7 +44,7 @@
                 <li v-for="Option in optionCurrLists" :key="Option.id"
                   class="optionItem d-flex justify-content-center align-items-center"
                   :class="{active: (Option.id == optionSelected)}"
-                  @click="optionChange(Option.id, Option.simu_img, optionParent.type)">
+                  @click="optionChange(Option.id, Option.simu_img, '', '', optionParent.type)">
                     <span class="option-code">{{Option.name}}</span>
                 </li>
               </ul>
@@ -64,7 +64,7 @@
             <p class="option-customname-title">ネーム入力</p>
             <p class="option-customname-inputval">
               <!-- <span class="text-alert">※ヤンアルタ14文字/東和10文字/那須8文字まで</span> -->
-              <input type="text" placeholder="" :maxlength="getMaxLengthCustomName()" v-model="optionCustomNameText">
+              <input type="text" placeholder="" :maxlength="getMaxLengthCustomName(facatory_id)" v-model="optionCustomNameText">
             </p>
           </div>
 
@@ -128,12 +128,12 @@ export default {
     closeOptionDetail:function(){
       this.optionDetailId = null
     },
-    optionChange: function(id, img, type){
+    optionChange: function(id, img, option_shirt_svg, option_shirt_shadow, type){
       if(this.optionSelected == id){
         return false
       } else{
         this.optionSelected = id
-        this.$store.dispatch('handleChangeOptionTemp', {option_id: id, option_img: img, type: type})
+        this.$store.dispatch('handleChangeOptionTemp', {option_id: id, option_img: img, option_shirt_svg: option_shirt_svg, option_shirt_shadow: option_shirt_shadow, type: type})
       }
     },
     changeOptionCategory(cate_id){
@@ -158,6 +158,8 @@ export default {
             cate_id: (this.cateOfSelectedOption && this.cateLists.find(cate => cate.cate_id == this.cateOfSelectedOption)) ? this.cateOfSelectedOption : null,
             cate_name: (this.cateOfSelectedOption && this.cateLists.find(cate => cate.cate_id == this.cateOfSelectedOption)) ? this.cateLists.find(cate => cate.cate_id == this.cateOfSelectedOption).cate_name : null,
             option_img: selectedObj.simu_img,
+            option_shirt_svg: selectedObj.option_shirt_svg,
+            option_shirt_shadow: selectedObj.option_shirt_shadow,
             name: selectedObj.name,
             type: this.optionParent.type,
             cost: selectedObj.price
@@ -172,7 +174,7 @@ export default {
         if(this.optionSelected){
           let selectedObj = this.optionDetailData.filter((item) => item.id == this.optionSelected)[0]
           let optionCustomNameObj = this.optionCustomNameSubLists.find(item => item.id == this.optionCustomNameSelected)
-          let reg = new RegExp('^[0-9a-zA-Z?\\s]+$');
+          let reg = new RegExp('^[0-9a-zA-Z?.\\s]+$');
           if(this.optionSelected == 43 || (this.optionSelected != 43 && this.optionCustomNameSelected && this.optionCustomNameText != '' && reg.test(this.optionCustomNameText))){
 
               this.$store.dispatch('handleChangeOption', {
@@ -323,17 +325,17 @@ export default {
     optionChangeCustomNameSub(sub_id){
       this.optionCustomNameSelected = sub_id
     },
-    getMaxLengthCustomName: function(){
+    getMaxLengthCustomName: function(facatory_id){
       //ヤンアルタ
-      if(['-1'].indexOf(this.facatory_id) !== -1){
+      if([11].indexOf(facatory_id) !== -1){
         return 14
       } 
       //東和
-      else if(['8'].indexOf(this.facatory_id) !== -1 ){
+      else if([8].indexOf(facatory_id) !== -1 ){
         return 10
       }
       //那須 
-      else if(['-1'].indexOf(this.facatory_id) !== -1){
+      else if([10].indexOf(facatory_id) !== -1){
         return 8
       } else{
         return 8
@@ -448,7 +450,7 @@ export default {
     },
     facatory_id: function(){
       if(this.itemDataActive){
-        return this.itemDataActive.facatory_id
+        return this.itemDataActive.factory_id
       } else{
         return 0
       }

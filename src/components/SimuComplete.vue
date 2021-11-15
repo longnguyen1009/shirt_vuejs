@@ -177,9 +177,13 @@ export default {
       })
       .then(response => {
         ret = response.data.data
+        if(!ret){
+          this.$store.dispatch('handleChangeErrorCode', 9)
+        }
       })
       .catch(error => {
         console.log(error)
+        this.$store.dispatch('handleChangeErrorCode', 9)
       })
       return ret
     },

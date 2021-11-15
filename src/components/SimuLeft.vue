@@ -26,15 +26,17 @@
         <img :src="correct_detail_img" alt="" v-on:error="loadCorrectImgError">
       </div>
       <div class="simuleft-options">
-        <span v-for="(Option,id) in optionSaved" :key="id">
-          <img v-if="Option.option_img || ShirtCheck()"
-          :id="createIdForOption(Option)"
-          :src="option_img_path + Option.option_img"
-          :cate="Option.type"
-          :option_id="Option.option_id" 
-          class="img_option" v-on:error="loadImgError"
-          @load="loadOption($event, Option.option_img, Option.type, Option.option_id)"/>
-        </span>
+        <template v-for="(Option,id) in optionSaved">
+          <span :key="id" v-if="Option && Option.option_img">
+            <img v-if="Option.option_img"
+            :id="createIdForOption(Option)"
+            :src="option_img_path + Option.option_img"
+            :cate="Option.type"
+            :option_id="Option.option_id" 
+            class="img_option" v-on:error="loadImgError"
+            @load="loadOption($event, Option.option_img, Option.type, Option.option_id)"/>
+          </span>
+        </template>
         <span v-if="optionTemp">
          <img id="option_temp"
          :src="option_img_path + optionTemp.option_img" 
@@ -43,6 +45,31 @@
          :option_id="optionTemp.option_id"
           @load="loadOption($event, optionTemp.option_img, optionTemp.type, optionTemp.option_id)"
          v-on:error="loadImgError">
+        </span>
+      </div>
+      <div class="simuleft-options-shirt" v-if="ShirtCheck()">
+        <template v-for="(Option,id) in optionSaved">
+          <span :key="id" v-if="Option && Option.option_shirt_svg">
+            <object
+              type="image/svg+xml"
+              v-bind:data="option_shirt_svg_path + Option.option_shirt_svg"
+              @load="svgOptionShirt"
+              class="svgOptionShirt"
+              style="image-rendering: pixelated"
+            ></object>
+            <img v-if="Option.option_shirt_shadow" :src="option_shirt_svg_path + Option.option_shirt_shadow" class="img_shadow" v-on:error="loadImgError"/>
+          </span>
+        </template>
+        <span v-if="optionTemp">
+          <object
+            v-if="optionTemp.option_shirt_svg"
+            type="image/svg+xml"
+            v-bind:data="option_shirt_svg_path + optionTemp.option_shirt_svg"
+            @load="svgOptionShirt"
+            class="svgOptionShirt"
+            style="image-rendering: pixelated"
+          ></object>
+          <img v-if="optionTemp.option_shirt_shadow" :src="option_shirt_svg_path + optionTemp.option_shirt_shadow" class="img_shadow" v-on:error="loadImgError"/>
         </span>
       </div>
       <!-- <div class="sumi-left-zoombtn">+ZOOM</div> -->
@@ -92,6 +119,11 @@ export default {
         // .not("#button")
         .attr("width", 74)
         .attr("height", 74);
+
+      // shirt: change kiji -> change shirt option
+      if(this.ShirtCheck()){
+        this.kijiLoadedToShirt()
+      }
     },
     loadOption(event, img, cate, option_id){
       let target = document.querySelector(".svgModel").contentDocument;
@@ -103,11 +135,9 @@ export default {
           .attr("xlink:href", $(event.target).attr('src'))
         }
       }
-      if(cate && this.ShirtCheck()){
-        if($(target).find('.'+cate).length){
-          $(target).find('.'+cate).css('display', 'none')
-          $(target).find("[data-name='"+ cate +"-"+ option_id+"']").css('display', 'block')
-        }
+
+      if(this.ShirtCheck()){
+        this.loadOptionToShirt(event)
       }
     },
     loadAllOption : async function(){
@@ -130,6 +160,54 @@ export default {
           $(".loadding_bl").removeClass("on");
         }, 300)
       })
+    },
+    kijiLoadedToShirt() {
+      let kiji = $(".kiji_preloader").find("img");
+      document.querySelectorAll('.svgOptionShirt').forEach(element => {
+        let target = element.contentDocument
+         $(target)
+          .find("pattern[type='kiji']")
+          .find("image")
+          .attr("xlink:href", kiji[0].currentSrc)
+          .attr("width", 74)
+          .attr("height", 74);
+        $(target)
+          .find("pattern[type='kiji']")
+          .attr("width", 74)
+          .attr("height", 74);
+      })
+    },
+    loadOptionToShirt : function(event){
+      setTimeout(() => {
+        document.querySelectorAll('.svgOptionShirt').forEach(element => {
+           let target = element.contentDocument
+           let cate = $(event.target).attr('cate')
+           if(cate && $(target).find("pattern[cate='"+cate+"']").length){
+             $(target)
+             .find("pattern[cate='"+cate+"']")
+             .find("image")
+             .attr("xlink:href", $(event.target).attr('src'))
+           }
+         })
+      }, 300)
+    },
+    loadAllOptionToShirt : function(){
+     document.querySelectorAll('.svgOptionShirt').forEach(element => {
+        let target = element.contentDocument
+        $(".img_option").each(function(index, optionDOM) {
+          let cate = $(optionDOM).attr('cate')
+          if(cate && $(target).find("pattern[cate='"+cate+"']").length){
+            $(target)
+            .find("pattern[cate='"+cate+"']")
+            .find("image")
+            .attr("xlink:href", $(optionDOM).attr('src'))
+          }
+        })
+      })
+    },
+    svgOptionShirt: function(){
+      this.kijiLoadedToShirt()
+      this.loadAllOptionToShirt()
     },
     loadImgError: function(e) {
       var target = document.querySelector(".svgModel").contentDocument;
@@ -246,6 +324,7 @@ export default {
         'kiji_img_path',
         'simu_img_path',
         'option_img_path',
+        'option_shirt_svg_path',
         'correct_detail_img_path',
         'optionMode',
         'styleSelected',
@@ -331,24 +410,54 @@ export default {
     },
     optionSaved: function(){
       if($("#option_temp").length > 0 && !this.optionTemp){
-        var target = document.querySelector(".svgModel").contentDocument;
+        let target = document.querySelector(".svgModel").contentDocument;
         $(target).find("pattern[cate='"+$("#option_temp").attr('cate')+"']")
         .find('image').attr("xlink:href", this.option_img_path + "notfounder.png")
       }
-      var optionSavedList = this.optionSelectedData.filter(
+      let optionSavedList = this.optionSelectedData.filter(
         (item) => (item.combine_id == this.designActive.combine_id && 
             item.item_id == this.designActive.item_id &&
             item.design_id == this.designActive.design_id)
       )
+
+      //load shirt default option: 衿、長袖とか。
+      if(this.ShirtCheck()){
+        //eri default
+        if(
+          optionSavedList.findIndex(item => item.type == 'eri') == -1 
+          && (!this.optionTemp || (this.optionTemp && this.optionTemp.type != 'eri'))
+        ){
+          optionSavedList.push({
+            option_img: null,
+            option_shirt_svg: '139.svg',
+            option_shirt_shadow: 'shadow-139.png',
+            type: 'eri'
+          })
+        }
+
+        //button default
+        if(
+          optionSavedList.findIndex(item => item.type == 'button') == -1 
+          && (!this.optionTemp || (this.optionTemp && this.optionTemp.type != 'button'))
+        ){
+          optionSavedList.push({
+            option_id : 128,
+            option_img: '1027185252_6179217476827.png',
+            option_shirt_svg: '',
+            option_shirt_shadow: '',
+            type: 'button'
+          })
+        }
+      }
       if(this.optionTemp){
-        var existOptionSelected = optionSavedList.findIndex(
-          (item) => (
-            item.parent_id == this.optionDetailActive
-          ))
+        let existOptionSelected = optionSavedList.findIndex(
+          item => item.parent_id == this.optionDetailActive)
         if(existOptionSelected !== -1){
-          optionSavedList.splice(existOptionSelected, 1)
+          optionSavedList[existOptionSelected] = null
+          // optionSavedList.splice(existOptionSelected, 1)
         } 
       }
+
       return optionSavedList
     },
     itemDataActive(){
