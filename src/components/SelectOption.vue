@@ -3,7 +3,7 @@
     <div class="simuright-sub-name d-flex justify-content-center align-items-center">{{optionParent.name}}選択</div>
     <div class="simuright-sub-content">
       <div class="simuright-sub-contentBox">
-        <div class="simuright-sub-nav" v-if="cateLists.length > 0 && optionDetailActive != 35">
+        <div class="simuright-sub-nav" v-if="cateLists.length > 0 && optionDetailActive != optionCustomNameID">
           <div class="simuright-sub-searchTop d-flex justify-content- align-items-center">
             <!-- Button Category -->
             <ul class="optionParentList scroll">
@@ -16,10 +16,10 @@
           </div>
         </div>
         <div class="optionParentCurrent d-flex justify-content-center align-items-center"
-          v-if="cateCurrObj && optionDetailActive != 35">
+          v-if="cateCurrObj && optionDetailActive != optionCustomNameID">
           <span>{{cateCurrObj.cate_name}}</span>
         </div>
-        <div class="simuright-sub-result d-flex flex-wrap" v-if="optionDetailActive != 35">
+        <div class="simuright-sub-result d-flex flex-wrap" v-if="optionDetailActive != optionCustomNameID">
           <div v-for="Option in optionCurrLists" :key="Option.id" class="optionItem"
             :class="{active: (Option.id == optionSelected)}">
             <img :src="option_img_path + Option.img" alt="" class="optionitem-img"
@@ -37,7 +37,7 @@
             </div>
           </div>
         </div>
-        <div class="simuright-sub-result" v-if="optionDetailActive == 35">
+        <div class="simuright-sub-result" v-if="optionDetailActive == optionCustomNameID">
           <div class="option-customname-row option-customname-type">
               <p class="option-customname-title">刺繍ネーム</p>
               <ul class="option-customname-itemList d-flex justify-content-start align-items-center">
@@ -49,7 +49,7 @@
                 </li>
               </ul>
           </div>
-          <div class="option-customname-row option-customname-color" v-if="optionSelected != 43">
+          <div class="option-customname-row option-customname-color" v-if="optionSelected != optionCustomNameNot">
             <p class="option-customname-title">刺繍糸色</p>
               <ul class="option-customname-itemList d-flex justify-content-start align-items-center">
                 <li v-for="Option in optionCustomNameSubLists" :key="Option.id"
@@ -60,7 +60,7 @@
                 </li>
               </ul>
           </div>
-          <div class="option-customname-row option-customname-input justify-content-start align-items-center" v-if="optionSelected != 43">
+          <div class="option-customname-row option-customname-input justify-content-start align-items-center" v-if="optionSelected != optionCustomNameNot">
             <p class="option-customname-title">ネーム入力</p>
             <p class="option-customname-inputval">
               <!-- <span class="text-alert">※ヤンアルタ14文字/東和10文字/那須8文字まで</span> -->
@@ -118,6 +118,10 @@ export default {
       optionCustomNameSubLists: [],
       optionCustomNameSelected: 0,
       optionCustomNameText: '',
+      //刺繍ネームID
+      optionCustomNameID: 35,
+      optionCustomNameNot: 43,
+      //刺繍糸色ID
       optionCustomNameSubParent: 36
     };
   },
@@ -145,7 +149,7 @@ export default {
     },
     buttonConfirm: function(){
       //普通Option
-      if(this.optionDetailActive != 35){
+      if(this.optionDetailActive != this.optionCustomNameID){
         if(this.optionSelected){
           var selectedObj = this.optionDetailData.filter((item) => item.id == this.optionSelected)[0]
           this.$store.dispatch('handleChangeOption', {
@@ -174,8 +178,8 @@ export default {
         if(this.optionSelected){
           let selectedObj = this.optionDetailData.filter((item) => item.id == this.optionSelected)[0]
           let optionCustomNameObj = this.optionCustomNameSubLists.find(item => item.id == this.optionCustomNameSelected)
-          let reg = new RegExp('^[0-9a-zA-Z?.\\s]+$');
-          if(this.optionSelected == 43 || (this.optionSelected != 43 && this.optionCustomNameSelected && this.optionCustomNameText != '' && reg.test(this.optionCustomNameText))){
+          let reg = new RegExp('^[0-9a-zA-Z.\\s]+$');
+          if(this.optionSelected == this.optionCustomNameNot || (this.optionSelected != this.optionCustomNameNot && this.optionCustomNameSelected && this.optionCustomNameText != '' && reg.test(this.optionCustomNameText))){
 
               this.$store.dispatch('handleChangeOption', {
                   orderId: this.orderId,
@@ -188,11 +192,11 @@ export default {
                   cate_name: null,
                   option_img: selectedObj.simu_img,
                   name: selectedObj.name,
-                  type: selectedObj.type,
+                  type: this.optionParent.type,
                   cost: selectedObj.price,
-                  custom_name_color_id: (this.optionSelected == 43) ? null : (optionCustomNameObj ? optionCustomNameObj.id : null),
-                  custom_name_color_name: (this.optionSelected == 43) ? null : (optionCustomNameObj ? optionCustomNameObj.name : null),
-                  custom_name_val: (this.optionSelected == 43) ? null : this.optionCustomNameText
+                  custom_name_color_id: (this.optionSelected == this.optionCustomNameNot) ? null : (optionCustomNameObj ? optionCustomNameObj.id : null),
+                  custom_name_color_name: (this.optionSelected == this.optionCustomNameNot) ? null : (optionCustomNameObj ? optionCustomNameObj.name : null),
+                  custom_name_val: (this.optionSelected == this.optionCustomNameNot) ? null : this.optionCustomNameText
                 })
               this.closeOption()
           }
@@ -218,7 +222,7 @@ export default {
       this.optionDetailId = id
     },
     confirmOptionDetail(data){
-      this.optionChange(data.id, data.img, data.type)
+      this.optionChange(data.id, data.img, data.option_shirt_svg, data.option_shirt_shadow, data.type)
       this.buttonConfirm()
     },
     getOptionData: async function(){
@@ -315,7 +319,7 @@ export default {
         this.optionSelected = this.optionSelectedData[optionSelectedIndex].option_id
         this.cateCurr = this.optionSelectedData[optionSelectedIndex].cate_id
         //刺繍ネーム
-        if(this.optionDetailActive == 35){
+        if(this.optionDetailActive == this.optionCustomNameID){
           this.optionCustomNameSelected = this.optionSelectedData[optionSelectedIndex].custom_name_color_id
           this.optionCustomNameText = this.optionSelectedData[optionSelectedIndex].custom_name_val
         }
@@ -375,7 +379,7 @@ export default {
         this.setOptionData()
     }
 
-    if(this.optionDetailActive == 35){
+    if(this.optionDetailActive == this.optionCustomNameID){
       //load 刺繍糸色Data ID = 36
       const loadedCustomNameDataIndex = this.optionDataLoaded.findIndex(
         (item) => item.model_id == this.modelSelected

@@ -13,7 +13,7 @@
                   <p class="">
                     <span class="simu-confirm-kiji-code">{{getKijiObj(Item.product_id).code}}</span><br>
                     <span class="simu-confirm-kiji-name">{{getKijiObj(Item.product_id).name}}</span><br>
-                    <span class="simu-confirm-kiji-name">C/# 09</span>
+                    <span class="simu-confirm-kiji-name">C/#{{getKijiObj(Item.product_id).fabric_color}}</span>
                   </p>
                 </div>
               </div>
@@ -99,13 +99,15 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import VueBarcode from 'vue-barcode';
+import VueBarcode from 'vue-barcode'
+import Mixins from '../mixin/mixin'
 
 export default {
   name: "SimuComplete",
   components: {
     'barcode': VueBarcode
   },
+  mixins: [Mixins],
   data() {
     return {
       barCodeShow: false,
@@ -121,9 +123,6 @@ export default {
     },
     barCodeModalClose(){
       this.barCodeShow = false
-    },
-    moneyTypeShow02(number){
-      return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(number)
     },
     getDeliName(deliId){
       if(this.deliData.findIndex(item => item.id == deliId) !== -1){

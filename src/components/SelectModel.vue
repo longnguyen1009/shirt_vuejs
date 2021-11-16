@@ -51,7 +51,7 @@
         </ul>
         <span class="simu-error-message" v-if="!checkErrorSelect">アイテム組み合わせが見つかりません。</span>
         <div class="simu-model-order d-flex justify-content-between align-items-end">
-          <p class="simu-model-price"><span v-if="initialData.shop_kind == 2">参考価格 {{moneyTypeShow02(modelDetail.price)}}（税込）</span></p>
+          <p class="simu-model-price"><span v-if="initialData.shop_kind == 2">参考価格 {{moneyTypeShow02(modelDetail.price, 'tax')}}</span></p>
           <div class="simu-nav-confirm d-flex justify-content-between">
             <button type="button" class="simu-common-btn btnSize01" @click="doBack">戻る</button>
             <button type="button" class="simu-common-btn btnSize01 gray" @click="doOrder" :disabled="!checkErrorSelect">決定</button>
@@ -65,12 +65,15 @@
 <script>
 
 //Carousel
-import { Carousel, Slide } from 'vue-carousel';
-import { mapGetters } from 'vuex';
+import { Carousel, Slide } from 'vue-carousel'
+import { mapGetters } from 'vuex'
+import Mixins from '../mixin/mixin'
+
 
 export default {
   name: "SelectModel",
   components: {Carousel,Slide},
+  mixins: [Mixins],
   data() {
     return {
       modelDetail: {},
@@ -88,9 +91,6 @@ export default {
     };
   },
   methods: {
-    moneyTypeShow02(number){
-      return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(number)
-    },
     doOrder(){
       let selectedData = this.itemSelectedTemp.filter(val => (val!==undefined) && (val!==null))
       if(selectedData.length > 0){

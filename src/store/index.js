@@ -5,27 +5,35 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-
-    //initial info
+    //initial info when load page
     initialData: {}, // {shop_id, shop_kind, customer_id, staff_id, cartItemId, orderItemId}
 
+    //選択してるカテゴリ: SUITS,JACKET,TROUSERS.VEST：13, SHIRT:14
     category_select: null,
 
+    //今のorderID, 0は初期化
     orderNowId: 0,
-    //存在ORDER
+
+    //存在ORDER、カートから入れる
     orderTempItem: [], //[{id, style, model, item, option_selected, price, quality, combineId}]
 
+    //simuPage has 4 step: 1:スタイル選択、2:オーダーシミュレーション、3:オーダー内容確認、4:オーダー完了
     step: 1,
+    //step=1 has 2 page, スタイル選択：page = 1, とモデル選択: page = 2
     page: 1, //page 2 is model page
 
-    main_path: 'https://ua.coremobile.win/',
-    // simu_img_path: "https://ua.coremobile.win/html/upload/simu_model/",
-    // style_img_path: "https://s3-ap-northeast-1.amazonaws.com/ua-dev-backet/upload/save_image/",
-    // model_img_path: "https://s3-ap-northeast-1.amazonaws.com/ua-dev-backet/upload/save_image/",
-    // kiji_img_path: "https://s3-ap-northeast-1.amazonaws.com/ua-dev-backet/upload/save_image/",
-    // option_img_path: "https://s3-ap-northeast-1.amazonaws.com/ua-dev-backet/upload/save_image/",
+    //画像、URL
+    // main_path: 'https://stg-personalorder.united-arrows.co.jp/',
+    // simu_img_path: "/html/upload/simu_model/",
+    // style_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
+    // model_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
+    // kiji_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
+    // option_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
     // correct_detail_img_path: "https://s3-ap-northeast-1.amazonaws.com/ua-dev-backet/upload/correct_detail/",
+    // option_shirt_svg_path: "/html/upload/simu_model/option_shirt/",
 
+    
+    main_path: 'https://ua.coremobile.win/',
     simu_img_path: "/html/upload/simu_model/",
     style_img_path: "/html/upload/save_image/",
     model_img_path: "/html/upload/save_image/",
@@ -34,58 +42,59 @@ export default new Vuex.Store({
     correct_detail_img_path: "/html/upload/correct_detail/",
     option_shirt_svg_path: "/html/upload/simu_model/option_shirt/",
 
-    // styleData load from server
+    // 全てスタイル情報
     styleData: [], //[{id, name, brand, detail, img, model[], product_price}]
 
-    //modelData load from server
+    //全てモデル情報
     modelData: [], //{modelId, data}
 
-    //back to model page
+    //step2からモデル選択に戻すの一時情報
     modelTemp: null, //{styleId, modelId}
 
-    //data selected at model page
+    //選択した情報
     styleSelected: 0,
     modelSelected: 0,
     itemSelected: [],
 
-    //option select mode
+    //オプション選択形： コードスキャン:1、リスト選択:2
     optionMode: 2,
 
-    //being selected design
+    //選択してるデザイン情報
     designActive: {}, //{combine_id, design_id, item_id}
 
-    kijiActive: null, //kijiId 
+    //選択してる生地ID
+    kijiActive: null, 
 
-    // kijiData load from server
+    // 全て生地情報
     kijiData: [],
+
+    //生地の絞り込み情報
     kijiSearchData: {},
 
-    // option parent Data by design
+    // 全てオプションカテゴリの情報
     optionParentData: [], //{design_id, genreData, parentData}
 
-    //id of selecting option_parent 
+    //選択してるオプションカテゴリ
     optionDetailActive: null,
 
-    // optionDetailList Data load from server
+    //全てオプションItemの情報
     // catelist: [{cate_id, cate_name}]
     // optionLists [{cate_id: [{id, name, img, simu_img, ....}]
     optionDataLoaded: [], //{model_id, design_id, parent_id, cateLists, optionLists }
+
+    //全てオプションItemの情報
+    optionDetailData:[],
     
-    //list of option item selcted 
+    //選択したオプション情報
     optionSelectedData:[], // list of {combine_id, item_id, design_id, parent_id, option_id, cate_id, option_img, simu_img, name}
 
     //raw html for option change img temp when change option
     optionTemp: null, // {option_id, option_img, type: type}
 
-    //optionDetailData List
-    optionDetailData:[],
-
-    //itemData load form server
+    //全てアイテム情報
     itemData: [], //{orderId, items, design[] in step 2}
 
-    //受け取り方法
-    deliActive: 0,
-
+    //エーラ、アラート
     errorCode: 0,
     errorData: [
       {errorCode: 1, text: '認証が失敗しました。'},
@@ -99,29 +108,46 @@ export default new Vuex.Store({
       {errorCode: 9, text: 'メール送信はエラーが発生されました。'},
     ],
     loaddingData: false,
+
+    //上代情報
     combinePriceData: [], //{model, combineid, price}
-    priceActive: 0,
+
+    //組み合わせID
     combineIdActive: 0,
 
+    //選択してるスタイルID
     sizeActiveId: 0,
 
+    //選択してる在庫の情報
     stockSelectedData: [], //{orderId, kiji, stockVal, stock_design, stock_min, stock_max }
 
-    //step 4
+    //オーダー完了ID
     orderCompleteId: 0,
-    deliData: [],
 
-    //size
+    //配送情報
+    deliData: [],
+    //受け取り方法
+    deliActive: 0,
+
+    //採寸情報
     correctDetailData: [], //{correct_id, detail_data}
 
+    //選択したサイズ情報
     sizeSelectedData: [],// {orderId, size_id, item_id, name, base_val...}
+
+    //選択した補正情報
     correctSelectedData: [], //{order_id, size_id, design_id, correct_id, correct_name, size_link, base_val, correct_detail_id, correct_detail_name, correct_detail_val, correct_result}
+    
+    //選択してる採寸ID
     correct_detail_id_now: 0,
 
-    //necksize
+    //選択したネックサイズ情報
     neckSelectedData: [], //{orderId, id , name},
 
+    //Onemeasureの採寸情報
     measureData: null,
+    
+    //前の一時保存ID
     stock_old_id: null
   },
   getters: {
@@ -172,7 +198,6 @@ export default new Vuex.Store({
     orderNowId: state => state.orderNowId,
     orderTempItem: state => state.orderTempItem,
     category_select: state => state.category_select,
-    priceActive: state => state.priceActive,
     combinePriceData: state =>state.combinePriceData,
     combineIdActive: state => state.combineIdActive,
     
@@ -458,9 +483,6 @@ export default new Vuex.Store({
         state.orderTempItem[index].necksize = state.neckSelectedData.filter(item => item.orderId == element.id)
       })
       state.orderTempItem = [...state.orderTempItem]
-    },
-    changePriceActive(state, price){
-      state.priceActive = price
     },
     updateCombinePrice(state, combinePrice){
       combinePrice.forEach(element => {
@@ -752,9 +774,6 @@ export default new Vuex.Store({
     // },
     handleUpdateOrderTempAllData(context, data){
       context.commit('updateOrderTempAllData')
-    },
-    handleChangePriceActive(context, priceActive){
-      context.commit('changePriceActive', priceActive)
     },
     handleUpdateCombinePrice(context, combinePrice){
       context.commit('updateCombinePrice', combinePrice)

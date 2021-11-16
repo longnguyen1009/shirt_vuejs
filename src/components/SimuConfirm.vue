@@ -209,8 +209,8 @@
               </div>
               <div class="modal-footer justify-content-center">
                 <slot name="footer">
-                  <button class="simu-common-btn" @click="confirmModalClose">戻る</button>
-                  <button class="simu-common-btn" @click="doOrderComplete(1)">完了</button>
+                  <button class="simu-common-btn btnSize01" @click="confirmModalClose">戻る</button>
+                  <button class="simu-common-btn btnSize01 gray" @click="doOrderComplete(1)">完了</button>
                 </slot>
               </div>
           </div>
@@ -224,29 +224,14 @@
               </div>
               <div class="modal-footer justify-content-center">
                 <slot name="footer">
-                  <button class="simu-common-btn" @click="confirmModalClose">戻る</button>
-                  <button class="simu-common-btn gray" @click="removeOrderTemp(orderRemoveCheck)">確認</button>
+                  <button class="simu-common-btn btnSize01" @click="confirmModalClose">戻る</button>
+                  <button class="simu-common-btn btnSize01 gray" @click="removeOrderTemp(orderRemoveCheck)">確認</button>
                 </slot>
               </div>
           </div>
         </div>
       </div>
-
-      <!-- <div class="modal-mask" v-if="HcErrorLogin" id="model-error">
-        <div class="modal-wrapper">
-          <div class="modal-container">
-              <div class="modal-body">
-                <span class="order-confirm-question">今HC番号を設定していません。</span>
-              </div>
-              <div class="modal-footer justify-content-center">
-                <slot name="footer">
-                  <a class="simu-common-btn" :href="main_path + 'myshop/hc_search/'">HC番号を選択</a>
-                </slot>
-              </div>
-          </div>
-        </div>
-      </div> -->
-
+      
     </transition>
 
   </div>
@@ -256,10 +241,12 @@
 import { mapGetters } from 'vuex'
 import SelectKiji from "../components/SelectKiji.vue"
 import SelectOption from "../components/SelectOption.vue"
+import Mixins from '../mixin/mixin'
 
 export default {
   name: "SimuConfirm",
   components: {SelectKiji, SelectOption},
+  mixins: [Mixins],
   data() {
     return {
       arrOrderTemp: [],
@@ -281,9 +268,6 @@ export default {
     }
   },
   methods: {
-    moneyTypeShow02(number){
-      return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(number)
-    },
     showOrderDetail(event){
       $(event.target).parents('.simu-confirm-detail').find('.simu-confirm-detail-bottom').toggleClass('on')
       $(event.target).toggleClass('on')
@@ -521,7 +505,7 @@ export default {
         let optionTotalprice = 0
         if(this.initialData.shop_kind == 2){
           this.optionSelectedData.filter(item => item.orderId == orderId).forEach(val => {
-            optionTotalprice += Number(val.cost);
+            optionTotalprice += Number(val.cost ? val.cost : 0);
           })
         }
         return optionTotalprice
@@ -537,7 +521,6 @@ export default {
           rank = this.kijiData[kijiObjTempIndex].style[styleIndex].rank
         }
       }
-
       let combinePriceIndex = this.combinePriceData.findIndex(item => (
         item.model == OrderTemp.model && item.combineId == OrderTemp.combineId && item.rank == rank
       ))
@@ -545,6 +528,7 @@ export default {
       if(combinePriceIndex !== -1){
         combinePrice = this.combinePriceData[combinePriceIndex].price
       }
+
       let optionPriceTemp = this.optionPrice(orderId)
       this.$store.dispatch('handleUpdatePriceOfOrder', {orderId: orderId, price: optionPriceTemp + combinePrice})
       return optionPriceTemp + combinePrice
@@ -873,7 +857,7 @@ export default {
       if((this.initialData.customer_id + '').startsWith("000")){
         return true
       } else{
-        return true
+        return false
       }
     },
     correctDetailActive: function(){

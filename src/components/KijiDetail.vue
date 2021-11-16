@@ -22,7 +22,7 @@
             <span class="option-detail-val" v-if="kijiDetailData.sensor">WEIGHT {{kijiDetailData.sensor}}g</span>
           </div>
           <div class="option-detail-moreinfo-price">
-            <span class="option-detail-price">カスタマイズ価格：{{moneyTypeShow01(getCombinePrice())}}円</span>
+            <span class="option-detail-price">カスタマイズ価格：{{moneyTypeShow02(getCombinePrice(), 'tax')}}</span>
           </div>
         </div>
         <div class="option-detail-descript d-flex justify-content-between flex-column">
@@ -40,19 +40,18 @@
 
 <script>
 
-import { mapGetters } from 'vuex';
+import { mapGetters } from 'vuex'
+import Mixins from '../mixin/mixin'
 
 export default {
   name: "KijiDetail",
   components: {},
+  mixins: [Mixins],
   data() {
     return {
     };
   },
   methods: {
-    moneyTypeShow01(number){
-      return new Intl.NumberFormat().format(number)
-    },
     closeKijiDetail: function(){
       this.$emit("close-detail")
     },

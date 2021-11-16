@@ -171,9 +171,9 @@
       </div>
       <div class="simuright-price d-flex justify-content-between">
           <div class="simuright-price-left d-flex justify-content-between flex-column">
-            <p class="simuright-prices-basic">商品価格：<span v-if="combinePrice">{{moneyTypeShow01(combinePrice)}}</span>円<br>
-            <span v-if="initialData.shop_kind == 2">+ カスタマイズ価格：<span v-if="optionPrice > 0">{{moneyTypeShow01(optionPrice)}}</span>円</span></p>
-            <p class="simuright-prices-total">お支払い金額: <span class="totalPayment"><span v-if="sumPayment > 0">{{moneyTypeShow01(sumPayment)}}</span>円</span></p>
+            <p class="simuright-prices-basic">商品価格：<span v-if="combinePrice">{{moneyTypeShow02(combinePrice, 'tax')}}</span><br>
+            <span v-if="initialData.shop_kind == 2">+ カスタマイズ価格：<span v-if="optionPrice > 0">{{moneyTypeShow02(optionPrice, 'tax')}}</span></span></p>
+            <p class="simuright-prices-total">お支払い金額: <span class="totalPayment"><span v-if="sumPayment > 0">{{moneyTypeShow02(sumPayment, 'tax')}}</span></span></p>
           </div>
           <div class="simuright-price-right d-flex justify-content-between flex-column">
             <p class="delivery-date"><span v-if="deli_date">仕上がり予定日：{{deli_date}}</span></p>
@@ -193,8 +193,8 @@
                 </div>
                 <div class="modal-footer justify-content-center">
                   <slot name="footer">
-                    <button class="simu-common-btn" @click="doBackShowModal = false">いええ</button>
-                    <button class="simu-common-btn gray" @click="doBackConfirm">はい</button>
+                    <button class="simu-common-btn btnSize02 btnSizeHalf" @click="doBackShowModal = false">いええ</button>
+                    <button class="simu-common-btn btnSize02 btnSizeHalf gray" @click="doBackConfirm">はい</button>
                   </slot>
                 </div>
             </div>
@@ -224,19 +224,26 @@
 
 import SelectKiji from "../components/SelectKiji.vue"
 import SelectOption from "../components/SelectOption.vue"
-import { mapGetters } from 'vuex';
+import { mapGetters } from 'vuex'
+import Mixins from '../mixin/mixin'
+
 
 export default {
     name: "SimuRight",
     components: {SelectKiji, SelectOption},
+    mixins: [Mixins],
     data() {
         return {
+          default_kiji: '/html/upload/save_image/0730151143_6103981fcfa43.jpeg',
           designActiveId: null,
           sizeSelectedValue: null,
           neckSelectedValue: null,
 
           optionParentDataTemp: {},
           genreData: {},
+
+          //刺繍ネームID
+          optionCustomNameID: 35,
 
           correctFixedData: [
             {
@@ -336,6 +343,7 @@ export default {
           // checkStatus
           checkAction: false,
           correctCustomValue: '',
+          //パンツのカスタマイズ:袖丈[右]、袖丈[左]
           correctCustomArr :[25, 26],
           correctCustomError: false
         }
@@ -361,7 +369,7 @@ export default {
 
         //kiji
         if(!this.kijiActive){
-          $('.kiji_preloader img').attr('src', '/html/upload/save_image/0730151143_6103981fcfa43.jpeg')
+          $('.kiji_preloader img').attr('src', this.default_kiji)
           $('.kiji_preloader img').attr('kiji-id', '')
         }
         if(this.kijiActive && this.kijiActive != $('.kiji_preloader img').attr('kiji-id')){
@@ -493,7 +501,7 @@ export default {
           }
           ret += this.optionSelectedData[option_selected_index].name
 
-          if(parent_id == 35){
+          if(parent_id == this.optionCustomNameID){
             if(this.optionSelectedData[option_selected_index].custom_name_color_id){
               ret += '/' + this.optionSelectedData[option_selected_index].custom_name_color_name
                     + '/' + this.optionSelectedData[option_selected_index].custom_name_val
@@ -502,14 +510,6 @@ export default {
           return ret
         }
         return ''
-      },
-      //3500 -> 3,500
-      moneyTypeShow01(number){
-        return new Intl.NumberFormat().format(number)
-      },
-      //3500 -> ￥3,500
-      moneyTypeShow02(number){
-        new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(number)
       },
       doOrderComfirm(){
         console.log(this.orderTempItem)
@@ -522,21 +522,21 @@ export default {
         else if(this.sizeSelectedCheck.length){
           this.checkAction = true
           console.log(this.sizeSelectedCheck)
-          alert('サイズを選択してください。')
+          alert('選択ものが残っています。')
         } 
         else if(this.allOptionSelectedCheck.length){
           this.checkAction = true
           console.log(this.allOptionSelectedCheck)
-          alert('オプションを全て選択してください。')
+          alert('選択ものが残っています。')
         } 
         else if(this.allCorrectSelectedCheck.length){
           this.checkAction = true
           console.log(this.allCorrectSelectedCheck)
-          alert('採寸を全て選択してください。')
+          alert('選択ものが残っています。')
         } 
         else if(this.category_select == this.shirt_cate && !this.neckSelectedValue){
           this.checkAction = true
-          alert('ネックサイズを選択してください。')
+          alert('選択ものが残っています。')
         } 
         else{
           this.checkAction = false
@@ -977,7 +977,7 @@ export default {
         let optionTotalprice = 0
         if(this.initialData.shop_kind == 2){
           this.optionSelectedData.filter(item => item.orderId == this.orderNowId).forEach(val => {
-            optionTotalprice += Number(val.cost);
+            optionTotalprice += Number(val.cost ? val.cost : 0);
           })
         }
         return optionTotalprice

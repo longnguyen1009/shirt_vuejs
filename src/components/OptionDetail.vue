@@ -20,7 +20,7 @@
             </span>
           </div>
           <div class="option-detail-moreinfo-price">
-            <span class="option-detail-price" v-if="initialData.shop_kind == 2">カスタマイズ価格：{{OptionDetailData.price}}円</span>
+            <span class="option-detail-price" v-if="initialData.shop_kind == 2">カスタマイズ価格：{{moneyTypeShow02(OptionDetailData.price, 'tax')}}</span>
           </div>
         </div>
         <div class="option-detail-descript d-flex justify-content-between flex-column">
@@ -38,11 +38,13 @@
 
 <script>
 
-import { mapGetters } from 'vuex';
+import { mapGetters } from 'vuex'
+import Mixins from '../mixin/mixin'
 
 export default {
   name: "KijiDetail",
   components: {},
+  mixins: [Mixins],
   data() {
     return {
     };

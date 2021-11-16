@@ -8,7 +8,7 @@
               <img :src="style_img_path + Item.image" alt="">
               <div class="simu-styleItem-label">
                 <h2 class="simu-styleItem-name">{{Item.name}}</h2>
-                <h3 class="simu-styleItem-productname">{{moneyTypeShow01(Item.product_price)}}円&nbsp;&nbsp;</h3>
+                <h3 class="simu-styleItem-productname">{{moneyTypeShow02(Item.product_price, 'tax')}}</h3>
               </div>
               <!-- <button class="simu-styleItem-btn">MORE DETAILS</button> -->
             </div>
@@ -46,14 +46,16 @@
 <script>
 
 //vue-carousel
-import { Carousel, Slide } from 'vue-carousel';
+import { Carousel, Slide } from 'vue-carousel'
 import SelectModel from './SelectModel.vue'
 import { mapGetters } from 'vuex'
+import Mixins from '../mixin/mixin'
 
 
 export default {
   name: "SelectStyle",
   components: { Carousel,Slide,SelectModel},
+  mixins: [Mixins],
   data() {
     return {
       settings: {
@@ -67,10 +69,6 @@ export default {
     };
   },
   methods: {
-    //3500 -> 3,500
-    moneyTypeShow01(number){
-      return new Intl.NumberFormat().format(number)
-    },
     styleClick(id, disable){
       if(!disable){
         this.styleActive = id

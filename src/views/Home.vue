@@ -33,12 +33,12 @@
       <div class="modal-mask" v-if="errorCode" id="model-error">
         <div class="modal-wrapper">
           <div class="modal-container">
-              <div class="modal-body">
+              <div class="modal-body center">
                 <span class="order-confirm-question">{{Errors.text}}</span>
               </div>
               <div class="modal-footer justify-content-center">
                 <slot name="footer">
-                  <button class="simu-common-btn" @click="clodeErrorModal">閉じる</button>
+                  <button class="simu-common-btn btnSize01" @click="clodeErrorModal">閉じる</button>
                 </slot>
               </div>
           </div>
