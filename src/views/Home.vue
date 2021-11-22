@@ -36,7 +36,7 @@
               <div class="modal-body center">
                 <span class="order-confirm-question">{{Errors.text}}</span>
               </div>
-              <div class="modal-footer justify-content-center">
+              <div class="modal-footer">
                 <slot name="footer">
                   <button class="simu-common-btn btnSize01" @click="clodeErrorModal">閉じる</button>
                 </slot>
@@ -50,7 +50,7 @@
               <div class="modal-body">
                 <span class="order-confirm-question">今HC番号を設定していません。</span>
               </div>
-              <div class="modal-footer justify-content-center">
+              <div class="modal-footer">
                 <button class="simu-common-btn" @click="showHcSearchModal">HC番号を選択</button>
               </div>
           </div>
@@ -136,7 +136,7 @@ export default {
               this.setStyleData().then((response) => {
                   $(".simu-style-loading").removeClass("on")
               })
-  
+
               this.$store.dispatch('handleChangeDeliData', response.deliData)
               this.$store.dispatch('handleChangeIniData', {
                 shop_id: response.shop_id,

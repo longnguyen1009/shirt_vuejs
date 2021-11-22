@@ -252,12 +252,23 @@ export default {
     },
     setHcInfo: async function(HC){
       let ret = null
+      let HCPostData = {
+        'kaiinNo': HC.kaiinNo,
+        'nameKj1': HC.nameKj1,
+        'nameKj2': HC.nameKj2,
+        'nameKn1': HC.nameKn1,
+        'nameKn2': HC.nameKn2,
+        'tel3': HC.tel3,
+        'keiTelNo3': HC.keiTelNo3,
+        'emailAddr': HC.emailAddr,
+        'birthDate': HC.birthDate
+      }
         await this.axios.request({
           url: this.main_path + 'myshop/sethcinfo/',
           method: 'post',
           headers: {'X-Requested-With': 'XMLHttpRequest'},
           data: {
-            hcData: HC
+            hcData: HCPostData
           }
         })
         .then(response => {

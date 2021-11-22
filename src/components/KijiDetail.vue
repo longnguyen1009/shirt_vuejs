@@ -1,7 +1,7 @@
 <template>
   <div class="container-option-detail d-flex justify-content-between flex-column">
     <div class="option-detail-top flex-grow-1">
-        <img class="option-detail-img" alt="" :src="kiji_img_path + kijiDetailData.img">
+        <img class="option-detail-img" alt="" :src="kiji_img_path + kijiDetailData.img" @error="imgError">
         <span class="closeBtn option-detail-closeBtn" @click="closeKijiDetail">
           <img :src="main_path + 'html/user_data/assets/img/common/header_close_white.png'" alt="">
         </span>
@@ -12,7 +12,7 @@
         <span class="option-detail-optionname" v-if="kijiDetailData.name">{{kijiDetailData.name}}</span>
         <span class="option-detail-optionname" v-if="!kijiDetailData.name">{{kijiDetailData.sub_name}}</span>
       </div>
-      <div class="option-detail-confirm d-flex justify-content-between">
+      <div class="option-detail-confirm d-flex justify-content-between align-items-stretch">
         <div class="option-detail-moreinfo d-flex justify-content-between flex-column">
           <div class="option-detail-moreinfo-top">
             <span class="option-detail-val">{{kijiDetailData.code}}</span>
@@ -71,7 +71,7 @@ export default {
       }
     }
   },
-  props: ['kiji_img_path', 'kijiDetailData'],
+  props: ['kijiDetailData'],
   mounted() {
     
   },

@@ -29,7 +29,7 @@ export default new Vuex.Store({
     // model_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
     // kiji_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
     // option_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
-    // correct_detail_img_path: "https://s3-ap-northeast-1.amazonaws.com/ua-dev-backet/upload/correct_detail/",
+    // correct_detail_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/correct_detail/",
     // option_shirt_svg_path: "/html/upload/simu_model/option_shirt/",
 
     
@@ -41,6 +41,8 @@ export default new Vuex.Store({
     option_img_path: "/html/upload/save_image/",
     correct_detail_img_path: "/html/upload/correct_detail/",
     option_shirt_svg_path: "/html/upload/simu_model/option_shirt/",
+
+    kiji_default: '0730151143_6103981fcfa43.jpeg',
 
     // 全てスタイル情報
     styleData: [], //[{id, name, brand, detail, img, model[], product_price}]
@@ -163,6 +165,7 @@ export default new Vuex.Store({
     option_img_path: state => state.option_img_path,
     correct_detail_img_path: state => state.correct_detail_img_path,
     option_shirt_svg_path: state => state.option_shirt_svg_path,
+    kiji_default: state => state.kiji_default,
 
     //
     styleSelected: state => state.styleSelected,
@@ -341,27 +344,24 @@ export default new Vuex.Store({
       state.modelSelected = 0,
       state.itemSelected = [],
       state.optionMode = 2,
-      // Object.keys(state.designActive).forEach(key => {
-      //   state.designActive[key] = ''
-      // }),
       state.designActive = {}, //{combine_id, design_id, item_id}
       state.kijiActive = null,
 
-      state.optionSelectedData = state.optionSelectedData.filter(item => item.orderId != state.orderTempItem)
+      state.optionSelectedData = state.optionSelectedData.filter(item => item.orderId != state.orderNowId)
       state.optionSelectedData = [...state.optionSelectedData]
 
-      state.sizeSelectedData = state.sizeSelectedData.filter(item => item.orderId != state.orderTempItem)
+      state.sizeSelectedData = state.sizeSelectedData.filter(item => item.orderId != state.orderNowId)
       state.sizeSelectedData = [...state.sizeSelectedData]
 
-      state.correctSelectedData = state.correctSelectedData.filter(item => item.order_id != state.orderTempItem)
+      state.correctSelectedData = state.correctSelectedData.filter(item => item.order_id != state.orderNowId)
       state.correctSelectedData = [...state.correctSelectedData]
 
-      state.neckSelectedData = state.neckSelectedData.filter(item => item.orderId != state.orderTempItem)
+      state.neckSelectedData = state.neckSelectedData.filter(item => item.orderId != state.orderNowId)
       state.neckSelectedData = [...state.neckSelectedData]
 
       state.optionDetailActive = null,
       
-      state.itemData = state.itemData.filter(item => item.orderId != this.orderNowId)
+      state.itemData = state.itemData.filter(item => item.orderId != state.orderNowId)
       state.itemData = [...state.itemData]
 
       //raw html for option change img temp

@@ -1,3 +1,5 @@
+
+import { mapGetters } from 'vuex'
 export default {
   data () {
     return {
@@ -18,8 +20,26 @@ export default {
       }
       return ret
     },
+    imgError: function(e){
+      e.target.src = this.kiji_img_path + 'no_image_product.png'
+    },
+    imgErrorBlank: function(e){
+      e.target.src = this.kiji_img_path + 'notfounder.png'
+    },
+    touchStart: function(e){
+      $(e.target).addClass('touch')
+    },
+    touchMove: function(e){
+      $(e.target).removeClass('touch')
+    },
+    touchEnd: function(e){
+      $(e.target).removeClass('touch')
+    },
   },
   computed: {
-   
+    ...mapGetters([
+      'kiji_img_path',
+      'kiji_default'
+    ])
   }
 }

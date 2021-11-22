@@ -1,26 +1,37 @@
 body{
   width: 100%;
-  margin: auto;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  height: 100%;
+  padding: 0;
+  margin: 0;
 }
-
+body > *{
+  padding: 0;
+  margin: 0;
+}
+#app{
+  position: absolute;
+  top: 66px;
+  width: 100%;
+  height: calc(100% - 66px);
+}
 #simupage_container{
     width: 100%;
     height: 100%;
     margin: auto;
     position: relative;
+    display: flex;
+    justify-content: space-between;
 }
 
 /*===========================
     03.MAIN css 
 ===========================*/
-
-.mrgnbtm {
-    margin-top: 20px;
+.touch{
+  background-color: rgba(103,102,101, .7);
 }
-
+.hover:hover{
+  background-color: rgba(103,102,101, .7);
+}
 /* SimuStep */
 .container-step .simu-stepgroup{
     width: 100%;
@@ -70,8 +81,11 @@ body{
     cursor: -webkit-grabbing;
     cursor: grabbing;
 }
-.VueCarousel-slide>div{
-  /* height: 100% !important; */
+.VueCarousel-inner{
+  height: 100% !important;
+}
+.VueCarousel-wrapper{
+  height: 100%;
 }
 .VueCarousel-slide img
 {
@@ -83,9 +97,8 @@ body{
 .simu-styleItem-front img,
 .simu-model-imgList .simu-model-img
 {
-  /* height: 100%; */
   width: 100%;
-  height: calc(100vh - 91px);
+  height: 100%;
   object-fit: cover;
 }
 
@@ -120,11 +133,13 @@ ul, ol, dl{
 /* StyleItem */
 .simupage_main, .container-selectstyle{
   position: relative;
-  height: calc(100vh - 91px);
   width: 100%;
-  /* height: 100%; */
+  height: 100%;
   overflow: hidden;
   background-color: #444444;
+}
+.simu-styleList{
+  height: 100%;
 }
 .simu-styleNone{
   position: absolute;
@@ -140,7 +155,7 @@ ul, ol, dl{
   margin-right: 10px;
 }
 .simu-styleItem{
-  display: block !important;
+  /* display: block !important; */
   position: relative;
   height: 100%;
 }
@@ -290,6 +305,7 @@ ul, ol, dl{
   padding: 30px;
   color: #fff;
   width: 50%;
+  overflow-y: auto;
 }
 .simu-model-rightTop{
   flex-grow: 1;
@@ -417,7 +433,9 @@ pre{
   cursor: pointer;
 }
 .simuleft-sample.hide img
-.simuleft-sample.hide object{
+.simuleft-sample.hide object,
+.simuleft-options-shirt img,
+.simuleft-options-shirt object{
   display: none;
 }
 
@@ -1146,9 +1164,6 @@ pre{
 }
 .simu-confirm-detail-return{
   padding: 25px 0 40px 0;
-}
-.simu-confirm-detail-return button{
-  width: 220px;
 }
 .simu-confirm-design{
   margin-top: 22.5px;
@@ -1965,11 +1980,37 @@ pre{
 }
 
 /* Vue Paginate */
-
 .ec-pager__item.disabled:not(.break){
   display: none;
 }
 
+/* Vue QrCode */
+.container-qrcode{
+  width: 40%;
+  height: 75%;
+  margin: 0px auto;
+  background-color: #fff;
+  color: #000;
+  border-radius: 2px;
+  border: 1px solid #676665;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
+  transition: all 0.3s ease;
+  font-family: Helvetica, Arial, sans-serif;
+  max-height: 85%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.container-qrcode .closeBtn{
+  top: -30px;
+  right: -30px;
+}
+.decode-result{
+  padding: 10px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
 
 
 

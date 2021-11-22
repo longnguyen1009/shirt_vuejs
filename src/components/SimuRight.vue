@@ -14,7 +14,9 @@
       <div class="simuright-options">
         <div class="simuright-options-content">
           <div class="simuright-options-row">
-            <div class="simuright-options-rowTop d-flex optionLv1 align-items-center" :class="{codeMode : (optionMode == 1)}"
+            <div class="simuright-options-rowTop d-flex optionLv1 align-items-center" 
+              :class="{codeMode : (optionMode == 1)}"
+              @touchstart="touchStart" @touchmove="touchMove" @touchend="touchEnd" 
               @click="openDetailOption('kiji')">
               <span class="simuright-options-label">生地</span>
               <div class="simuright-options-name">
@@ -24,7 +26,9 @@
           </div>
           <div class="simuright-options-row" 
             v-for="Genre in genreData" :key="Genre.genre_id">
-            <div class="simuright-options-rowTop optionLv1 d-flex align-items-center" @click="showOptionParent($event)">
+            <div class="simuright-options-rowTop optionLv1 d-flex align-items-center" 
+            @touchstart="touchStart" @touchmove="touchMove" @touchend="touchEnd" 
+            @click="showOptionParent($event)">
               <span class="simuright-options-label">{{Genre.genre_name}}</span>
               <div class="simuright-options-name">
                 <span v-if="checkAllOptionComplete(Genre.genre_id)"><i class="fas fa-check-double"></i>&nbsp;選択済み</span>
@@ -33,7 +37,7 @@
             </div>
             <div class="simuright-options-rowDown">
               <ul class="simuright-optionLists">
-                <li class="optionLv2 d-flex align-items-center"
+                <li class="optionLv2 d-flex align-items-center" @touchstart="touchStart" @touchmove="touchMove" @touchend="touchEnd" 
                 :class="{codeMode : (optionMode == 1), notComplete: checkOptionNotComplete(Option.parent_id)}"
                 v-for="Option in optionParentSortData[Genre.genre_id]" :key="Option.parent_id"
                 @click="openDetailOption(Option.parent_id)">
@@ -47,7 +51,9 @@
             </div>
           </div>
           <div class="simuright-options-row" v-if="category_select == shirt_cate">
-            <div class="simuright-options-rowTop optionLv1 d-flex align-items-center" @click="showOptionParent($event)">
+            <div class="simuright-options-rowTop optionLv1 d-flex align-items-center"
+              @touchstart="touchStart" @touchmove="touchMove" @touchend="touchEnd" 
+              @click="showOptionParent($event)">
               <span class="simuright-options-label">ネックサイズ</span>
               <div class="simuright-options-name">
                 <span v-if="neckObject && neckObject.name"><i class="fas fa-check-double"></i>&nbsp;{{neckObject.name}}</span>
@@ -73,7 +79,9 @@
           </div>
           
           <div class="simuright-options-row">
-            <div class="simuright-options-rowTop optionLv1 d-flex align-items-center" @click="showOptionParent($event)">
+            <div class="simuright-options-rowTop optionLv1 d-flex align-items-center" 
+            @touchstart="touchStart" @touchmove="touchMove" @touchend="touchEnd" 
+            @click="showOptionParent($event)">
               <span class="simuright-options-label">サイズ</span>
               <div class="simuright-options-name">
                 <span v-if="sizeItemDataActive.name"><i class="fas fa-check-double"></i>&nbsp;{{sizeItemDataActive.name}}</span>
@@ -101,7 +109,9 @@
             </div>
           </div>
           <div class="simuright-options-row">
-            <div class="simuright-options-rowTop optionLv1 d-flex align-items-center" @click="showOptionParent($event)">
+            <div class="simuright-options-rowTop optionLv1 d-flex align-items-center" 
+            @touchstart="touchStart" @touchmove="touchMove" @touchend="touchEnd" 
+            @click="showOptionParent($event)">
               <span class="simuright-options-label">採寸</span>
               <div class="simuright-options-name">
                 <span v-if="checkAllCorrectComplete()"><i class="fas fa-check-double"></i>&nbsp;選択済み</span>
@@ -112,6 +122,7 @@
               <ul class="simuright-optionLists">
                 <template v-for="correctSelectedItem in correctSelectedDataActive" >
                   <li class="optionLv2 d-flex align-items-center"
+                  @touchstart="touchStart" @touchmove="touchMove" @touchend="touchEnd" 
                   :class="{notComplete: checkCorrectNotComplete(correctSelectedItem.correct_id)}"
                   v-if="!isNaN(correctSelectedItem.correct_id)"
                   :key="correctSelectedItem.correct_id"
@@ -137,7 +148,7 @@
         <transition name="transitionRightToLeftHalfWidth">
           <div class="measure-sub" v-if="correction_selected_id">
             <ul class="measure-sub-list">
-              <li class="measure-sub-item" v-for="correctDetailItem in correctDetailActive" :key="correctDetailItem.id">
+              <li class="measure-sub-item hover" v-for="correctDetailItem in correctDetailActive" :key="correctDetailItem.id">
                 <input class="fancy-radio" hidden 
                   :id="'correctDetailItem-' + correctDetailItem.id" 
                   :name="'correctDetailItem' + correction_selected_id" 
@@ -191,7 +202,7 @@
                 <div class="modal-body center">
                   <span class="order-confirm-question">現在作成中のデータが消去されますがよろしいですか？</span>
                 </div>
-                <div class="modal-footer justify-content-center">
+                <div class="modal-footer">
                   <slot name="footer">
                     <button class="simu-common-btn btnSize02 btnSizeHalf" @click="doBackShowModal = false">いええ</button>
                     <button class="simu-common-btn btnSize02 btnSizeHalf gray" @click="doBackConfirm">はい</button>
@@ -217,6 +228,13 @@
         </div>
       </transition>
 
+      <transition name="modal">
+        <div class="modal-mask" v-if="qrCodeShow">
+          <div class="modal-wrapper">
+            <SimuQrcode @closeQrCode="qrCodeShow = false"/>
+          </div>
+        </div>
+      </transition>
     </div>
 </template>
 
@@ -224,13 +242,14 @@
 
 import SelectKiji from "../components/SelectKiji.vue"
 import SelectOption from "../components/SelectOption.vue"
+import SimuQrcode from "../components/SimuQrcode.vue"
 import { mapGetters } from 'vuex'
 import Mixins from '../mixin/mixin'
 
 
 export default {
     name: "SimuRight",
-    components: {SelectKiji, SelectOption},
+    components: {SelectKiji, SelectOption, SimuQrcode},
     mixins: [Mixins],
     data() {
         return {
@@ -345,7 +364,9 @@ export default {
           correctCustomValue: '',
           //パンツのカスタマイズ:袖丈[右]、袖丈[左]
           correctCustomArr :[25, 26],
-          correctCustomError: false
+          correctCustomError: false,
+
+          qrCodeShow: false
         }
     },
     props: [],
@@ -359,7 +380,11 @@ export default {
         this.$store.dispatch('handleChangeModelTemp', {styleId: this.styleSelected, modelId: this.modelSelected})
       },
       openDetailOption: function(optionid){
-        this.$store.dispatch('handleChangeOptionDetailActive', optionid)
+        if(this.optionMode == 1){
+          this.qrCodeShow = true
+        } else{
+          this.$store.dispatch('handleChangeOptionDetailActive', optionid)
+        }
       },
       closeDetailOption: function(){
         this.$store.dispatch('handleChangeOptionDetailActive', null)
@@ -522,21 +547,21 @@ export default {
         else if(this.sizeSelectedCheck.length){
           this.checkAction = true
           console.log(this.sizeSelectedCheck)
-          alert('選択ものが残っています。')
+          alert('選択されていない項目があります。ご確認ください。')
         } 
         else if(this.allOptionSelectedCheck.length){
           this.checkAction = true
           console.log(this.allOptionSelectedCheck)
-          alert('選択ものが残っています。')
+          alert('選択されていない項目があります。ご確認ください。')
         } 
         else if(this.allCorrectSelectedCheck.length){
           this.checkAction = true
           console.log(this.allCorrectSelectedCheck)
-          alert('選択ものが残っています。')
+          alert('選択されていない項目があります。ご確認ください。')
         } 
         else if(this.category_select == this.shirt_cate && !this.neckSelectedValue){
           this.checkAction = true
-          alert('選択ものが残っています。')
+          alert('選選択されていない項目があります。ご確認ください。')
         } 
         else{
           this.checkAction = false

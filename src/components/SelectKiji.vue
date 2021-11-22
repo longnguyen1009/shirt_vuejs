@@ -20,7 +20,7 @@
             <div class="kijiItem" v-if="checkStyleAndStockKiji(Kiji.id)" :key="Kiji.id"
             :class="{active: (Kiji.id == kijiSelected)}">
               <span class="kijiitem-img" @click="kijiChange(Kiji.id, Kiji.img_simu)">
-                <img class="kijiitem-img" :src="kiji_img_path + Kiji.img" alt="">
+                <img class="kijiitem-img" v-lazy="kiji_img_path + Kiji.img" alt="" @error="imgError">
               </span>
               <span class="simuright-kiji-icon" @click="showKijiDetail(Kiji.id)">
                 <img :src="main_path + 'html/user_data/assets/img/common/icon_info.png'" alt="">
@@ -43,22 +43,22 @@
     <transition name="transitionRightToLeft">
       <div class="simu-subpage" v-if="kijiDetailId != 0">
         <KijiDetail 
-        :kijiDetailData="kijiDetailData"
+        :kiji-detail-data="kijiDetailData"
         @close-detail="closeKijiDetail($event)"
         @kiji-confirm="confirmKijiDetail($event)"
         />
       </div>
       <KijiSearchBrand
         v-if="search_brand_shop"
-        :brandSelected="sortParam.brand"
+        :brand-selected="sortParam.brand"
         @closeSearchKiji="closeSearchKiji(event)"
         @confirmSearchKiji="confirmSearchKiji"
       />
       <KijiSearchOther
         v-if="search_other_shop"
-        :seasonSelected="sortParam.season"
-        :colorSelected="sortParam.color"
-        :patternSelected="sortParam.pattern"
+        :season-selected="sortParam.season"
+        :color-selected="sortParam.color"
+        :pattern-selected="sortParam.pattern"
         @closeSearchKiji="closeSearchKiji(event)"
         @confirmSearchKiji="confirmSearchKiji"
       />
@@ -83,10 +83,12 @@ import KijiSearchBrand from './KijiSearchBrand.vue';
 import KijiSearchOther from './KijiSearchOther.vue';
 import { mapGetters } from 'vuex';
 import _ from 'lodash'
+import Mixins from '../mixin/mixin'
 
 export default {
   name: "SelectKiji",
   components: {KijiDetail, KijiSearchBrand, KijiSearchOther},
+  mixins: [Mixins],
   data() {
     return {
       kijiSelected: 0,

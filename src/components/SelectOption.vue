@@ -22,7 +22,7 @@
         <div class="simuright-sub-result d-flex flex-wrap" v-if="optionDetailActive != optionCustomNameID">
           <div v-for="Option in optionCurrLists" :key="Option.id" class="optionItem"
             :class="{active: (Option.id == optionSelected)}">
-            <img :src="option_img_path + Option.img" alt="" class="optionitem-img"
+            <img v-lazy="option_img_path + Option.img" alt="" class="optionitem-img" @error="imgError"
               @click="optionChange(Option.id, Option.simu_img, Option.option_shirt_svg, Option.option_shirt_shadow, optionParent.type)">
             <span class="simuright-option-icon" @click="showOptionDetail(Option.id)">
               <img :src="main_path + 'html/user_data/assets/img/common/icon_info.png'" alt="">
@@ -102,10 +102,12 @@
 <script>
 import { mapGetters } from 'vuex';
 import OptionDetail from './OptionDetail.vue';
+import Mixins from '../mixin/mixin'
 
 export default {
   name: "SelectOption",
   components: {OptionDetail},
+  mixins: [Mixins],
   data() {
     return {
       optionSelected: 0,

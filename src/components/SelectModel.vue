@@ -4,13 +4,13 @@
       <div class="simu-model-imgList">
         <carousel v-bind="settings" v-if="hasImg">
           <slide v-if="modelDetail.images.img1">
-            <div class="simu-model-img"><img :src="model_img_path + modelDetail.images.img1" alt=""></div>
+            <div class="simu-model-img"><img v-lazy="model_img_path + modelDetail.images.img1" alt="モデル画像" @error="imgError"></div>
           </slide>
           <slide v-if="modelDetail.images.sub_images1">
-            <div class="simu-model-img"><img :src="model_img_path + modelDetail.images.sub_images1" alt=""></div>
+            <div class="simu-model-img"><img v-lazy="model_img_path + modelDetail.images.sub_images1" alt="モデル画像" @error="imgError"></div>
           </slide>
           <slide v-if="modelDetail.images.sub_images2">
-            <div class="simu-model-img"><img :src="model_img_path + modelDetail.images.sub_images2" alt=""></div>
+            <div class="simu-model-img"><img v-lazy="model_img_path + modelDetail.images.sub_images2" alt="モデル画像" @error="imgError"></div>
           </slide>
         </carousel>
       </div>

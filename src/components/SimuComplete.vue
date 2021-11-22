@@ -12,7 +12,8 @@
                 <div class="simu-confirm-kiji-detail d-flex flex-column justify-content-between">
                   <p class="">
                     <span class="simu-confirm-kiji-code">{{getKijiObj(Item.product_id).code}}</span><br>
-                    <span class="simu-confirm-kiji-name">{{getKijiObj(Item.product_id).name}}</span><br>
+                    <span class="simu-confirm-kiji-name" v-if="getKijiObj(Item.product_id).name">{{getKijiObj(Item.product_id).name}}<br></span>
+                    <span class="simu-confirm-kiji-name" v-if="!getKijiObj(Item.product_id).name">{{getKijiObj(Item.product_id).sub_name}}<br></span>
                     <span class="simu-confirm-kiji-name">C/#{{getKijiObj(Item.product_id).fabric_color}}</span>
                   </p>
                 </div>
@@ -85,7 +86,7 @@
                   </div>
                 </div>
               </div>
-              <div class="modal-footer justify-content-center">
+              <div class="modal-footer">
                 <slot name="footer">
                   <button class="simu-common-btn white btnSize02" @click="barCodeModalClose">戻る</button>
                 </slot>
@@ -188,11 +189,11 @@ export default {
     },
 
   },
+  props: [],
   mounted(){
     this.setOrderInfo()
     this.sendCompleteMailToFactory()
   },
-  props: [],
   watch: {
     
   },

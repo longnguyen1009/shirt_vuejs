@@ -32,6 +32,10 @@ window.$ = window.jQuery = require('jquery')
 import VueCarousel from 'vue-carousel';
 Vue.use(VueCarousel);
 
+//VueLazyload
+import VueLazyload from 'vue-lazyload'
+Vue.use(VueLazyload)
+
 //CORS
 // import Cors from 'cors'
 // Vue.use(Cors);

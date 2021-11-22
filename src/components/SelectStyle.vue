@@ -5,7 +5,7 @@
           <slide class="simu-styleItem" :class="{disable: Item.disable}" v-for="Item in styleData" :key="Item.id"
           @slideclick="styleClick(Item.id, Item.disable)">
             <div class="simu-styleItem-front">
-              <img :src="style_img_path + Item.image" alt="">
+              <img v-lazy="style_img_path + Item.image" alt="" @error="imgError">
               <div class="simu-styleItem-label">
                 <h2 class="simu-styleItem-name">{{Item.name}}</h2>
                 <h3 class="simu-styleItem-productname">{{moneyTypeShow02(Item.product_price, 'tax')}}</h3>
@@ -20,7 +20,7 @@
               </div>
               <div class="simu-styleItem-model">
                 <ul class="simu-styleItem-modelList">
-                  <li v-for="styleModel in Item.model" :key="styleModel.id" @click="modelSelect(styleModel.id)">
+                  <li v-for="styleModel in Item.model" :key="styleModel.id" @click="modelSelect(styleModel.id)" class="hover">
                     {{styleModel.name}}
                   </li>
                 </ul>
@@ -59,7 +59,7 @@ export default {
   data() {
     return {
       settings: {
-        "perPage": 3.2,
+        "perPageCustom": [[320, 1],[640, 2.2],[768, 3.2]],
         "scrollPerPage": false,
         "paginationEnabled": false,
         "navigationEnabled": true,

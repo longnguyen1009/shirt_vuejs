@@ -8,10 +8,10 @@
 
     <div class="simuleft-main">
       <div style="display: none" class="kiji_preloader">
-          <img v-bind:src="kiji_img_path + kiji_img" @load="kijiLoaded" alt="" kiji-id=""/>
+          <img v-bind:src="kiji_img_path + kiji_img" @load="kijiLoaded" @error="imgErrorBlank" alt="シミュレーター生地画像" kiji-id=""/>
       </div>
       <div class="simuleft-sample" :class="{hide: (correct_detail_id_now && hasCorrectImg)}">
-            <img :src="design.sample_path" class="img_sample" v-on:error="loadImgError"/>
+            <img :src="design.sample_path" class="img_sample" @error="imgErrorBlank"/>
             <object
               ref="carousel_or_anything"
               type="image/svg+xml"
@@ -20,10 +20,10 @@
               class="svgModel"
               style="image-rendering: pixelated"
             ></object>
-            <img :src="design.shadow_path" class="img_shadow" v-on:error="loadImgError"/>
+            <img :src="design.shadow_path" class="img_shadow" @error="imgErrorBlank"/>
       </div>
       <div class="correct_detail_img" v-if="correct_detail_id_now && hasCorrectImg">
-        <img :src="correct_detail_img" alt="" v-on:error="loadCorrectImgError">
+        <img :src="correct_detail_img" alt="" @error="loadCorrectImgError">
       </div>
       <div class="simuleft-options">
         <template v-for="(Option,id) in optionSaved">
@@ -33,7 +33,7 @@
             :src="option_img_path + Option.option_img"
             :cate="Option.type"
             :option_id="Option.option_id" 
-            class="img_option" v-on:error="loadImgError"
+            class="img_option" @error="loadImgError"
             @load="loadOption($event, Option.option_img, Option.type, Option.option_id)"/>
           </span>
         </template>
@@ -44,10 +44,10 @@
          :cate="optionTemp.type"
          :option_id="optionTemp.option_id"
           @load="loadOption($event, optionTemp.option_img, optionTemp.type, optionTemp.option_id)"
-         v-on:error="loadImgError">
+         @error="loadImgError">
         </span>
       </div>
-      <div class="simuleft-options-shirt" v-if="ShirtCheck()">
+      <div class="simuleft-options-shirt" v-if="ShirtCheck()" :class="{hide: (correct_detail_id_now && hasCorrectImg)}">
         <template v-for="(Option,id) in optionSaved">
           <span :key="id" v-if="Option && Option.option_shirt_svg">
             <object
@@ -57,7 +57,7 @@
               class="svgOptionShirt"
               style="image-rendering: pixelated"
             ></object>
-            <img v-if="Option.option_shirt_shadow" :src="option_shirt_svg_path + Option.option_shirt_shadow" class="img_shadow" v-on:error="loadImgError"/>
+            <img v-if="Option.option_shirt_shadow" :src="option_shirt_svg_path + Option.option_shirt_shadow" class="img_shadow" @error="imgErrorBlank"/>
           </span>
         </template>
         <span v-if="optionTemp">
@@ -69,7 +69,7 @@
             class="svgOptionShirt"
             style="image-rendering: pixelated"
           ></object>
-          <img v-if="optionTemp.option_shirt_shadow" :src="option_shirt_svg_path + optionTemp.option_shirt_shadow" class="img_shadow" v-on:error="loadImgError"/>
+          <img v-if="optionTemp.option_shirt_shadow" :src="option_shirt_svg_path + optionTemp.option_shirt_shadow" class="img_shadow" @error="imgErrorBlank"/>
         </span>
       </div>
       <!-- <div class="sumi-left-zoombtn">+ZOOM</div> -->
@@ -87,9 +87,11 @@
 <script>
 
 import { mapGetters } from 'vuex'
+import Mixins from '../mixin/mixin'
 
 export default {
   name: "SimuLeft",
+  mixins: [Mixins],
   data() {
     return {
       //全身ON/OFF
@@ -301,7 +303,7 @@ export default {
     }
   },
   watch: {
-    designActive: function(){
+    designActive: function(newDesign, oldDesign){
       if(this.firstLoaded && this.SuitCheck() != 0){
         this.viewMode = this.SuitCheck()
       } else{
@@ -326,6 +328,7 @@ export default {
         'option_img_path',
         'option_shirt_svg_path',
         'correct_detail_img_path',
+        'kiji_default',
         'optionMode',
         'styleSelected',
         'modelSelected',
@@ -364,7 +367,7 @@ export default {
     },
     correct_detail_img: function(){
       if(this.correct_detail_id_now){
-        return this.correct_detail_img_path + this.correct_detail_id_now + '.png'
+        return this.correct_detail_img_path + this.correct_detail_id_now + '.svg'
       } else{
         return ''
       }
@@ -373,9 +376,9 @@ export default {
     kiji_img: function(){
       if(this.kijiActive && this.kijiData.length && this.kijiData.findIndex(item => item.id == this.kijiActive) !== -1){
         let kijiTemp = this.kijiData.find(item => item.id == this.kijiActive)
-        return kijiTemp.img_simu ? kijiTemp.img_simu : '0730151143_6103981fcfa43.jpeg'
+        return kijiTemp.img_simu ? kijiTemp.img_simu : this.kiji_default
       } else{
-        return "0730151143_6103981fcfa43.jpeg"
+        return this.kiji_default
       }
     },
     designActive_path: function(){

@@ -7,7 +7,7 @@
             <div class="simu-confirm-card-top d-flex justify-content-between align-items-stretch">
               <div class="simu-confirm-kiji d-flex justify-content-start flex-grow-1">
                 <span class="simu-confirm-kiji-img">
-                  <img :src="kiji_img_path + kijiObj(OrderTemp.product_id).img" alt="">
+                  <img :src="kiji_img_path + kijiObj(OrderTemp.product_id).img" alt="" @error="imgError">
                 </span>
                 <div class="simu-confirm-kiji-detail d-flex flex-column justify-content-between">
                   <p class="">
@@ -62,7 +62,7 @@
                   </div>
                 </div>
                 <div class="simu-confirm-detail-return d-flex align-items-center justify-content-center">
-                  <button class="simu-common-btn" @click="doBack(OrderTemp.id)">シミュレーターに戻る</button>
+                  <button class="simu-common-btn btnSize02" @click="doBack(OrderTemp.id)">シミュレーターに戻る</button>
                 </div>
               </div>
             </div>
@@ -111,7 +111,7 @@
       @click="confirmModalShow"
       v-if="orderTempItem.length > 0">オーダー完了</button>
 
-      <button class="simu-common-btn btnSize01"
+      <button class="simu-common-btn btnSize02"
         v-if="orderTempItem.length == 0"
         @click="goToTop">TOP</button>
     </div>
@@ -191,7 +191,7 @@
                   </ul>
                 </div>
               </div>
-              <div class="modal-footer justify-content-center">
+              <div class="modal-footer">
                 <slot name="footer">
                   <button class="simu-common-btn white btnSize02 btnSizeHalf" @click="doBack(orderSizeActive)">シミュレーターに戻る</button>
                   <button class="simu-common-btn gray btnSize02 btnSizeHalf" @click="confirmModalClose">オーダー確認画面に戻る</button>
@@ -207,10 +207,10 @@
               <div class="modal-body center">
                 <span class="order-confirm-question">オーダーを完了しますか？</span>
               </div>
-              <div class="modal-footer justify-content-center">
+              <div class="modal-footer">
                 <slot name="footer">
-                  <button class="simu-common-btn btnSize01" @click="confirmModalClose">戻る</button>
-                  <button class="simu-common-btn btnSize01 gray" @click="doOrderComplete(1)">完了</button>
+                  <button class="simu-common-btn btnSize02 btnSizeHalf" @click="confirmModalClose">戻る</button>
+                  <button class="simu-common-btn btnSize02 btnSizeHalf gray" @click="doOrderComplete(1)">完了</button>
                 </slot>
               </div>
           </div>
@@ -222,10 +222,10 @@
               <div class="modal-body center">
                 <span class="order-confirm-question">このオーダーアイテムを削除しますか？</span>
               </div>
-              <div class="modal-footer justify-content-center">
+              <div class="modal-footer">
                 <slot name="footer">
-                  <button class="simu-common-btn btnSize01" @click="confirmModalClose">戻る</button>
-                  <button class="simu-common-btn btnSize01 gray" @click="removeOrderTemp(orderRemoveCheck)">確認</button>
+                  <button class="simu-common-btn btnSize02 btnSizeHalf" @click="confirmModalClose">戻る</button>
+                  <button class="simu-common-btn btnSize02 btnSizeHalf gray" @click="removeOrderTemp(orderRemoveCheck)">確認</button>
                 </slot>
               </div>
           </div>
@@ -721,6 +721,7 @@ export default {
     }
 
   },
+  props: [],
   mounted(){
     this.deli_id = this.deliActive
     //save orderItemNow to arrOrderItem
@@ -754,7 +755,6 @@ export default {
     //Hide Cart button
     $('.header-cart-btn').css("display", "none");
   },
-  props: [],
   watch: {
     deli_id: function(){
       this.$store.dispatch('handleChangeDeliActive', this.deli_id)

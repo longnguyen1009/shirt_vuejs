@@ -166,7 +166,7 @@
                             </li>
                           </ul>
                         </div>
-                        <div class="modal-footer justify-content-center">
+                        <div class="modal-footer">
                           <div class="onemeasure-iniinfo-btn">
                             <button type="button" class="btn btn-dark" @click="doBackToSimu">オーダー画面に戻る</button>
                             <span class="onemeasure-notice">画面が横になります</span>
