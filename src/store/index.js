@@ -246,6 +246,14 @@ export default new Vuex.Store({
     },
     changeKiji(state, kiji){
       state.kijiActive = kiji
+
+      // update optionSelectedData when GRL and kiji change
+      if(state.initialData.shop_kind == 2 && state.kijiData){
+        let kijiObj = state.kijiData.find(item => item.id == state.kijiActive)
+        if(kijiObj && kijiObj.glr_kind){
+          state.optionSelectedData = state.optionSelectedData.filter(item => (item.orderId != state.orderNowId || (item.orderId == state.orderNowId && item.glr_kind.indexOf(kijiObj.glr_kind + '') != -1)))
+        }
+      }
     },
     updateKijiSearchData(state, searchData){
       state.kijiSearchData = searchData
@@ -590,12 +598,12 @@ export default new Vuex.Store({
     },
     // stock data
     updateStockSelectedData(state){
-      let stockSelectedNowIndex = state.stockSelectedData.findIndex(item => item.orderId == state.orderNowId)
-      let sizeSelectedNow = state.sizeSelectedData.find(item => item.orderId == state.orderNowId)
       let itemDataNow = state.itemData.find(item => item.orderId == state.orderNowId)
-      if(state.kijiActive && sizeSelectedNow && stockSelectedNowIndex != -1){
+      let stockSelectedNowIndex = state.stockSelectedData.findIndex(item => item.orderId == state.orderNowId)
+      if(state.kijiActive && itemDataNow && stockSelectedNowIndex != -1){
+        let sizeSelectedNow = state.sizeSelectedData.find(item => item.orderId == state.orderNowId && item.design == itemDataNow.stock_design)
         let KijiNowIndex = state.kijiData.findIndex(item => item.id == state.kijiActive)
-        if(KijiNowIndex !== -1){
+        if(KijiNowIndex !== -1 && sizeSelectedNow){
           state.stockSelectedData[stockSelectedNowIndex].kiji = state.kijiActive
           let KijiNow = state.kijiData[KijiNowIndex]
             let stockValTemp = 0

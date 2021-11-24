@@ -196,7 +196,7 @@
       </div>
 
       <transition name="modal">
-        <div class="modal-mask" v-if="doBackShowModal">
+        <div class="modal-mask" v-if="doBackShowModal" id="modal-mask-kiji">
           <div class="modal-wrapper">
             <div class="modal-container">
                 <div class="modal-body center">
@@ -869,7 +869,6 @@ export default {
         if(this.stockSelectedDataNow.stock_design == this.designActive.design_id){
           this.$store.dispatch('handleUpdateStockSelectedData', null)
         }
-        console.log(this.stockSelectedDataNow)
       },
       neckSelectedValue: function(){
         if(this.neckSelectedValue && this.neckSizeData.findIndex(item => item.id == this.neckSelectedValue) !== -1){

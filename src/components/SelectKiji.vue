@@ -38,7 +38,7 @@
     </div>
     <div class="simuright-sub-navi d-flex align-items-center">
       <button class="simu-common-btn btnSize02 btnSizeHalf" @click="closeOption">戻る</button>
-      <button class="simu-common-btn btnSize02 gray btnSizeHalf" @click="kijiConfirm">決定</button>
+      <button class="simu-common-btn btnSize02 gray btnSizeHalf" @click="changeKijiConfirm">決定</button>
     </div>
     <transition name="transitionRightToLeft">
       <div class="simu-subpage" v-if="kijiDetailId != 0">
@@ -73,6 +73,21 @@
           </div>
         </div>
       </div>
+      <div class="modal-mask" v-if="changeKijiModalShow" id="modal-mask-option">
+          <div class="modal-wrapper">
+            <div class="modal-container">
+                <div class="modal-body center">
+                  <span class="order-confirm-question">現在作成中のオプションデータが消去されますがよろしいですか？</span>
+                </div>
+                <div class="modal-footer">
+                  <slot name="footer">
+                    <button class="simu-common-btn btnSize02 btnSizeHalf" @click="changeKijiModalShow = false">いええ</button>
+                    <button class="simu-common-btn btnSize02 btnSizeHalf gray" @click="kijiConfirm">はい</button>
+                  </slot>
+                </div>
+            </div>
+          </div>
+        </div>
     </transition>
   </div>
 </template>
@@ -107,6 +122,7 @@ export default {
       kijiSortResult: null,
       search_brand_shop: false,
       search_other_shop: false,
+      changeKijiModalShow: false
     };
   },
   methods: {
@@ -160,7 +176,19 @@ export default {
         })
         return ret
     },
+    changeKijiConfirm:function(){
+      if(this.kijiSelected && this.kijiData.find(item => item.id == this.kijiSelected)){
+        if(!this.kijiActive || this.kijiSelected == this.kijiActive){
+          this.kijiConfirm()
+        } else{
+          this.changeKijiModalShow = true
+        }
+      } else{
+        alert('生地を選択してください')
+      }
+    },
     kijiConfirm: function(){
+      this.changeKijiModalShow = false
       if(this.kijiSelected && this.kijiData.find(item => item.id == this.kijiSelected)){
         let Kiji = this.kijiData.find(item => item.id == this.kijiSelected)
         let requireStock = 0

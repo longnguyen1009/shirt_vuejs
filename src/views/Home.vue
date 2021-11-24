@@ -256,7 +256,6 @@ export default {
           }
         })
         .then(response => {
-          console.log(response.data.data)
           ret = response.data.data
         })
         .catch(error => {
@@ -438,7 +437,6 @@ export default {
     },
     kijiActive: function(){
       this.$store.dispatch('handleUpdateStockSelectedData', null)
-      console.log(this.stockSelectedData)
     }
   },
   mounted() {

@@ -20,22 +20,23 @@
           <span>{{cateCurrObj.cate_name}}</span>
         </div>
         <div class="simuright-sub-result d-flex flex-wrap" v-if="optionDetailActive != optionCustomNameID">
-          <div v-for="Option in optionCurrLists" :key="Option.id" class="optionItem"
-            :class="{active: (Option.id == optionSelected)}">
-            <img v-lazy="option_img_path + Option.img" alt="" class="optionitem-img" @error="imgError"
-              @click="optionChange(Option.id, Option.simu_img, Option.option_shirt_svg, Option.option_shirt_shadow, optionParent.type)">
-            <span class="simuright-option-icon" @click="showOptionDetail(Option.id)">
-              <img :src="main_path + 'html/user_data/assets/img/common/icon_info.png'" alt="">
-            </span>
-            <div class="simuright-option-text" @click="optionChange(Option.id, Option.simu_img, Option.option_shirt_svg, Option.option_shirt_shadow, optionParent.type)">
-              <div class="simuright-kiji-text-top d-flex justify-content-between align-items-center">
-                <span class="simuright-kiji-code">{{Option.name}}</span><br>
-              </div>
-              <span class="simuright-kiji-name">
-                <span v-if="(optionParent.type == 'button' || optionParent.type == 'uraji') && Option.color_code">C/#{{Option.color_code}}</span>
+          <template v-for="Option in optionCurrLists">
+            <div class="optionItem" :class="{active: Option.id == optionSelected}" :key="Option.id" v-if="checkOptionItemShow(Option)">
+              <img v-lazy="option_img_path + Option.img" alt="" class="optionitem-img" @error="imgError"
+                @click="optionChange(Option.id, Option.simu_img, Option.option_shirt_svg, Option.option_shirt_shadow, optionParent.type)">
+              <span class="simuright-option-icon" @click="showOptionDetail(Option.id)">
+                <img :src="main_path + 'html/user_data/assets/img/common/icon_info.png'" alt="">
               </span>
+              <div class="simuright-option-text" @click="optionChange(Option.id, Option.simu_img, Option.option_shirt_svg, Option.option_shirt_shadow, optionParent.type)">
+                <div class="simuright-kiji-text-top d-flex justify-content-between align-items-center">
+                  <span class="simuright-kiji-code">{{Option.name}}</span><br>
+                </div>
+                <span class="simuright-kiji-name">
+                  <span v-if="(optionParent.type == 'button' || optionParent.type == 'uraji') && Option.color_code">C/#{{Option.color_code}}</span>
+                </span>
+              </div>
             </div>
-          </div>
+          </template>
         </div>
         <div class="simuright-sub-result" v-if="optionDetailActive == optionCustomNameID">
           <div class="option-customname-row option-customname-type">
@@ -150,10 +151,11 @@ export default {
       }
     },
     buttonConfirm: function(){
+
       //普通Option
       if(this.optionDetailActive != this.optionCustomNameID){
-        if(this.optionSelected){
-          var selectedObj = this.optionDetailData.filter((item) => item.id == this.optionSelected)[0]
+        if(this.optionSelected && this.optionDetailData.find(item => item.id == this.optionSelected)){
+          let selectedObj = this.optionDetailData.find(item => item.id == this.optionSelected)
           this.$store.dispatch('handleChangeOption', {
             orderId: this.orderId,
             combine_id: this.designActive.combine_id,
@@ -168,7 +170,8 @@ export default {
             option_shirt_shadow: selectedObj.option_shirt_shadow,
             name: selectedObj.name,
             type: this.optionParent.type,
-            cost: selectedObj.price
+            cost: selectedObj.price,
+            glr_kind: selectedObj.glr_kind
           })
           this.closeOption()
         } else{
@@ -177,12 +180,11 @@ export default {
         }
       } else{
         //刺繍ネーム
-        if(this.optionSelected){
-          let selectedObj = this.optionDetailData.filter((item) => item.id == this.optionSelected)[0]
+        if(this.optionSelected && this.optionDetailData.find(item => item.id == this.optionSelected)){
+          let selectedObj = this.optionDetailData.find(item => item.id == this.optionSelected)
           let optionCustomNameObj = this.optionCustomNameSubLists.find(item => item.id == this.optionCustomNameSelected)
           let reg = new RegExp('^[0-9a-zA-Z.\\s]+$');
           if(this.optionSelected == this.optionCustomNameNot || (this.optionSelected != this.optionCustomNameNot && this.optionCustomNameSelected && this.optionCustomNameText != '' && reg.test(this.optionCustomNameText))){
-
               this.$store.dispatch('handleChangeOption', {
                   orderId: this.orderId,
                   combine_id: this.designActive.combine_id,
@@ -198,7 +200,8 @@ export default {
                   cost: selectedObj.price,
                   custom_name_color_id: (this.optionSelected == this.optionCustomNameNot) ? null : (optionCustomNameObj ? optionCustomNameObj.id : null),
                   custom_name_color_name: (this.optionSelected == this.optionCustomNameNot) ? null : (optionCustomNameObj ? optionCustomNameObj.name : null),
-                  custom_name_val: (this.optionSelected == this.optionCustomNameNot) ? null : this.optionCustomNameText
+                  custom_name_val: (this.optionSelected == this.optionCustomNameNot) ? null : this.optionCustomNameText,
+                  glr_kind: selectedObj.glr_kind
                 })
               this.closeOption()
           }
@@ -305,6 +308,7 @@ export default {
               optionLists: this.optionLists
             })
             this.$store.dispatch('handleUpdateOptionDetailData', this.optionLists)
+            this.setOptionSelected()
           }
         })
     },
@@ -327,6 +331,12 @@ export default {
         }
       }
 
+      if(this.optionSelected && this.optionDetailData){
+        let selectedObj = this.optionDetailData.find(item => item.id == this.optionSelected)
+        if(!selectedObj || (selectedObj && !this.checkOptionItemShow(selectedObj))){
+          this.optionSelected = 0
+        }
+      }
     },
     optionChangeCustomNameSub(sub_id){
       this.optionCustomNameSelected = sub_id
@@ -346,6 +356,14 @@ export default {
       } else{
         return 8
       }
+    },
+    checkOptionItemShow: function(Option){
+      if(this.initialData.shop_kind == 2 && this.kijiObj && this.kijiObj.glr_kind){
+        if(!Option.glr_kind || (Option.glr_kind && Option.glr_kind.indexOf(this.kijiObj.glr_kind + '') == -1)){
+          return false
+        }
+      }
+      return true
     }
   },
   watch: {
@@ -408,7 +426,10 @@ export default {
       'optionParentData',
       'optionDetailData',
       'orderNowId',
-      'itemData'
+      'itemData',
+      'initialData',
+      'kijiData',
+      'kijiActive'
     ]),
     cateCurrObj: function(){
       if(this.cateLists && this.cateCurr){
@@ -425,7 +446,7 @@ export default {
       }
     },
     OptionDetailData: function(){
-      return this.optionCurrLists.filter((item) => item.id == this.optionDetailId)[0]
+      return this.optionCurrLists.find((item) => item.id == this.optionDetailId)
     },
     optionParent: function(){
       var parentLists = this.optionParentData.filter((item) => item.design_id == this.designActive.design_id)[0];
@@ -459,6 +480,13 @@ export default {
         return this.itemDataActive.factory_id
       } else{
         return 0
+      }
+    },
+    kijiObj: function(){
+      if(this.kijiData && this.kijiActive){
+        return this.kijiData.find(item => item.id == this.kijiActive)
+      } else{
+        return null
       }
     }
   }

@@ -984,6 +984,13 @@ pre{
   line-height: 1;
 }
 
+#modal-mask-option{
+  position: absolute;
+}
+#modal-mask-option .modal-container{
+  width: 85%;
+}
+
 /* KijiDetail */
 .container-option-detail{
   width: 100%;
@@ -2011,6 +2018,8 @@ pre{
   margin-bottom: 10px;
   font-size: 13px;
 }
+
+
 
 
 
