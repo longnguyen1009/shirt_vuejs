@@ -5,7 +5,8 @@
 
 I have consulted some websites, source code to use for my project, thank you very much.
 
-- [Become a backer or sponsor on Patreon](https://www.patreon.com/evanyou).
+- [Dynamic Colour Picking](https://codepen.io/kylewetton/pen/KKPvbLX).
+- [How to Build a Color Customizer App for a 3D Model with Three.js](https://tympanus.net/codrops/2019/09/17/how-to-build-a-color-customizer-app-for-a-3d-model-with-three-js/).
 
 ## Install guide
 Perform the following steps:
