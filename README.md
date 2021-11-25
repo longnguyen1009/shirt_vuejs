@@ -7,6 +7,7 @@ I have consulted some websites, source code to use for my project, thank you ver
 
 - [Dynamic Colour Picking](https://codepen.io/kylewetton/pen/KKPvbLX).
 - [How to Build a Color Customizer App for a 3D Model with Three.js](https://tympanus.net/codrops/2019/09/17/how-to-build-a-color-customizer-app-for-a-3d-model-with-three-js/).
+- [Awesome Vue 3 Tutorials](https://github.com/vuesomedev/awesome-vue-3)
 
 ## Install guide
 Perform the following steps:
