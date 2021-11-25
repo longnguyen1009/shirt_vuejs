@@ -192,10 +192,8 @@
                 </div>
               </div>
               <div class="modal-footer">
-                <slot name="footer">
-                  <button class="simu-common-btn white btnSize02 btnSizeHalf" @click="doBack(orderSizeActive)">シミュレーターに戻る</button>
-                  <button class="simu-common-btn gray btnSize02 btnSizeHalf" @click="confirmModalClose">オーダー確認画面に戻る</button>
-                </slot>
+                <button class="simu-common-btn white btnSize02 btnSizeHalf" @click="doBack(orderSizeActive)">シミュレーターに戻る</button>
+                <button class="simu-common-btn gray btnSize02 btnSizeHalf" @click="confirmModalClose">オーダー確認画面に戻る</button>
               </div>
             </div>
           </div>
@@ -208,10 +206,8 @@
                 <span class="order-confirm-question">オーダーを完了しますか？</span>
               </div>
               <div class="modal-footer">
-                <slot name="footer">
-                  <button class="simu-common-btn btnSize02 btnSizeHalf" @click="confirmModalClose">戻る</button>
-                  <button class="simu-common-btn btnSize02 btnSizeHalf gray" @click="doOrderComplete(1)">完了</button>
-                </slot>
+                <button class="simu-common-btn btnSize02 btnSizeHalf" @click="confirmModalClose">戻る</button>
+                <button class="simu-common-btn btnSize02 btnSizeHalf gray" @click="doOrderComplete(1)">完了</button>
               </div>
           </div>
         </div>
@@ -223,10 +219,8 @@
                 <span class="order-confirm-question">このオーダーアイテムを削除しますか？</span>
               </div>
               <div class="modal-footer">
-                <slot name="footer">
-                  <button class="simu-common-btn btnSize02 btnSizeHalf" @click="confirmModalClose">戻る</button>
-                  <button class="simu-common-btn btnSize02 btnSizeHalf gray" @click="removeOrderTemp(orderRemoveCheck)">確認</button>
-                </slot>
+                <button class="simu-common-btn btnSize02 btnSizeHalf" @click="confirmModalClose">戻る</button>
+                <button class="simu-common-btn btnSize02 btnSizeHalf gray" @click="removeOrderTemp(orderRemoveCheck)">確認</button>
               </div>
           </div>
         </div>

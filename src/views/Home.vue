@@ -37,9 +37,7 @@
                 <span class="order-confirm-question">{{Errors.text}}</span>
               </div>
               <div class="modal-footer">
-                <slot name="footer">
-                  <button class="simu-common-btn btnSize01" @click="clodeErrorModal">閉じる</button>
-                </slot>
+                <button class="simu-common-btn btnSize01" @click="clodeErrorModal">閉じる</button>
               </div>
           </div>
         </div>

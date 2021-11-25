@@ -203,10 +203,8 @@
                   <span class="order-confirm-question">現在作成中のデータが消去されますがよろしいですか？</span>
                 </div>
                 <div class="modal-footer">
-                  <slot name="footer">
-                    <button class="simu-common-btn btnSize02 btnSizeHalf" @click="doBackShowModal = false">いええ</button>
-                    <button class="simu-common-btn btnSize02 btnSizeHalf gray" @click="doBackConfirm">はい</button>
-                  </slot>
+                  <button class="simu-common-btn btnSize02 btnSizeHalf" @click="doBackShowModal = false">いええ</button>
+                  <button class="simu-common-btn btnSize02 btnSizeHalf gray" @click="doBackConfirm">はい</button>
                 </div>
             </div>
           </div>

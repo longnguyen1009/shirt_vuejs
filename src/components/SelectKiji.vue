@@ -77,13 +77,13 @@
           <div class="modal-wrapper">
             <div class="modal-container">
                 <div class="modal-body center">
-                  <span class="order-confirm-question">現在作成中のオプションデータが消去されますがよろしいですか？</span>
+                  <span class="order-confirm-question">この生地に変更するとオプションの選択内容が適用されなくなるものがあります。<br>
+                  この生地に対応していないオプション指定が消去されますがよろしいですか？
+                  </span>
                 </div>
                 <div class="modal-footer">
-                  <slot name="footer">
-                    <button class="simu-common-btn btnSize02 btnSizeHalf" @click="changeKijiModalShow = false">いええ</button>
-                    <button class="simu-common-btn btnSize02 btnSizeHalf gray" @click="kijiConfirm">はい</button>
-                  </slot>
+                  <button class="simu-common-btn btnSize02 btnSizeHalf" @click="changeKijiModalShow = false">いええ</button>
+                  <button class="simu-common-btn btnSize02 btnSizeHalf gray" @click="kijiConfirm">はい</button>
                 </div>
             </div>
           </div>
@@ -177,8 +177,9 @@ export default {
         return ret
     },
     changeKijiConfirm:function(){
-      if(this.kijiSelected && this.kijiData.find(item => item.id == this.kijiSelected)){
-        if(!this.kijiActive || this.kijiSelected == this.kijiActive){
+      let Kiji = this.kijiData.find(item => item.id == this.kijiSelected)
+      if(this.kijiSelected && Kiji){
+        if(this.kijiSelected == this.kijiActive || this.initialData.shop_kind == 1 || this.optionSelectedChanged.length == 0){
           this.kijiConfirm()
         } else{
           this.changeKijiModalShow = true
@@ -305,6 +306,18 @@ export default {
     this.kijiSelected = this.kijiActive
     this.kijiSortResult = this.kijiData
   },
+  watch: {
+    searchKijiNo: _.debounce(function() {
+      this.isTyping = false;
+    }, 500),
+    isTyping: function(value) {
+      if (!value) {
+        this.isLoading = true
+        this.sortParam.kijiNo = this.searchKijiNo
+        this.searchKiji()
+      }
+    }
+  },
   computed: {
     ...mapGetters([
       'main_path',
@@ -314,7 +327,10 @@ export default {
       'stockSelectedData',
       'orderNowId',
       'styleSelected',
-      'stock_old_id'
+      'stock_old_id',
+      'initialData',
+      'optionSelectedData',
+      'orderNowId'
     ]),
     kijiDetailData: function(){
       if(this.kijiDetailId != 0){
@@ -331,25 +347,23 @@ export default {
     stockSelectedDataNow: function(){
       return this.stockSelectedData.find(item => item.orderId == this.orderNowId)
     },
-    // kijiSortResult: function(){
-    //   let sortResult = this.kijiData
-    //   if(this.sortParam.kijiNo != null){
-    //     sortResult = this.kijiData
-    //   }
-    //   return sortResult
-    // }
-  },
-
-  watch: {
-    searchKijiNo: _.debounce(function() {
-      this.isTyping = false;
-    }, 500),
-    isTyping: function(value) {
-      if (!value) {
-        this.isLoading = true
-        this.sortParam.kijiNo = this.searchKijiNo
-        this.searchKiji()
+    optionSelectedDataNow: function(){
+      if(this.optionSelectedData){
+        return this.optionSelectedData.filter(item => (item.orderId == this.orderNowId))
+      } else{
+        return false
       }
+    },
+    optionSelectedChanged: function(){
+      if(this.initialData.shop_kind == 2 && this.kijiSelected && this.optionSelectedDataNow){
+        let kijiObj = this.kijiData.find(item => item.id == this.kijiSelected)
+        if(kijiObj && kijiObj.glr_kind){
+          return this.optionSelectedDataNow.filter(item => 
+            (item.glr_kind && item.glr_kind.length && item.glr_kind.indexOf(kijiObj.glr_kind + '') == -1)
+          )
+        }
+      }
+      return []
     }
   }
 };

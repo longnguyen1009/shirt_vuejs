@@ -87,9 +87,7 @@
                 </div>
               </div>
               <div class="modal-footer">
-                <slot name="footer">
-                  <button class="simu-common-btn white btnSize02" @click="barCodeModalClose">戻る</button>
-                </slot>
+                <button class="simu-common-btn white btnSize02" @click="barCodeModalClose">戻る</button>
               </div>
           </div>
         </div>
