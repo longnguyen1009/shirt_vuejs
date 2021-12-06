@@ -36,6 +36,11 @@ Vue.use(VueCarousel);
 import VueLazyload from 'vue-lazyload'
 Vue.use(VueLazyload)
 
+// Mobile UI Components build on Vue
+// import Vant from 'vant';
+// import 'vant/lib/index.css';
+// Vue.use(Vant);
+
 //CORS
 // import Cors from 'cors'
 // Vue.use(Cors);

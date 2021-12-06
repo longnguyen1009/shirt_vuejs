@@ -251,15 +251,15 @@ export default new Vuex.Store({
       if(state.initialData.shop_kind == 2 && state.kijiData){
         let kijiObj = state.kijiData.find(item => item.id == state.kijiActive)
         if(kijiObj && kijiObj.glr_kind){
-          state.optionSelectedData = state.optionSelectedData.filter(item => (item.orderId != state.orderNowId || (item.orderId == state.orderNowId && item.glr_kind.indexOf(kijiObj.glr_kind + '') != -1)))
+          state.optionSelectedData = state.optionSelectedData.filter(item => (item.orderId != state.orderNowId || (item.orderId == state.orderNowId && item.glr_kind && item.glr_kind.indexOf(kijiObj.glr_kind + '') != -1)))
         }
       }
     },
     updateKijiSearchData(state, searchData){
       state.kijiSearchData = searchData
     },
-    async changeStyleData(state, styleData){
-      await Object.values(styleData).forEach(element => {
+    changeStyleData(state, styleData){
+      Object.values(styleData).forEach(element => {
           const existStyleIndex = state.styleData.findIndex(
             (item) => (
               item.id == element.id
@@ -377,8 +377,8 @@ export default new Vuex.Store({
       state.optionDataLoaded = [] //{model_id, design_id, parent_id, cateLists, optionLists }
       // state.optionParentData = [] //{design_id, data}
     },
-    async updateOptionDetailData(state, detailData){
-      await Object.values(detailData).forEach(element => {
+    updateOptionDetailData(state, detailData){
+      Object.values(detailData).forEach(element => {
         element.forEach(detail => {
           const existDetailIndex = state.optionDetailData.findIndex(
             (item) => (

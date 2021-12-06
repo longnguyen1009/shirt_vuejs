@@ -1,0 +1,40 @@
+{#
+This file is part of EC-CUBE
+
+Copyright(c) EC-CUBE CO.,LTD. All Rights Reserved.
+
+http://www.ec-cube.co.jp/
+
+For the full copyright and license information, please view the LICENSE
+file that was distributed with this source code.
+#}
+{% extends 'default_frame.twig' %}
+
+{% set myshopno = 'simulator' %}
+
+{% set body_class = 'myshop_simulator' %}
+
+{% block stylesheet %}
+    <link rel="stylesheet" href="{{ asset('assets/css/simupage/main.css', 'user_data') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/onemeasure/oneMeasureSDKUI.css?2.6.3', 'user_data') }}">
+{% endblock %}
+
+{% block main %}
+    <div id="app"></div>
+{% endblock %}
+
+{% block javascript %}
+    {# VUEJS #}
+    <script src="{{ asset('assets/js/simupage/runtime.js', 'user_data') }}"></script>
+    <script src="{{ asset('assets/js/simupage/vendors.js', 'user_data') }}"></script>
+    <script src="{{ asset('assets/js/simupage/main.js', 'user_data') }}"></script>
+
+    {# ONEMEASURE JS #}
+    <script src="{{ asset('assets/js/onemeasure/toast.js?', 'user_data') }}" type="text/javascript"></script>
+    <script src="{{ asset('assets/js/onemeasure/tozAdjust.js?v2.6.3', 'user_data') }}" type="text/javascript"></script>
+    <script src="{{ asset('assets/js/onemeasure/OneMeasureSDK.js?v2.6.3', 'user_data') }}" type="text/javascript"></script>
+    <script src="{{ asset('assets/js/onemeasure/datainterface.js?v2.6.43', 'user_data') }}" type="text/javascript"></script>
+    <script src="{{ asset('assets/js/onemeasure/customize.js?', 'user_data') }}" type="text/javascript"></script>
+
+{% endblock %}
+

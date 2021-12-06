@@ -359,7 +359,7 @@ export default {
         let kijiObj = this.kijiData.find(item => item.id == this.kijiSelected)
         if(kijiObj && kijiObj.glr_kind){
           return this.optionSelectedDataNow.filter(item => 
-            (item.glr_kind && item.glr_kind.length && item.glr_kind.indexOf(kijiObj.glr_kind + '') == -1)
+            (!item.glr_kind || (item.glr_kind && item.glr_kind.length && item.glr_kind.indexOf(kijiObj.glr_kind + '') == -1))
           )
         }
       }

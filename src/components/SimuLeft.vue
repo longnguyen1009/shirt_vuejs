@@ -47,7 +47,7 @@
          @error="loadImgError">
         </span>
       </div>
-      <div class="simuleft-options-shirt" v-if="ShirtCheck()" :class="{hide: (correct_detail_id_now && hasCorrectImg)}">
+      <!-- <div class="simuleft-options-shirt" v-if="ShirtCheck()" :class="{hide: (correct_detail_id_now && hasCorrectImg)}">
         <template v-for="(Option,id) in optionSaved">
           <span :key="id" v-if="Option && Option.option_shirt_svg">
             <object
@@ -71,7 +71,7 @@
           ></object>
           <img v-if="optionTemp.option_shirt_shadow" :src="option_shirt_svg_path + optionTemp.option_shirt_shadow" class="img_shadow" @error="imgErrorBlank"/>
         </span>
-      </div>
+      </div> -->
       <!-- <div class="sumi-left-zoombtn">+ZOOM</div> -->
       <span class="sumi-left-downbtn" @click="doSaveTemp">
         <img :src="main_path + 'html/user_data/assets/img/common/icon_save.png'" alt="">
@@ -113,19 +113,18 @@ export default {
         // .not("#button")
         .find("image")
         .attr("xlink:href", kiji[0].currentSrc)
-        // .attr("width", kiji[0].naturalWidth / 20)
         .attr("width", 74)
-        .attr("height", 74);
+        .attr("height", kiji[0].naturalHeight/ (kiji[0].naturalWidth/74));
       $(target)
         .find("pattern[type='kiji']")
         // .not("#button")
         .attr("width", 74)
-        .attr("height", 74);
+        .attr("height", kiji[0].naturalHeight/ (kiji[0].naturalWidth/74));
 
       // shirt: change kiji -> change shirt option
-      if(this.ShirtCheck()){
-        this.kijiLoadedToShirt()
-      }
+      // if(this.ShirtCheck()){
+      //   this.kijiLoadedToShirt()
+      // }
     },
     loadOption(event, img, cate, option_id){
       let target = document.querySelector(".svgModel").contentDocument;
@@ -138,9 +137,9 @@ export default {
         }
       }
 
-      if(this.ShirtCheck()){
-        this.loadOptionToShirt(event)
-      }
+      // if(this.ShirtCheck()){
+      //   this.loadOptionToShirt(event)
+      // }
     },
     loadAllOption : async function(){
       //if have type: load img to svg
@@ -163,54 +162,54 @@ export default {
         }, 300)
       })
     },
-    kijiLoadedToShirt() {
-      let kiji = $(".kiji_preloader").find("img");
-      document.querySelectorAll('.svgOptionShirt').forEach(element => {
-        let target = element.contentDocument
-         $(target)
-          .find("pattern[type='kiji']")
-          .find("image")
-          .attr("xlink:href", kiji[0].currentSrc)
-          .attr("width", 74)
-          .attr("height", 74);
-        $(target)
-          .find("pattern[type='kiji']")
-          .attr("width", 74)
-          .attr("height", 74);
-      })
-    },
-    loadOptionToShirt : function(event){
-      setTimeout(() => {
-        document.querySelectorAll('.svgOptionShirt').forEach(element => {
-           let target = element.contentDocument
-           let cate = $(event.target).attr('cate')
-           if(cate && $(target).find("pattern[cate='"+cate+"']").length){
-             $(target)
-             .find("pattern[cate='"+cate+"']")
-             .find("image")
-             .attr("xlink:href", $(event.target).attr('src'))
-           }
-         })
-      }, 300)
-    },
-    loadAllOptionToShirt : function(){
-     document.querySelectorAll('.svgOptionShirt').forEach(element => {
-        let target = element.contentDocument
-        $(".img_option").each(function(index, optionDOM) {
-          let cate = $(optionDOM).attr('cate')
-          if(cate && $(target).find("pattern[cate='"+cate+"']").length){
-            $(target)
-            .find("pattern[cate='"+cate+"']")
-            .find("image")
-            .attr("xlink:href", $(optionDOM).attr('src'))
-          }
-        })
-      })
-    },
-    svgOptionShirt: function(){
-      this.kijiLoadedToShirt()
-      this.loadAllOptionToShirt()
-    },
+    // kijiLoadedToShirt() {
+    //   let kiji = $(".kiji_preloader").find("img");
+    //   document.querySelectorAll('.svgOptionShirt').forEach(element => {
+    //     let target = element.contentDocument
+    //      $(target)
+    //       .find("pattern[type='kiji']")
+    //       .find("image")
+    //       .attr("xlink:href", kiji[0].currentSrc)
+    //       .attr("width", 74)
+    //       .attr("height", 74);
+    //     $(target)
+    //       .find("pattern[type='kiji']")
+    //       .attr("width", 74)
+    //       .attr("height", 74);
+    //   })
+    // },
+    // loadOptionToShirt : function(event){
+    //   setTimeout(() => {
+    //     document.querySelectorAll('.svgOptionShirt').forEach(element => {
+    //        let target = element.contentDocument
+    //        let cate = $(event.target).attr('cate')
+    //        if(cate && $(target).find("pattern[cate='"+cate+"']").length){
+    //          $(target)
+    //          .find("pattern[cate='"+cate+"']")
+    //          .find("image")
+    //          .attr("xlink:href", $(event.target).attr('src'))
+    //        }
+    //      })
+    //   }, 300)
+    // },
+    // loadAllOptionToShirt : function(){
+    //  document.querySelectorAll('.svgOptionShirt').forEach(element => {
+    //     let target = element.contentDocument
+    //     $(".img_option").each(function(index, optionDOM) {
+    //       let cate = $(optionDOM).attr('cate')
+    //       if(cate && $(target).find("pattern[cate='"+cate+"']").length){
+    //         $(target)
+    //         .find("pattern[cate='"+cate+"']")
+    //         .find("image")
+    //         .attr("xlink:href", $(optionDOM).attr('src'))
+    //       }
+    //     })
+    //   })
+    // },
+    // svgOptionShirt: function(){
+    //   this.kijiLoadedToShirt()
+    //   this.loadAllOptionToShirt()
+    // },
     loadImgError: function(e) {
       var target = document.querySelector(".svgModel").contentDocument;
       var cate = $(e.target).attr('cate')
@@ -426,17 +425,17 @@ export default {
       //load shirt default option: 衿、長袖とか。
       if(this.ShirtCheck()){
         //eri default
-        if(
-          optionSavedList.findIndex(item => item.type == 'eri') == -1 
-          && (!this.optionTemp || (this.optionTemp && this.optionTemp.type != 'eri'))
-        ){
-          optionSavedList.push({
-            option_img: null,
-            option_shirt_svg: '139.svg',
-            option_shirt_shadow: 'shadow-139.png',
-            type: 'eri'
-          })
-        }
+        // if(
+        //   optionSavedList.findIndex(item => item.type == 'eri') == -1 
+        //   && (!this.optionTemp || (this.optionTemp && this.optionTemp.type != 'eri'))
+        // ){
+        //   optionSavedList.push({
+        //     option_img: null,
+        //     option_shirt_svg: '139.svg',
+        //     option_shirt_shadow: 'shadow-139.png',
+        //     type: 'eri'
+        //   })
+        // }
 
         //button default
         if(
