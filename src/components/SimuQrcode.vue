@@ -88,7 +88,7 @@ export default {
           barcode: barcode,
           design_list: designArr,
           glr_kind: glr_kind,
-          model: this.
+          // model: this.
         }
       })
       .then(response => {
