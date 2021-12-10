@@ -361,21 +361,19 @@ pre{
 .simu-model-order{
   margin-top: 20px;
 }
-
 .simu-model-itemType{
-  width: 150px;
-  padding-right: 1.5em;
+  width: 125px;
 }
 .simu-model-item .form-check{
   min-height: auto;
   margin-bottom: 0;
+  width: 50%;
+  margin-right: 0;
+  padding-left: 5px;
 }
-
 .simu-model-item .form-check:first-child{
   padding-left: 0;
 }
-
-
 
 /* END RADIO STYLE */
 
@@ -1994,8 +1992,8 @@ pre{
 
 /* Vue QrCode */
 .container-qrcode{
-  width: 40%;
-  height: 75%;
+  width: 50%;
+  height: 60%;
   margin: 0px auto;
   background-color: #fff;
   color: #000;
@@ -2014,16 +2012,27 @@ pre{
   top: -30px;
   right: -30px;
 }
-.decode-result{
+.container-qrcode .qr-result{
   padding: 10px;
   margin-bottom: 10px;
   font-size: 13px;
+}
+.container-qrcode .decode-result{
+  margin-bottom: 10px;
 }
 .container-qrcode .scan-box{
   flex-grow: 1;
   position: relative;
 }
-.scanner-container, .scan-confirmation{
+#videoWindow{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 2;
+}
+.scan-confirmation{
   position: absolute;
   width: 100%;
   height: 100%;
@@ -2035,11 +2044,21 @@ pre{
   left: 0;
   z-index: 2;
 }
-.scanner-container>div, .scanner-container video{
+#videoWindow video{
+  position: absolute;
   width: 100%;
   height: 100%;
+  object-fit: fill;
 }
-.container-qrcode .error {
+#videoWindow.viewport canvas.drawingBuffer, video.drawingBuffer {
+  margin-left: -640px;
+}
+#videoWindow .drawingBuffer{
+  /* display: none; */
+  position: absolute;
+  left: 0;
+}
+.container-qrcode .qr-error {
   font-weight: bold;
   color: red;
 }

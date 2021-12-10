@@ -14,8 +14,7 @@
       <div class="simuright-options">
         <div class="simuright-options-content">
           <div class="simuright-options-row">
-            <div class="simuright-options-rowTop d-flex optionLv1 align-items-center" 
-              :class="{codeMode : (optionMode == 1)}"
+            <div class="simuright-options-rowTop d-flex optionLv1 align-items-center"
               @touchstart="touchStart" @touchmove="touchMove" @touchend="touchEnd" 
               @click="openDetailOption('kiji')">
               <span class="simuright-options-label">生地</span>
@@ -38,7 +37,7 @@
             <div class="simuright-options-rowDown">
               <ul class="simuright-optionLists">
                 <li class="optionLv2 d-flex align-items-center" @touchstart="touchStart" @touchmove="touchMove" @touchend="touchEnd" 
-                :class="{codeMode : (optionMode == 1), notComplete: checkOptionNotComplete(Option.parent_id)}"
+                :class="{codeMode : (optionMode == 1 && Option.parent_id != optionCustomNameID), notComplete: checkOptionNotComplete(Option.parent_id)}"
                 v-for="Option in optionParentSortData[Genre.genre_id]" :key="Option.parent_id"
                 @click="openDetailOption(Option.parent_id)">
                   <span class="simuright-options-notcomplete simu-alert" v-if="checkOptionNotComplete(Option.parent_id)">
@@ -229,7 +228,10 @@
       <transition name="modal">
         <div class="modal-mask" v-if="qrCodeShow">
           <div class="modal-wrapper">
-            <SimuQrcode @closeQrCode="qrCodeShow = false"/>
+            <SimuQrcode 
+              @closeQrCode="qrCodeShow = false"
+              :designData="designData"
+            />
           </div>
         </div>
       </transition>
@@ -378,7 +380,7 @@ export default {
         this.$store.dispatch('handleChangeModelTemp', {styleId: this.styleSelected, modelId: this.modelSelected})
       },
       openDetailOption: function(optionid){
-        if(this.optionMode == 1){
+        if(this.optionMode == 1 && optionid != 'kiji' && optionid != 35){
           this.qrCodeShow = true
         } else{
           this.$store.dispatch('handleChangeOptionDetailActive', optionid)
@@ -412,7 +414,6 @@ export default {
           headers: {'X-Requested-With': 'XMLHttpRequest'}
         })
         .then(response => {
-          // console.log(response)
           ret = response.data.data
         })
         .catch(error => {
@@ -1021,8 +1022,8 @@ export default {
         }
       },
       itemDataActive: function(){
-        if(this.itemData.length && this.itemData.filter(item => item.orderId == this.orderNowId).length){
-          return this.itemData.filter(item => item.orderId == this.orderNowId)[0]
+        if(this.itemData.length && this.itemData.find(item => item.orderId == this.orderNowId)){
+          return this.itemData.find(item => item.orderId == this.orderNowId)
         } else{
           return null
         }
@@ -1064,7 +1065,7 @@ export default {
         }
       },
       sizeItemDataActive: function(){
-        if(this.sizeSortData && this.sizeSelectedValue){
+        if(this.sizeSortData.length && this.sizeSelectedValue){
           return this.sizeSortData.find(item => item.id == this.sizeSelectedValue)
         } else{
           return {}

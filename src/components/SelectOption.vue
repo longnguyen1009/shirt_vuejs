@@ -343,15 +343,15 @@ export default {
     },
     getMaxLengthCustomName: function(facatory_id){
       //ヤンアルタ
-      if([11].indexOf(facatory_id) !== -1){
+      if([1].indexOf(facatory_id) !== -1){
         return 14
       } 
       //東和
-      else if([8].indexOf(facatory_id) !== -1 ){
+      else if([5].indexOf(facatory_id) !== -1 ){
         return 10
       }
       //那須 
-      else if([10].indexOf(facatory_id) !== -1){
+      else if([4].indexOf(facatory_id) !== -1){
         return 8
       } else{
         return 8

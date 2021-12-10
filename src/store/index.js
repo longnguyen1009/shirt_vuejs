@@ -23,24 +23,23 @@ export default new Vuex.Store({
     page: 1, //page 2 is model page
 
     //画像、URL
-    // main_path: 'https://stg-personalorder.united-arrows.co.jp/',
-    // simu_img_path: "/html/upload/simu_model/",
-    // style_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
-    // model_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
-    // kiji_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
-    // option_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
-    // correct_detail_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/correct_detail/",
-    // option_shirt_svg_path: "/html/upload/simu_model/option_shirt/",
-
-    
-    main_path: 'https://ua.coremobile.win/',
+    main_path: 'https://stg-personalorder.united-arrows.co.jp/',
     simu_img_path: "/html/upload/simu_model/",
-    style_img_path: "/html/upload/save_image/",
-    model_img_path: "/html/upload/save_image/",
-    kiji_img_path: "/html/upload/save_image/",
-    option_img_path: "/html/upload/save_image/",
-    correct_detail_img_path: "/html/upload/correct_detail/",
+    style_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
+    model_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
+    kiji_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
+    option_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
+    correct_detail_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/correct_detail/",
     option_shirt_svg_path: "/html/upload/simu_model/option_shirt/",
+
+    // main_path: 'https://ua.coremobile.win/',
+    // simu_img_path: "/html/upload/simu_model/",
+    // style_img_path: "/html/upload/save_image/",
+    // model_img_path: "/html/upload/save_image/",
+    // kiji_img_path: "/html/upload/save_image/",
+    // option_img_path: "/html/upload/save_image/",
+    // correct_detail_img_path: "/html/upload/correct_detail/",
+    // option_shirt_svg_path: "/html/upload/simu_model/option_shirt/",
 
     kiji_default: '0730151143_6103981fcfa43.jpeg',
 
