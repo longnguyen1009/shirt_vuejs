@@ -449,10 +449,10 @@ export default {
       return this.optionCurrLists.find((item) => item.id == this.optionDetailId)
     },
     optionParent: function(){
-      var parentLists = this.optionParentData.filter((item) => item.design_id == this.designActive.design_id)[0];
-      var parentCurr = parentLists.parentData.filter((item) => item.parent_id == this.optionDetailActive);
+      var parentLists = this.optionParentData.find((item) => item.design_id == this.designActive.design_id && item.model == this.modelSelected);
+      var parentCurr = parentLists.parentData.find((item) => item.parent_id == this.optionDetailActive);
       if(parentCurr){
-        return parentCurr[0]
+        return parentCurr
       } else{
         return {}
       }

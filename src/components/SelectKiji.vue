@@ -82,7 +82,7 @@
                   </span>
                 </div>
                 <div class="modal-footer">
-                  <button class="simu-common-btn btnSize02 btnSizeHalf" @click="changeKijiModalShow = false">いええ</button>
+                  <button class="simu-common-btn btnSize02 btnSizeHalf" @click="changeKijiModalShow = false">いいえ</button>
                   <button class="simu-common-btn btnSize02 btnSizeHalf gray" @click="kijiConfirm">はい</button>
                 </div>
             </div>

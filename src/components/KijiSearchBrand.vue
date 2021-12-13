@@ -12,18 +12,21 @@
           </div>
         </div>
         <div class="simuright-sub-result searchkiji-brand">
-            <ul class="searchkiji-brand-list d-flex justify-content-between align-items-center flex-wrap">
-              <li class="searchkiji-brand-item" v-for="(Brand, id) in searchKijiBrandResult" :key="id">
-                <input class="fancy-radio" hidden :id="'brand-' + Brand.id" name="size" type="checkbox" :value="Brand.id" v-model="brandSelected">
-                <label class="fancy-radio-label" :for="'brand-' + Brand.id">
-                    <span class="fancy-label--text searchkiji-brand-name">{{Brand.name}}</span><br>
-                    <span class="fancy-label--text searchkiji-brand-kana">{{Brand.kana}}</span>
-                    <span class="fancy-checkbox">
-                        <span class="radiobutton-dot"></span>
-                    </span>
-                </label>
-              </li>
-            </ul>
+            <div class="searchkiji-brand-group" v-for="(Group, id) in arrBrandSortByAlphabet" :key="id">
+              <span class="searchkiji-brand-letter">{{Group.letter}}</span>
+              <ul class="searchkiji-brand-list d-flex justify-content-between align-items-center flex-wrap">
+                <li class="searchkiji-brand-item" v-for="(Brand, id2) in Group.brand" :key="id2">
+                  <input class="fancy-radio" hidden :id="'brand-' + Brand.id" name="size" type="checkbox" :value="Brand.id" v-model="brandSelected">
+                  <label class="fancy-radio-label" :for="'brand-' + Brand.id">
+                      <span class="fancy-label--text searchkiji-brand-name">{{Brand.name}}</span><br>
+                      <span class="fancy-label--text searchkiji-brand-kana">{{Brand.kana}}</span>
+                      <span class="fancy-checkbox">
+                          <span class="radiobutton-dot"></span>
+                      </span>
+                  </label>
+                </li>
+              </ul>
+            </div>
         </div>
       </div>
     </div>
@@ -113,6 +116,21 @@ export default {
     }
     this.searchKijiBrandResult = this.kijiSearchBrand
   },
+  watch: {
+    searchKijiBrandName: _.debounce(function() {
+      this.isTyping = false;
+    }, 500),
+    isTyping: function(value) {
+      if (!value) {
+        // this.brandSelected = []
+        this.isLoading = true
+        this.searchKijiBrand()
+      }
+    },
+    arrBrandSortByAlphabet: function(){
+      console.log(this.arrBrandSortByAlphabet)
+    }
+  },
   computed: {
     ...mapGetters([
       'main_path',
@@ -124,21 +142,27 @@ export default {
       } else{
         return []
       }
+    },
+    arrBrandSortByAlphabet: function(){
+      const groupNames = arr => {
+        const map = arr.reduce((acc, val) => {
+            let char = val.name.charAt(0).toUpperCase();
+            acc[char] = [].concat((acc[char] || []), val);
+            return acc;
+        }, {})
+        const res = Object.keys(map).map(el => ({
+            letter: el,
+            brand: map[el]
+        }))
+        return res
+      }
+      return groupNames(this.searchKijiBrandResult).sort(function(a,b){
+        if(a.letter < b.letter) return -1
+        if(a.letter > b.letter) return 1
+        return 0
+      })
     }
   },
-
-  watch: {
-    searchKijiBrandName: _.debounce(function() {
-      this.isTyping = false;
-    }, 500),
-    isTyping: function(value) {
-      if (!value) {
-        // this.brandSelected = []
-        this.isLoading = true
-        this.searchKijiBrand()
-      }
-    }
-  }
 };
 </script>
 

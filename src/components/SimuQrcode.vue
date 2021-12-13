@@ -79,7 +79,8 @@ export default {
         code: foundResult.codeResult.code,
         type: foundResult.codeResult.format
       }
-      this.result = foundCode.code
+      //CODABAR format: (start)[A,B,C,D]xxxxxxxxxx[A,B,C,D](stop)
+      this.result = foundCode.code.substring(1, foundCode.code.length-1)
       this.pause()
       this.optionResult.splice(0, this.optionResult.length)
       this.loadingOption = true

@@ -209,6 +209,7 @@ export default {
         if(response){
           this.$store.dispatch('handleChangeItemData', {
             orderId: this.orderNowId,
+            model: model_selected,
             items: response.items,
             design: response.design,
             stock: response.stock,
@@ -226,6 +227,7 @@ export default {
         if(response){
           this.$store.dispatch('handleChangeItemData', {
             orderId: id,
+            model: model,
             items: response.items,
             design: response.design,
             stock: response.stock,
@@ -238,7 +240,7 @@ export default {
         }
       })
     },
-    getAllOptionParentData: async function(designData){
+    getAllOptionParentData: async function(designData, model){
       var arrDesign = [];
       let ret = null
       if(designData && designData.length){
@@ -250,7 +252,8 @@ export default {
           method: 'post',
           headers: {'X-Requested-With': 'XMLHttpRequest'},
           data: {
-            design_id: arrDesign
+            design_id: arrDesign,
+            model: model
           }
         })
         .then(response => {
@@ -263,25 +266,26 @@ export default {
       } 
       return ret
     },
+    // note: option_parent depend on modelSelected
     updateAllOptionParent: async function(){
-      await this.getAllOptionParentData(this.designData).then(response => {
+      await this.getAllOptionParentData(this.designData, this.modelSelected).then(response => {
         if(response){
           response.forEach((item) => {
             this.$store.dispatch('handleChangeOptionParentData', 
-              {design_id: item.design_id, genreData: item.genreData, parentData: item.optionData}
+              {model:this.modelSelected, design_id: item.design_id, genreData: item.genreData, parentData: item.optionData}
             )
           })
         }
       })
       .catch(error => console.log(error))
     },
-    updateAllOptionParentFromOrderTemp: async function(designData){
-      if(this.optionParentData.length == 0 || !(designData.every(element => this.optionParentData.findIndex(item => item.design_id == element.design_id) !== -1))){
-        await this.getAllOptionParentData(designData).then(response => {
+    updateAllOptionParentFromOrderTemp: async function(designData, model){
+      if(this.optionParentData.length == 0 || !(designData.every(element => this.optionParentData.findIndex(item => item.design_id == element.design_id && item.model == model) !== -1))){
+        await this.getAllOptionParentData(designData, model).then(response => {
           if(response){
             response.forEach((item) => {
               this.$store.dispatch('handleChangeOptionParentData', 
-                {design_id: item.design_id, genreData: item.genreData, parentData: item.optionData}
+                {model: model, design_id: item.design_id, genreData: item.genreData, parentData: item.optionData}
               )
             })
           }
@@ -419,7 +423,7 @@ export default {
     },
     itemData: function(){
       this.itemData.forEach(element => {
-        this.updateAllOptionParentFromOrderTemp(element.design)
+        this.updateAllOptionParentFromOrderTemp(element.design, element.model)
       })
       this.$store.dispatch('handleUpdateInitialStockData')
     },
@@ -482,9 +486,10 @@ export default {
         return null
       }
     },
+
     itemDataActive(){
-      if(this.itemData.length && this.itemData.filter(item => item.orderId == this.orderNowId).length){
-        return this.itemData.filter(item => item.orderId == this.orderNowId)[0]
+      if(this.itemData.length && this.itemData.find(item => item.orderId == this.orderNowId)){
+        return this.itemData.find(item => item.orderId == this.orderNowId)
       } else{
         return null
       }

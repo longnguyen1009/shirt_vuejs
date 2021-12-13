@@ -49,7 +49,7 @@
                     <h4 class="simu-confirm-design"><i class="far fa-square"></i>&nbsp;{{Design.design_label}}</h4>
                     <ul class="simu-confirm-detail-list d-flex justify-content-between">
                       <li class="simu-confirm-detail-item d-flex justify-content-between align-items-center"
-                      v-for="OptionParent in getOptionParent(Design.design_id)" :key="OptionParent.parent_id">
+                      v-for="OptionParent in getOptionParent(Design.design_id, OrderTemp.model)" :key="OptionParent.parent_id">
                         <span class="simu-confirm-detail-label">{{OptionParent.name}}</span>
                         <span class="simu-confirm-detail-value">
                           {{getNameOptionItem(OrderTemp.id, Design.combine_id, Design.item_id, Design.design_id, OptionParent.parent_id)}}
@@ -90,7 +90,7 @@
               <div class="simu-confirm-payment-right d-flex flex-column justify-content-between">
                 <span class="simu-confirm-label">商品価格(税込)</span>
                 <span class="simu-confirm-payment-price">{{moneyTypeShow02(getSumPrice())}}</span>
-                <span class="simu-confirm-label simu-confirm-payment-cost" v-if="isStaff">原価：{{getCostTempOrder()}}</span>
+                <span class="simu-confirm-label simu-confirm-payment-cost" v-if="isStaff">{{getCostTempOrder()}}</span>
               </div>
           </div>
         </div>
@@ -102,9 +102,9 @@
           オーダー追加
         </button>
         <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton2">
-          <li class="dropdown-item" @click="doSaveOrderTemp(1)">小名サイズで作成</li>
+          <li class="dropdown-item" @click="doSaveOrderTemp(1)">同じサイズで作成</li>
           <li class="dropdown-item" @click="doSaveOrderTemp(2)">違うサイズで作成</li>
-          <li class="dropdown-item" @click="doSaveOrderTemp(3)">履歴川作成</li>
+          <li class="dropdown-item" @click="doSaveOrderTemp(3)">履歴から作成</li>
         </ul>
       </div>
       <button class="simu-common-btn btnSize02"
@@ -266,9 +266,9 @@ export default {
       $(event.target).parents('.simu-confirm-detail').find('.simu-confirm-detail-bottom').toggleClass('on')
       $(event.target).toggleClass('on')
     },
-    getOptionParent(design_id){
-      if(this.optionParentData.filter(item => item.design_id == design_id).length){
-        return this.optionParentData.filter(item => item.design_id == design_id)[0].parentData
+    getOptionParent(design_id, model){
+      if(this.optionParentData.find(item => item.design_id == design_id && item.model == model)){
+        return this.optionParentData.find(item => item.design_id == design_id && item.model == model).parentData
       }
     },
     getOptionItem(orderId, combine_id, item_id, design_id, parent_id){
@@ -399,6 +399,18 @@ export default {
           this.$store.dispatch('handleChangeLoaddingData', false)
           if(savetype == 1 || savetype == 2){
             let orderClone = Object.assign({}, this.orderTempItem[0])
+            let sizecopy = []
+            let correctcopy = []
+            if(savetype == 1){
+              sizecopy = orderClone.size_selected.map(item => {
+                let sizeClone = Object.assign({}, {...item, orderId: 0})
+                return sizeClone
+              })
+              correctcopy = orderClone.correct_selected.map(item => {
+                let correctClone = Object.assign({}, {...item, order_id: 0})
+                return correctClone
+              })
+            }
             this.$store.dispatch('handleUpdateOrderTemp',{
               id: 0,
               category_select: orderClone.category_select,
@@ -417,8 +429,8 @@ export default {
               combineId: orderClone.combineId,
               quantity: 1,
               //size and correction
-              size_selected: [],
-              correct_selected: [],
+              size_selected: sizecopy,
+              correct_selected: correctcopy,
               stock: 0
             })
             this.$store.dispatch('handleChangeOrder', 0)

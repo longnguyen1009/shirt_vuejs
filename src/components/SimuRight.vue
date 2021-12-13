@@ -202,7 +202,7 @@
                   <span class="order-confirm-question">現在作成中のデータが消去されますがよろしいですか？</span>
                 </div>
                 <div class="modal-footer">
-                  <button class="simu-common-btn btnSize02 btnSizeHalf" @click="doBackShowModal = false">いええ</button>
+                  <button class="simu-common-btn btnSize02 btnSizeHalf" @click="doBackShowModal = false">いいえ</button>
                   <button class="simu-common-btn btnSize02 btnSizeHalf gray" @click="doBackConfirm">はい</button>
                 </div>
             </div>
@@ -482,7 +482,8 @@ export default {
             method: 'post',
             headers: {'X-Requested-With': 'XMLHttpRequest'},
             data: {
-              'design_id': this.designActive.design_id 
+              'design_id': this.designActive.design_id,
+              'model': this.modelSelected
             }
           })
             .then(response => {
@@ -502,7 +503,7 @@ export default {
             this.genreData = response.genreData
             this.optionParentDataTemp = response.optionData
             this.$store.dispatch('handleChangeOptionParentData', 
-              {design_id: this.designActive.design_id, genreData: this.genreData, parentData: this.optionParentDataTemp}
+              {model: this.modelSelected, design_id: this.designActive.design_id, genreData: this.genreData, parentData: this.optionParentDataTemp}
             )
           }
         })
@@ -812,7 +813,7 @@ export default {
         this.tempCorrectDetailId = null
 
         let optionParentIndex = this.optionParentData.findIndex(
-          (item) => item.design_id == this.designActive.design_id
+          (item) => item.design_id == this.designActive.design_id && item.model == this.modelSelected
         )
         if(optionParentIndex !== -1){
           this.genreData = this.optionParentData[optionParentIndex].genreData
@@ -1209,7 +1210,7 @@ export default {
       allOptionSelectedCheck: function(){
         let ret = []
         this.designData.forEach(design => {
-          let allParents = this.optionParentData.find(item => item.design_id == design.design_id)
+          let allParents = this.optionParentData.find(item => item.design_id == design.design_id && item.model == this.modelSelected)
           if(allParents){
             allParents.parentData.forEach(parent => {
               if(this.optionSelectedData.findIndex(
