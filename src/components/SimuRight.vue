@@ -15,6 +15,7 @@
         <div class="simuright-options-content">
           <div class="simuright-options-row">
             <div class="simuright-options-rowTop d-flex optionLv1 align-items-center"
+              :class="{codeMode : (optionMode == 1)}"
               @touchstart="touchStart" @touchmove="touchMove" @touchend="touchEnd" 
               @click="openDetailOption('kiji')">
               <span class="simuright-options-label">生地</span>
@@ -380,7 +381,7 @@ export default {
         this.$store.dispatch('handleChangeModelTemp', {styleId: this.styleSelected, modelId: this.modelSelected})
       },
       openDetailOption: function(optionid){
-        if(this.optionMode == 1 && optionid != 'kiji' && optionid != 35){
+        if(this.optionMode == 1 && optionid != 35){
           this.qrCodeShow = true
         } else{
           this.$store.dispatch('handleChangeOptionDetailActive', optionid)

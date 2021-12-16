@@ -126,9 +126,6 @@ export default {
         this.isLoading = true
         this.searchKijiBrand()
       }
-    },
-    arrBrandSortByAlphabet: function(){
-      console.log(this.arrBrandSortByAlphabet)
     }
   },
   computed: {
