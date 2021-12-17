@@ -23,23 +23,23 @@ export default new Vuex.Store({
     page: 1, //page 2 is model page
 
     //画像、URL
-    // main_path: 'https://stg-personalorder.united-arrows.co.jp/',
-    // simu_img_path: "/html/upload/simu_model/",
-    // style_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
-    // model_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
-    // kiji_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
-    // option_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
-    // correct_detail_img_path: "/html/upload/correct_detail/",
-    // option_shirt_svg_path: "/html/upload/simu_model/option_shirt/",
-
-    main_path: 'https://ua.coremobile.win/',
+    main_path: 'https://stg-personalorder.united-arrows.co.jp/',
     simu_img_path: "/html/upload/simu_model/",
-    style_img_path: "/html/upload/save_image/",
-    model_img_path: "/html/upload/save_image/",
-    kiji_img_path: "/html/upload/save_image/",
-    option_img_path: "/html/upload/save_image/",
+    style_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
+    model_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
+    kiji_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
+    option_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
     correct_detail_img_path: "/html/upload/correct_detail/",
     option_shirt_svg_path: "/html/upload/simu_model/option_shirt/",
+
+    // main_path: 'https://ua.coremobile.win/',
+    // simu_img_path: "/html/upload/simu_model/",
+    // style_img_path: "/html/upload/save_image/",
+    // model_img_path: "/html/upload/save_image/",
+    // kiji_img_path: "/html/upload/save_image/",
+    // option_img_path: "/html/upload/save_image/",
+    // correct_detail_img_path: "/html/upload/correct_detail/",
+    // option_shirt_svg_path: "/html/upload/simu_model/option_shirt/",
 
     kiji_default: '0730151143_6103981fcfa43.jpeg',
 
@@ -128,7 +128,7 @@ export default new Vuex.Store({
     //配送情報
     deliData: [],
     //受け取り方法
-    deliActive: 0,
+    deliActive: 2,
 
     //採寸情報
     correctDetailData: [], //{correct_id, detail_data}
@@ -149,7 +149,10 @@ export default new Vuex.Store({
     measureData: null,
     
     //前の一時保存ID
-    stock_old_id: null
+    stock_old_id: null,
+
+    //初めて生地一覧に入るとき、備蓄生地のみ表示される
+    first_show_kiji: true
   },
   getters: {
     //step
@@ -217,7 +220,8 @@ export default new Vuex.Store({
 
     neckSelectedData: state => state.neckSelectedData,
     measureData: state => state.measureData,
-    stock_old_id: state => state.stock_old_id
+    stock_old_id: state => state.stock_old_id,
+    first_show_kiji: state => state.first_show_kiji
   },
   mutations: {
     changeStep(state, newStep){
@@ -251,6 +255,11 @@ export default new Vuex.Store({
         let kijiObj = state.kijiData.find(item => item.id == state.kijiActive)
         if(kijiObj && kijiObj.glr_kind){
           state.optionSelectedData = state.optionSelectedData.filter(item => (item.orderId != state.orderNowId || (item.orderId == state.orderNowId && item.glr_kind && item.glr_kind.indexOf(kijiObj.glr_kind + '') != -1)))
+          
+          //change first_show_kiji when chane kiji
+          if(state.first_show_kiji && kijiObj.fabric_kind == 2){
+            state.first_show_kiji = false
+          }
         }
       }
     },
@@ -334,6 +343,14 @@ export default new Vuex.Store({
      
       //Clone the array to trigger a UI update.
       state.kijiData = [...state.kijiData]
+
+      //update first_show_kiji when change kijiActive
+      if(state.kijiData.find(item => item.id == state.kijiActive)){
+        let kijiObj = state.kijiData.find(item => item.id == state.kijiActive)
+        if(state.first_show_kiji && kijiObj.fabric_kind == 2){
+          state.first_show_kiji = false
+        }
+      }
     },
     changeOptionParentData(state, parentData){
       let existParentDataIndex = state.optionParentData.findIndex(
@@ -418,7 +435,7 @@ export default new Vuex.Store({
       state.neckSelectedData = (data.necksize) ? JSON.parse(data.necksize) : []
       state.correctSelectedData = (data.correct_selected) ? JSON.parse(data.correct_selected) : []
       state.category_select = (data.category_select) ? Number(data.category_select) : null
-      state.deliActive = (data.shipping) ? data.shipping: 0
+      state.deliActive = (data.shipping) ? data.shipping: 2
     },
     changeErrorCode(state, code){
       state.errorCode = code
@@ -544,9 +561,6 @@ export default new Vuex.Store({
       }
       state.sizeSelectedData = [...state.sizeSelectedData]
     },
-    // updateSizeFromMeasure(state, sizeDataMeasure){
-      
-    // },
     updateCorrectDetailData(state, correctData){
       const correcIndex = state.correctDetailData.findIndex(item => (
         item.correct_id == correctData.correct_id
@@ -606,9 +620,9 @@ export default new Vuex.Store({
             let stockValTemp = 0
             let stockItemTemp = itemDataNow.stock.find(item => (item.design_id == itemDataNow.stock_design && item.size_id == sizeSelectedNow.id))
             if(KijiNow.fabric_kind == 1){
-              stockValTemp = stockItemTemp ? (stockItemTemp.sensei_scale ? stockItemTemp.sensei_scale : 0) : 0
-            } else{
               stockValTemp = stockItemTemp ? (stockItemTemp.bichikusei_scale ? stockItemTemp.bichikusei_scale : 0) : 0
+            } else{
+              stockValTemp = stockItemTemp ? (stockItemTemp.sensei_scale ? stockItemTemp.sensei_scale : 0) : 0
             }
             state.stockSelectedData[stockSelectedNowIndex].stockVal = stockValTemp
         } else{
@@ -677,6 +691,9 @@ export default new Vuex.Store({
     },
     updateStockOldId(state, value){
       state.stock_old_id = value
+    },
+    changeFirstShowKiji(state){
+      state.first_show_kiji = false
     }
   },
   actions: {
@@ -838,6 +855,9 @@ export default new Vuex.Store({
     },
     handleUpdateStockOldId(context, value){
       context.commit('updateStockOldId', value)
+    },
+    handleChangeKijiFirstLoad(context){
+      context.commit('changeFirstShowKiji')
     }
   }
 })

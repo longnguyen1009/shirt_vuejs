@@ -39,7 +39,7 @@
               <div class="simu-confirm-payment-right d-flex flex-column justify-content-between">
                 <span class="simu-confirm-label">商品価格(税込)</span>
                 <span class="simu-confirm-payment-price">{{moneyTypeShow02(orderData.payment)}}</span>
-                <span class="simu-confirm-label" v-if="isStaff">原価：{{parseInt(orderData.cost)}}</span>
+                <span class="simu-confirm-label" v-if="isStaff">{{parseInt(orderData.cost)}}</span>
               </div>
           </div>
         </div>

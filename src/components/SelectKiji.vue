@@ -260,18 +260,24 @@ export default {
     },
     checkStyleAndStockKiji: function(id){
       let Kiji = this.kijiData.find(item => item.id == id)
+      //check style
       if(Kiji.style.length == 0 || Kiji.style.findIndex(item => item.style_id == this.styleSelected) == -1){
         return false
       }
-      if(Kiji.stock_unlimited){
-        return true
+
+      // fix first time: only show binchiku kiji
+      if(Kiji.fabric_kind == 2 && this.first_show_kiji){
+        return false
       }
-      if((Kiji.fabric_kind == 1 && Kiji.stock >= this.stockSelectedDataNow.bichikusei_min) || 
+
+      //check stock
+      if(Kiji.stock_unlimited || (Kiji.fabric_kind == 1 && Kiji.stock >= this.stockSelectedDataNow.bichikusei_min) || 
       ((Kiji.fabric_kind == 2 && Kiji.stock >= this.stockSelectedDataNow.sensei_min))){
         return true
       } else{
         return false
       }
+      return true
     },
     searchKiji: function(){
       let ret = this.kijiData
@@ -330,7 +336,8 @@ export default {
       'stock_old_id',
       'initialData',
       'optionSelectedData',
-      'orderNowId'
+      'orderNowId',
+      'first_show_kiji'
     ]),
     kijiDetailData: function(){
       if(this.kijiDetailId != 0){

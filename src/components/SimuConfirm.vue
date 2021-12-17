@@ -757,9 +757,6 @@ export default {
     if(this.initialData.customer_id){
       this.updateOrderItemList()
     }
-
-    //Hide Cart button
-    $('.header-cart-btn').css("display", "none");
   },
   watch: {
     deli_id: function(){

@@ -41,7 +41,7 @@
         <div class="simuright-sub-result" v-if="optionDetailActive == optionCustomNameID">
           <div class="option-customname-row option-customname-type">
               <p class="option-customname-title">刺繍ネーム</p>
-              <ul class="option-customname-itemList d-flex justify-content-start align-items-center">
+              <ul class="option-customname-itemList d-flex justify-content-start align-items-center simu-custom-scroll">
                 <li v-for="Option in optionCurrLists" :key="Option.id"
                   class="optionItem d-flex justify-content-center align-items-center"
                   :class="{active: (Option.id == optionSelected)}"
@@ -52,7 +52,7 @@
           </div>
           <div class="option-customname-row option-customname-color" v-if="optionSelected != optionCustomNameNot">
             <p class="option-customname-title">刺繍糸色</p>
-              <ul class="option-customname-itemList d-flex justify-content-start align-items-center">
+              <ul class="option-customname-itemList d-flex justify-content-start align-items-center simu-custom-scroll">
                 <li v-for="Option in optionCustomNameSubLists" :key="Option.id"
                 class="optionItem d-flex justify-content-center align-items-center"
                   :class="{active: (Option.id == optionCustomNameSelected)}"
@@ -298,7 +298,14 @@ export default {
         await this.getOptionData().then(response => {
           if(response){
             this.optionLists = response.options
-            this.cateLists = response.cates
+            //only show optionCate has option 
+            let tempCateList = response.cates
+            let tempCateListHasOption = []
+            if(tempCateList.length > 0){
+              tempCateListHasOption = tempCateList.filter(item => this.optionLists.hasOwnProperty(item.cate_id))
+            }
+            this.cateLists = tempCateListHasOption
+
             this.loaddingOptionData = false
             this.$store.dispatch('handleSaveOptionDataLoaded', {
               model_id: this.modelSelected,
@@ -391,7 +398,13 @@ export default {
       )
       if(loadedDataIndex !== -1) {
         this.optionLists = this.optionDataLoaded[loadedDataIndex].optionLists
-        this.cateLists = this.optionDataLoaded[loadedDataIndex].cateLists
+        //only show which optionCate has option 
+        let tempCateList = this.optionDataLoaded[loadedDataIndex].cateLists
+        let tempCateListHasOption = []
+        if(tempCateList.length > 0){
+          tempCateListHasOption = tempCateList.filter(item => this.optionLists.hasOwnProperty(item.cate_id))
+        }
+        this.cateLists = tempCateListHasOption
       } else{
         this.setOptionData()
       }

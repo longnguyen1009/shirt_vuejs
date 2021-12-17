@@ -22,7 +22,7 @@
             <span class="option-detail-val" v-if="kijiDetailData.sensor">WEIGHT {{kijiDetailData.sensor}}g</span>
           </div>
           <div class="option-detail-moreinfo-price">
-            <span class="option-detail-price">カスタマイズ価格：{{moneyTypeShow02(getCombinePrice(), 'tax')}}</span>
+            <span class="option-detail-price">商品価格：<span class="totalPayment">{{moneyTypeShow02(getCombinePrice(), 'tax')}}</span></span>
           </div>
         </div>
         <div class="option-detail-descript d-flex justify-content-between flex-column">

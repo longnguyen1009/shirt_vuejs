@@ -470,7 +470,9 @@ export default {
       'category_select',
       'combinePriceData',
       'optionParentData',
-      'stockSelectedData'
+      'stockSelectedData',
+      'kijiData',
+      'first_show_kiji'
     ]),
     Errors: function(){
       if(this.errorCode){

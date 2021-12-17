@@ -156,7 +156,7 @@
                   :value="correctDetailItem.id"
                   v-model="tempCorrectDetailId"
                 >
-                <label class="fancy-radio-label" :for="'correctDetailItem-' + correctDetailItem.id">
+                <label class="fancy-radio-label" :for="'correctDetailItem-' + correctDetailItem.id" @click="selectCorrectDetail(correctDetailItem.id)">
                     <span class="fancy-label--text">{{correctDetailItem.text}}</span>
                     <span class="fancy-radiobutton">
                         <span class="radiobutton-dot"></span>
@@ -164,8 +164,8 @@
                 </label>
               </li>
             </ul>
-            <div class="matashita-correct-input" v-if="hasCorrectCustom && tempCorrectDetailId">
-              <input type="text" v-model="correctCustomValue"><br>
+            <div class="matashita-correct-input" v-if="hasCorrectCustom">
+              <input type="number" v-model="correctCustomValue"><br>
               <span v-if="correctCustomError">数字で入力してください</span>
               <span class="simu-common-btn btnSize01" @click="correctCustomConfirm">決定</span>
             </div>
@@ -181,9 +181,9 @@
         </transition>
       </div>
       <div class="simuright-price d-flex justify-content-between">
-          <div class="simuright-price-left d-flex justify-content-between flex-column">
-            <p class="simuright-prices-basic">商品価格：<span v-if="combinePrice">{{moneyTypeShow02(combinePrice, 'tax')}}</span><br>
-            <span v-if="initialData.shop_kind == 2">+ カスタマイズ価格：<span v-if="optionPrice > 0">{{moneyTypeShow02(optionPrice, 'tax')}}</span></span></p>
+          <div class="simuright-price-left d-flex justify-content-end flex-column">
+            <p class="simuright-prices-basic" v-if="initialData.shop_kind == 2">商品価格：<span v-if="combinePrice">{{moneyTypeShow02(combinePrice)}}</span><br>
+            <span>+ カスタマイズ価格：<span v-if="optionPrice > 0">{{moneyTypeShow02(optionPrice)}}</span></span></p>
             <p class="simuright-prices-total">お支払い金額: <span class="totalPayment"><span v-if="sumPayment > 0">{{moneyTypeShow02(sumPayment, 'tax')}}</span></span></p>
           </div>
           <div class="simuright-price-right d-flex justify-content-between flex-column">
@@ -318,7 +318,7 @@ export default {
               design_id: 14,
               fixedData: [
                 {name: '着丈', column_name: 'jk_kitake'},
-                {name: '肩幅', column_name: 'jk_katahaba'},
+                // {name: '肩幅', column_name: 'jk_katahaba'},
                 {name: '袖丈 (右)', column_name: 'jk_yukitake_right'},
                 {name: 'ウェスト', column_name: 'jk_west'},
                 {name: '袖丈 (左)', column_name: 'jk_yukitake_left'}
@@ -632,6 +632,7 @@ export default {
           }
         })
       },
+      // show 補正 options detail when select 補正, right menu
       showCorrectionDetail: function(correct_id){
         this.correction_selected_id = correct_id
         let correctDetailIndexNow = this.correctSelectedDataActive.findIndex(item => (
@@ -640,15 +641,21 @@ export default {
           && item.size_id == this.sizeItemDataActive.id
           && item.correct_id == this.correction_selected_id
         ))
+        console.log(correctDetailIndexNow)
         if(correctDetailIndexNow !== -1){
           this.tempCorrectDetailId = this.correctSelectedDataActive[correctDetailIndexNow].correct_detail_id
           if(this.hasCorrectCustom){
+            //set パンツの股下デフォルト: 補正あり
+            if(!this.tempCorrectDetailId){
+              this.tempCorrectDetailId = (this.correction_selected_id == 25) ? 560 : 561
+            }
             this.correctCustomValue = this.correctSelectedDataActive[correctDetailIndexNow].correct_custom_value ? this.correctSelectedDataActive[correctDetailIndexNow].correct_custom_value : ''
           }
         } else{
           this.tempCorrectDetailId = null
         }
       },
+      // change Option mode: コードスキャン and リストから選択　
       changeOptionMode(mode){
         if(this.optionMode == mode){
           return false
@@ -781,6 +788,12 @@ export default {
           } else{
             return false
           }
+      },
+      //click to 補正 option
+      selectCorrectDetail : function(correct_detail_id){
+        if(this.tempCorrectDetailId && this.tempCorrectDetailId == correct_detail_id){
+          this.closeCorrectionDetail()
+        }
       }
     },
     mounted() {
@@ -889,7 +902,6 @@ export default {
       },
       //correct detail change
       tempCorrectDetailId: function(newval, oldval){
-
         let tempCorrectDetailIndex = this.correctDetailActive.findIndex(item => item.id == this.tempCorrectDetailId)
         let correctDetailIndexNow = this.correctSelectedDataActive.findIndex(item => (
           item.order_id == this.orderNowId
@@ -910,11 +922,11 @@ export default {
             tempCorrectionItem['correct_result'] = null
           } else{
               if(tempCorrectDetailItem.value < 0){
-                  tempCorrectionItem['correct_result'] = eval(tempCorrectionItem['base_val'] + tempCorrectDetailItem.value)
+                  tempCorrectionItem['correct_result'] = parseFloat(eval(tempCorrectionItem['base_val'] + tempCorrectDetailItem.value))
               } else if(tempCorrectDetailItem.value > 0){
-                tempCorrectionItem['correct_result'] = eval(tempCorrectionItem['base_val'] + '+' + tempCorrectDetailItem.value)
+                tempCorrectionItem['correct_result'] = parseFloat(eval(tempCorrectionItem['base_val'] + '+' + tempCorrectDetailItem.value))
               } else{
-                tempCorrectionItem['correct_result'] = tempCorrectionItem['base_val']
+                tempCorrectionItem['correct_result'] = parseFloat(tempCorrectionItem['base_val'])
               }
           }
 
@@ -1122,7 +1134,7 @@ export default {
                     correct_id: correct.id,
                     correct_name: correct.name,
                     size_link: correct.size_link,
-                    base_val: this.sizeItemDataActive[correct.size_link] ? this.sizeItemDataActive[correct.size_link] : null,
+                    base_val: (this.sizeItemDataActive[correct.size_link] && !isNaN(this.sizeItemDataActive[correct.size_link])) ? parseFloat(this.sizeItemDataActive[correct.size_link]) : null,
                     correct_detail_id: null,
                     correct_detail_name: null,
                     correct_detail_val: null,

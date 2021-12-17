@@ -73,6 +73,16 @@ export default {
     }
   },
   props: [],
+  watch: {
+    step: function(){
+      if(this.step == 3){
+        //Hide Cart button
+        $('.header-cart-btn').css("display", "none");
+      } else if(this.step == 2){
+        $('.header-cart-btn').css("display", "block");
+      }
+    }
+  },
   computed: {
     ...mapGetters([
       'step',

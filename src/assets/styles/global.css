@@ -641,46 +641,6 @@ pre{
   z-index: 2;
 } */
 
-
-/* SelectOption CustomName */
-.option-customname-row{
-  display: block;
-  padding: 20px;
-}
-.option-customname-title{
-  padding-bottom: 15px;
-  text-align: center;
-  font-size: 13px;
-}
-.option-customname-itemList{
-  width: 100%;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  overflow-x: auto;
-  overflow-y: hidden;
-}
-.option-customname-itemList li{
-  padding: 5px;
-  width: 33.3%;
-  height: 110px;
-  background-color: #373737;
-  color: #fff;
-  border: 1px solid #676665;
-  flex: 0 0 auto;
-  font-size: 14px;
-}
-.option-customname-inputval .text-alert{
-  font-size: 10px;
-}
-.option-customname-inputval input{
-  width: 360px;
-  padding: 3px;
-  margin: 0 auto;
-  display: block;
-  font-size: 13px;
-}
-
 /* simuright-sub */
 .simu-subpage{
   position: absolute;
@@ -906,15 +866,17 @@ pre{
   z-index: 2;
   line-height: 1;
 }
+.kijiItem.active{
+  border: 2px solid #fff;
+}
 .kijiItem.active::before{
+  content: "\f058";
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 110px;
-  z-index: 1;
-  background-color: #14182E;
-  content: '';
+  top: 5px;
+  left: 5px;
+  font-size: 24px;
+  color: #fff;
+  font-family: "Font Awesome 5 Free";
 }
 
 /* OPTION */
@@ -982,12 +944,51 @@ pre{
   z-index: 2;
   line-height: 1;
 }
-
 #modal-mask-option{
   position: absolute;
 }
 #modal-mask-option .modal-container{
   width: 85%;
+}
+
+/* SelectOption CustomName */
+.option-customname-row{
+  display: block;
+  padding: 20px;
+}
+.option-customname-title{
+  padding-bottom: 15px;
+  text-align: center;
+  font-size: 13px;
+}
+.option-customname-itemList{
+  width: 100%;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.simuright-sub-result .option-customname-itemList .optionItem{
+  padding: 5px;
+  /* width: 33.3%; */
+  width: 28.5%;
+  height: 110px;
+  background-color: #373737;
+  color: #fff;
+  border: 1px solid #676665;
+  flex: 0 0 auto;
+  font-size: 14px;
+}
+.option-customname-inputval .text-alert{
+  font-size: 10px;
+}
+.option-customname-inputval input{
+  width: 360px;
+  padding: 3px;
+  margin: 0 auto;
+  display: block;
+  font-size: 13px;
 }
 
 /* KijiDetail */
@@ -1005,7 +1006,7 @@ pre{
   height: 50%;
   position: relative;
   padding: 50px 32px 0 32px;
-  background-color: #444444;
+  /* background-color: #444444; */
 }
 .option-detail-top .option-detail-img{
   width: 100%;
@@ -1039,6 +1040,11 @@ pre{
 .option-detail-select, .option-detail-moreinfo-price{
   height: 40px;
   margin-top: 30px;
+  display: flex;
+  flex-direction: row;
+}
+.option-detail-moreinfo-price{
+  align-items: flex-end;
 }
 
 /* Simu Confirm */
@@ -2070,6 +2076,27 @@ pre{
 .barcodeScan-error{
   font-weight: bold;
   color: red;
+}
+
+/* Customize scroll */
+/* width */
+.simu-custom-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 10px;
+}
+/* Track */
+.simu-custom-scroll::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px grey; 
+  border-radius: 10px;
+}
+/* Handle */
+.simu-custom-scroll::-webkit-scrollbar-thumb {
+  background: #676665; 
+  border-radius: 10px;
+}
+/* Handle on hover */
+.simu-custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: #676665; 
 }
 
 

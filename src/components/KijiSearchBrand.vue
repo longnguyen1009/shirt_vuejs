@@ -31,7 +31,7 @@
       </div>
     </div>
     <div class="simuright-sub-navi d-flex align-items-center">
-      <button class="simu-common-btn btnSize02 btnSizeHalf" @click="closeSearchKiji">戻る</button>
+      <button class="simu-common-btn btnSize02 btnSizeHalf" @click="clearAllSearchKiji">すべてクリア</button>
       <button class="simu-common-btn btnSize02 gray btnSizeHalf" @click="confirmSearchBrand">決定</button>
     </div>
 
@@ -69,6 +69,12 @@ export default {
   methods: {
     closeSearchKiji: function(){
       this.$emit('closeSearchKiji')
+    },
+    clearAllSearchKiji:function(){
+      this.searchKijiBrandName = ''
+      this.brandSelected = []
+      this.isLoading = true
+      this.searchKijiBrand()
     },
     confirmSearchBrand: function(){
       this.$emit('confirmSearchKiji', {brand: this.brandSelected})
@@ -115,6 +121,9 @@ export default {
       this.updateKijiSearchData()
     }
     this.searchKijiBrandResult = this.kijiSearchBrand
+    if(this.first_show_kiji){
+      this.$store.dispatch('handleChangeKijiFirstLoad')
+    }
   },
   watch: {
     searchKijiBrandName: _.debounce(function() {
@@ -131,7 +140,8 @@ export default {
   computed: {
     ...mapGetters([
       'main_path',
-      'kijiSearchData'
+      'kijiSearchData',
+      'first_show_kiji'
     ]),
     kijiSearchBrand : function(){
       if(Object.keys(this.kijiSearchData).length){
