@@ -4,38 +4,22 @@
       @click="closeQrCode">
       <img :src="main_path + 'html/user_data/assets/img/common/header_close_white.png'" alt="">
     </span>
-    <div class="barcodeScan-top">
-      <div class="barcodeScan-input d-flex justify-content-between flex-wrap align-items-center">
-        <div class="barcodeScan-input-left d-flex justify-content-between">
-          <input type="text" class="form-control" id="barcodeId" @input="isTyping = true" v-model="barcodeInput" placeholder="バーコードを入力" aria-label="検索">
-          <span v-show="scannerActive == false" class="scan-confirmation">
-            <img :src="main_path + 'html/user_data/assets/img/common/checkmark.svg'" alt="Checkmark" width="128px" />
-          </span>
-        </div>
-        <div class="barcodeScan-button d-flex justify-content-around">
-          <button @click="deleteBarcodeInput" class="simu-common-btn btnSize01 white">クリア</button>
-          <button @click="optionConfirm" class="simu-common-btn btnSize01 gray">確定</button>
-        </div>
-        <span class="barcodeScan-input-error" v-if="error">{{error}}</span>
+    <div class="qr-result">
+      <p class="decode-result">バーコード: <b>{{ result }}</b></p>
+      <ul class="qr-options" v-if="optionResult.length">
+        <li v-for="(option, id) in optionResult" :key="id">
+          <i class="fas fa-check-square"></i>&nbsp;{{option.design_name}}<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;{{option.parent_name}} | <b>{{option.option_name}}</b>
+        </li>
+      </ul>
+      <p class="qr-error" v-if="error">{{error}}</p>
+    </div>
+    <div class="scan-box">
+      <div id="videoWindow" class="video"></div>
+      <div v-show="scannerActive == false" class="scan-confirmation">
+        <img :src="main_path + 'html/user_data/assets/img/common/checkmark.svg'" alt="Checkmark" width="128px" />
       </div>
-      <div class="barcodeScan-result" v-if="optionResult.length">
-        <div v-for="(optionItem, id) in optionResult.slice().reverse()" :key="id" 
-          class="d-flex justify-content-between align-items-center barcodeScan-item">
-          <span class="barcodeScan-code">{{optionItem.barcode}}</span>
-          <ul v-if="!optionItem.error && optionItem.type == 'option'" class="barcodeScan-lists">
-            <li v-for="(option, id2) in optionItem.options" :key="id2" class="barcodeScan-detail">
-              {{option.parent_name}}&nbsp;&nbsp;|&nbsp;&nbsp;<b>{{option.option_name}}</b>
-            </li>
-          </ul>
-          <ul v-if="!optionItem.error && optionItem.type == 'kiji'" class="barcodeScan-lists">
-            <li class="barcodeScan-detail">
-              生地&nbsp;&nbsp;|&nbsp;&nbsp;<b>{{optionItem.kiji.code}}</b> &nbsp;&nbsp;|&nbsp;&nbsp;{{optionItem.kiji.brand_name}}
-            </li>
-          </ul>
-          <span v-if="optionItem.error" class="barcodeScan-error">{{optionItem.error}}</span>
-        </div>
-      </div>
-      <div class="loaddingDataIo" v-if="isLoading">
+      <div class="loaddingDataIo" v-if="loadingOption">
         <div class="loadingio-spinner-spinner-482naetb3m">
           <div class="ldio-2vyxc9gibh9">
             <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
@@ -49,27 +33,24 @@
 
 <script>
 
-// import Quagga from '@ericblade/quagga2';
+import Quagga from '@ericblade/quagga2';
 import { mapGetters } from 'vuex'
-import _ from 'lodash'
 
 export default {
   name: "SimuQrcode",
   data() {
     return {
-      scannerActive: true,
+      scannerActive: false,
       result: null,
-      error: '',
       optionResult: [],
-      isLoading: false,
-      barcodeInput: '',
-      isTyping: false
+      error: '',
+      loadingOption: false
     };
   },
 
   methods: {
     closeQrCode: function(){
-      // Quagga.stop()
+      Quagga.stop()
       this.$emit('closeQrCode')
     },
     showError: function(error) {
@@ -92,70 +73,54 @@ export default {
         this.error = `ERROR: Camera error (${error.message})`;
       }
     },
-    optionConfirm: async function() {
-      let barcodeIndex = this.optionResult.findIndex(item => item.barcode == this.barcodeInput)
-      if(barcodeIndex == -1){
-        if(this.barcodeInput){
-          this.isLoading = true
-          await this.getOptionFromBarCode(this.barcodeInput).then(respone => {
-            if(respone.type == 'kiji'){
-              let kijiSearch = this.kijiData.find(item => item.id == respone.kiji.id)
-              if(kijiSearch && kijiSearch.style.findIndex(item => item.style_id == this.styleSelected) != -1){
-                this.setKijiStock(respone.kiji, this.barcodeInput)
-              } else{
-                this.error = '生地を選択できません。'
-              }
-            } else{
-              if(respone.type == 'option' && respone.options.length){
-                this.designData.forEach(element => {
-                  let OptionItem = respone.options.find(item => item.design == element.design_id)
-                  if(OptionItem){
-                    this.$store.dispatch('handleChangeOption', {
-                      orderId: this.orderNowId,
-                      combine_id: element.combine_id,
-                      item_id: element.item_id,
-                      design_id: element.design_id,
-                      parent_id: OptionItem.parent_id,
-                      option_id: OptionItem.id,
-                      cate_id: OptionItem.cate_id ? OptionItem.cate_id : null,
-                      cate_name: OptionItem.cate_name ? OptionItem.cate_name : null,
-                      option_img: OptionItem.simu_img,
-                      option_shirt_svg: OptionItem.option_shirt_svg,
-                      option_shirt_shadow: OptionItem.option_shirt_shadow,
-                      name: OptionItem.name,
-                      type: OptionItem.type,
-                      cost: OptionItem.price,
-                      glr_kind: OptionItem.glr_kind
-                    })
-                    this.addOption({
-                      barcode: this.barcodeInput,
-                      options: [{
-                        design_name: element.design_label,
-                        parent_name: OptionItem.parent_name,
-                        option_name: OptionItem.name
-                      }],
-                      type: 'option',
-                      error: false
-                    })
-                  }
-                })
-              } else{
-                this.addOption({
-                  barcode: this.barcodeInput,
-                  options: [],
-                  type: 'option',
-                  error: 'オプションがありません。'
-                })
-              }
-            }
-          })
-          this.scannerActive = true;
-          this.isLoading = false
-        }
-        this.deleteBarcodeInput()
-      } else{
-        this.error = 'バーコードを確定しました。'
+    onDecode: async function(data) {
+      const foundResult = data;
+      const foundCode = {
+        code: foundResult.codeResult.code,
+        type: foundResult.codeResult.format
       }
+      //CODABAR format: (start)[A,B,C,D]xxxxxxxxxx[A,B,C,D](stop)
+      this.result = foundCode.code.substring(1, foundCode.code.length-1)
+      this.pause()
+      this.optionResult.splice(0, this.optionResult.length)
+      this.loadingOption = true
+      await this.getOptionFromBarCode(this.result).then(respone => {
+        if(respone.options.length){
+          this.error = ''
+          this.designData.forEach(element => {
+            let OptionItem = respone.options.find(item => item.design == element.design_id)
+            if(OptionItem){
+              this.$store.dispatch('handleChangeOption', {
+                orderId: this.orderNowId,
+                combine_id: element.combine_id,
+                item_id: element.item_id,
+                design_id: element.design_id,
+                parent_id: OptionItem.parent_id,
+                option_id: OptionItem.id,
+                cate_id: OptionItem.cate_id ? OptionItem.cate_id : null,
+                cate_name: OptionItem.cate_name ? OptionItem.cate_name : null,
+                option_img: OptionItem.simu_img,
+                option_shirt_svg: OptionItem.option_shirt_svg,
+                option_shirt_shadow: OptionItem.option_shirt_shadow,
+                name: OptionItem.name,
+                type: OptionItem.type,
+                cost: OptionItem.price,
+                glr_kind: OptionItem.glr_kind
+              })
+              this.optionResult.push({
+                design_name: element.design_label,
+                parent_name: OptionItem.parent_name,
+                option_name: OptionItem.name
+              })
+            }
+          });
+        } else{
+          this.error = 'このオプションを選択することができません。'
+        }
+        this.scannerActive = true;
+        Quagga.start()
+      })
+      this.loadingOption = false
     },
     getOptionFromBarCode: async function(barcode){
       let ret = null
@@ -177,157 +142,54 @@ export default {
         this.error = error
         console.log(error)
       })
+      
       return ret
     },
-    deleteBarcodeInput: function(){
-      this.barcodeInput = ''
-      this.scannerActive = true
-      $('#barcodeId').prop("readonly", true);
-      // $('#barcodeId').focus()
-      // setTimeout(() => {
-      //   $('#barcodeId').prop("readonly", false);
-      // }, 50)
-      this.error = ''
+    unpause() {
+      this.scannerActive = true;
+      Quagga.start();
     },
-    setKijiStock: async function(kiji, barcode){
-      let requireStock = 0
-      if(!kiji.stock_unlimited){
-        if(kiji.fabric_kind == 1) {
-            requireStock = this.stockSelectedDataNow.bichikusei_min
-        } else if(kiji.fabric_kind == 2){
-            requireStock = this.stockSelectedDataNow.sensei_min
-        }
-      }
-
-      await this.saveKijiStockApi(kiji.id, requireStock).then(response => {
-          if(response){
-            if(response == 'nostock'){
-              this.$store.dispatch('handleChangeErrorCode', 7)
-              this.setKijiData()
-              this.addOption({
-                barcode: barcode,
-                options: [],
-                kiji: null,
-                type: 'kiji',
-                error: '生地を選択できません。'
-              })
-            } else{
-              if(Number.isInteger(response)){
-                this.$store.dispatch('handleUpdateStockOldId', response)
-              } else{
-                this.$store.dispatch('handleUpdateStockOldId', false)
-              }
-              this.$store.dispatch('handleChangeKiji', kiji.id)
-              let kijiObj = this.kijiData.find(item => item.id == kiji.id)
-              this.addOption({
-                  barcode: barcode,
-                  options: [],
-                  kiji: kijiObj,
-                  type: 'kiji',
-                  error: false
-                })
-            }
-          } else{
-            this.$store.dispatch('handleChangeErrorCode', 2)
-            this.setKijiData()
-          }
-        })
-
+    pause() {
+      this.scannerActive = false;
+      Quagga.pause();
     },
-    saveKijiStockApi: async function(kijiId, stock){
-      this.isLoading = true
-      let ret = null
-        await this.axios.request({
-          url: this.main_path + 'myshop/savekijistock/',
-          method: 'post',
-          headers: {'X-Requested-With': 'XMLHttpRequest'},
-          data: {
-            kiji: kijiId,
-            stock: stock,
-            stock_old_id: this.stock_old_id
-          }
-        })
-        .then(response => {
-          // console.log(response)
-          ret = response.data.data
-          this.isLoading = false
-        })
-        .catch(error => {
-          this.isLoading = false
-          this.$store.dispatch('handleChangeErrorCode', 2)
-          console.log(error)
-        })
-        return ret
-    },
-    addOption: function(optionData){
-      let optionIndex = this.optionResult.findIndex(item => item.barcode == optionData.barcode)
-      if(optionIndex !== -1 && !optionData.error){
-        if(optionData.type == 'option'){
-          this.optionResult[optionIndex].options.push(optionData.options[0])
-        }
-      } else{
-        this.optionResult.push(optionData)
-      }
-    },
-    setKijiData: async function(){
-      await this.getKijiFromAPI().then(response => {
-        if(response){
-          this.$store.dispatch('handleChangeKijiData', response)
-        }
+    timeout(ms) {
+      return new Promise((resolve) => {
+        window.setTimeout(resolve, ms)
       })
     },
-    getKijiFromAPI: async function(){
-        let ret = null
-        await this.axios.request({
-          url: this.main_path + 'myshop/getkijilist/',
-          method: 'get',
-          headers: {'X-Requested-With': 'XMLHttpRequest'}
-        })
-        .then(response => {
-          // console.log(response)
-          ret = response.data.data
-        })
-        .catch(error => {
-          this.$store.dispatch('handleChangeErrorCode', 2)
-          console.log(error)
-        })
-        return ret
-    },
-  },
-  mounted() {
-    $('#barcodeId').prop("readonly", true);
-    // $('#barcodeId').focus()
-    // setTimeout(() => {
-    //   $('#barcodeId').prop("readonly", false);
-    // }, 50)
-    this.setKijiData()
-    document.addEventListener('keyup', (ev) => {
-      // if (ev.ctrlKey || ev.altKey) return;  // Ignore command-like keys
-      if (ev.key == 'Enter') {
-        this.scannerActive = false
-        // this.optionConfirm()
-        return
-      } else if(ev.key.length > 1) { // A character not a key like F12 or Backspace
-       return
-      } else {
-       this.barcodeInput += ev.key
-      }
-    });
 
   },
-  props: ['designData'],
-  watch: {
-    barcodeInput: _.debounce(function() {
-      this.isTyping = false;
-    }, 300),
-    isTyping: function(value) {
-      if (!value && this.barcodeInput) {
-        this.scannerActive = false
-      } else{
-        this.scannerActive = true
+  mounted() {
+    this.scannerActive = true;
+    Quagga.init({
+      inputStream : {
+        name : "Live",
+        type : "LiveStream",
+        target: document.querySelector('#videoWindow'),   // Or '#yourElement' (optional),
+        // area: { top: "30%", right: "0%", left: "0%", bottom: "30%" }
+      },
+      decoder : {
+        readers : ["codabar_reader"],
+        debug: {
+            drawBoundingBox: false,
+            showFrequency: false,
+            drawScanline: false,
+            showPattern: false
+        },
+        multiple: false
       }
-    }
+    }, function(err) {
+        if (err) {
+            console.log(err)
+            return 
+        }
+        //console.log("Initialization finished. Ready to start");
+        Quagga.start();
+    });
+    Quagga.onDetected(data => this.onDecode(data))
   },
+  props: ['designData'],
   computed: {
     ...mapGetters([
       'main_path',
@@ -337,10 +199,7 @@ export default {
       'initialData',
       'itemData',
       'orderNowId',
-      'designActive',
-      'stockSelectedData',
-      'stock_old_id',
-      'styleSelected'
+      'designActive'
     ]),
     glr_kind: function(){
       if(this.initialData.shop_kind == 2 && this.kijiObj && this.kijiObj.glr_kind){
@@ -357,10 +216,7 @@ export default {
     },
     designArr: function(){
       return this.designData.map(item => item.design_id)
-    },
-    stockSelectedDataNow: function(){
-      return this.stockSelectedData.find(item => item.orderId == this.orderNowId)
-    },
+    }
   }
 };
 </script>
