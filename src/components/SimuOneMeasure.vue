@@ -51,10 +51,10 @@
                 <div class="cameraBox">
                   <div class="cameraBox-camera">
                       <!--when chrome kernel version is 65, the accelerometer can not be used if the video label exists. Suggest to append video label after initializing accelerometer  -->
-                      <video id="tozCameraVideo"  playsinline="" autoplay ></video>
+                      <video id="tozCameraVideo" playsinline="" autoplay width="100%" height="100%"></video>
                       <div class="tozCameraView_button">
                           <!-- <button  id="closeCamera" style="height: 50px;width: 30%;max-width: 100px" @click="OnePrevStep">キャンセル</button> -->
-                          <button id="captureImage"><span></span></button><br>
+                          <button id="captureImage"><img :src="main_path + '/html/user_data/assets/img/common/take_camera_btn.png'" alt=""></button>
                           <span class="hidden_button" id="nexttostep2" @click="OneNextStep(2)">Next to step 2</span>
                           <span class="hidden_button" id="nexttostep3" @click="OneNextStep(3)">Next to step 3</span>
                           <span class="hidden_button" id="nexttostep4" @click="OneNextStep(4)">Next to step 4</span>
@@ -74,13 +74,13 @@
                     <div class="modal-mask onemeasure-modal-mask" v-if="guide_show_flg && oneStep == 2">
                       <div class="modal-wrapper">
                         <div class="modal-container white">
-                            <span class="onemeasure-modal-closebtn closeBtn" @click="closeOneGuide"><img :src="main_path + 'html/user_data/assets/img/common/header_close_black.png'" alt=""></span>
+                            <span class="modal-close-btn" @click="closeOneGuide"><img :src="main_path + 'html/user_data/assets/img/common/header_close_white.png'" alt=""></span>
                             <div class="modal-header">
-                              <span>側面を撮影</span>
+                              <span>正面を撮影</span>
                             </div>
                             <div class="modal-body">
                               <div class="onemeasure-modal-img">
-                                <img :src="main_path + '/html/user_data/assets/img/common/onemeasure-guide-01.png'" alt="">
+                                <img :src="main_path + '/html/user_data/assets/img/common/onemeasure-guide-01.svg'" alt="">
                               </div>
                               <div class="onemeasure-modal-textbox">
                                 <ul class="onemeasure-guide-list">
@@ -95,16 +95,18 @@
                         </div>
                       </div>
                     </div>
+                  </transition>
+                  <transition>
                     <div class="modal-mask onemeasure-modal-mask" v-if="guide_show_flg && oneStep == 3">
                       <div class="modal-wrapper">
-                        <div class="modal-container">
-                            <span class="onemeasure-modal-closebtn closeBtn" @click="closeOneGuide"><img :src="main_path + 'html/user_data/assets/img/common/header_close_black.png'" alt=""></span>
+                        <div class="modal-container white">
+                            <span class="modal-close-btn" @click="closeOneGuide"><img :src="main_path + 'html/user_data/assets/img/common/header_close_white.png'" alt=""></span>
                             <div class="modal-header">
                               <span>側面を撮影</span>
                             </div>
                             <div class="modal-body">
                               <div class="onemeasure-modal-img">
-                                <img :src="main_path + '/html/user_data/assets/img/common/onemeasure-guide-02.png'" alt="">
+                                <img :src="main_path + '/html/user_data/assets/img/common/onemeasure-guide-02.svg'" alt="">
                               </div>
                               <div class="onemeasure-modal-textbox">
                                 <ul class="onemeasure-guide-list">
@@ -134,12 +136,13 @@
                   <span class="onemeasure-result-hidden hidden_button"></span>
                   <span class="onemeasure-result-alldata hidden_button"></span>
                 </div>
-                <div class="onemeasure-iniinfo-btn">
-                  <button type="button" class="btn btn-dark" onclick="doResetMeasure();">もう一度撮影する</button>
-                  <button type="button" class="btn btn-dark" @click="getSizeMeasure">採寸を完了する</button>
+                <div class="onemeasure-iniinfo-btn d-flex jjustify-content-center align-items-center">
+                  <button type="button" class="simu-common-btn btnSize02 white" onclick="doResetMeasure();">もう一度撮影する</button>
+                  <button type="button" class="simu-common-btn btnSize02 black" @click="getSizeMeasure">採寸を完了する</button>
                 </div>
               </div>
             </div>
+
             <transition name="modal">
               <div class="loaddingDataIo">
                 <div class="loadingio-spinner-spinner-482naetb3m">
@@ -149,14 +152,15 @@
                   </div>
                 </div>
               </div>
-
             </transition>
 
             <transition name="modal">
               <div id="modal-measure-result" class="modal-mask" v-if="resultMeasureShow">
                   <div class="modal-wrapper">
                     <div class="modal-container white">
-                        <span class="closeBtn" @click="resultMeasureShow = false"><img :src="main_path + 'html/user_data/assets/img/common/header_close_black.png'" alt=""></span>
+                        <span class="modal-close-btn" @click="resultMeasureShow = false">
+                          <img :src="main_path + 'html/user_data/assets/img/common/header_close_white.png'" alt="">
+                        </span>
                         <div class="modal-header">推奨ゲージサイズ</div>
                         <div class="modal-body">
                           <ul class="modal-measure-list">
@@ -168,7 +172,7 @@
                         </div>
                         <div class="modal-footer">
                           <div class="onemeasure-iniinfo-btn">
-                            <button type="button" class="btn btn-dark" @click="doBackToSimu">オーダー画面に戻る</button>
+                            <button type="button" class="simu-common-btn btnSize02 black" @click="doBackToSimu">オーダー画面に戻る</button>
                             <span class="onemeasure-notice">画面が横になります</span>
                           </div>
                         </div>

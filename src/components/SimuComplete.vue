@@ -73,12 +73,12 @@
                     <p class="barCodeName">オーダー({{Item.item_id}}) PO品番・金額</p>
                     <ul class="barCodeImgList">
                       <li class="barCodeImg"><span>PO品番</span><br>
-                        <barcode :value="Item.order_code" format="codabar" height="68" displayValue="false">
+                        <barcode :value="fomatPoCode(Item.order_code)" format="codabar" height="68" displayValue="false">
                           バーコードはエラーが発生しました。
                         </barcode>
                       </li>
                       <li class="barCodeImg"><span>金額</span><br>
-                        <barcode :value="Number(Item.price)" format="codabar" height="68" displayValue="false">
+                        <barcode :value="fomatPayment(Number(Item.price))" format="codabar" height="68" displayValue="false">
                           バーコードはエラーが発生しました。
                         </barcode>
                       </li>
@@ -162,7 +162,6 @@ export default {
         }
       })
     },
-
     sendCompleteMailToFactory: async function(){
       let ret = null
       await this.axios.request({
@@ -185,7 +184,17 @@ export default {
       })
       return ret
     },
-
+    //1129-273-0010 -> 112927300100000
+    fomatPoCode: function(pocode){
+      return pocode.replaceAll('-', '') + '0000';
+    },
+    fomatPayment: function(payment){
+      let paymentTemp = payment.toString()
+      while (paymentTemp.length < 7) {
+        paymentTemp = '0' + paymentTemp;
+      }
+      return paymentTemp
+    }
   },
   props: [],
   mounted(){

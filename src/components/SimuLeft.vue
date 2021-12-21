@@ -436,9 +436,9 @@ export default {
         //     type: 'eri'
         //   })
         // }
+      }
 
-        //button default
-        if(
+      if(
           optionSavedList.findIndex(item => item.type == 'button') == -1 
           && (!this.optionTemp || (this.optionTemp && this.optionTemp.type != 'button'))
         ){
@@ -450,7 +450,7 @@ export default {
             type: 'button'
           })
         }
-      }
+
       if(this.optionTemp){
         let existOptionSelected = optionSavedList.findIndex(
           item => item.parent_id == this.optionDetailActive)
