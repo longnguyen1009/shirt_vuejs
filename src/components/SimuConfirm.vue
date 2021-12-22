@@ -27,7 +27,7 @@
               </div>
               <div class="simu-confirm-card-bl">
                 <span class="simu-confirm-label">単価(税込)</span>
-                <span class="simu-confirm-card-value">{{moneyTypeShow02(getPriceOrder(OrderTemp.id))}}</span>
+                <span class="simu-confirm-card-value">{{moneyTypeShow02(getPriceOrder(OrderTemp.id) * (1 + initialData.tax_rate/100))}}</span>
               </div>
               <div class="simu-confirm-card-bl">
                 <span class="simu-confirm-label">数量</span>
@@ -35,7 +35,7 @@
               </div>
               <div class="simu-confirm-card-bl">
                 <span class="simu-confirm-label">小計(税込)</span>
-                <span class="simu-confirm-card-value">{{moneyTypeShow02(OrderTemp.quantity * getPriceOrder(OrderTemp.id))}}</span>
+                <span class="simu-confirm-card-value">{{moneyTypeShow02(OrderTemp.quantity * getPriceOrder(OrderTemp.id) * (1 + initialData.tax_rate/100))}}</span>
               </div>
             </div>
             <div class="simu-confirm-detail">
@@ -48,16 +48,19 @@
                   v-for="Design in designData(OrderTemp.id)" :key="Design.design_id">
                     <h4 class="simu-confirm-design"><i class="far fa-square"></i>&nbsp;{{Design.design_label}}</h4>
                     <ul class="simu-confirm-detail-list d-flex justify-content-between">
-                      <li class="simu-confirm-detail-item d-flex justify-content-between align-items-center"
-                      v-for="OptionParent in getOptionParent(Design.design_id, OrderTemp.model)" :key="OptionParent.parent_id">
-                        <span class="simu-confirm-detail-label">{{OptionParent.name}}</span>
-                        <span class="simu-confirm-detail-value">
-                          {{getNameOptionItem(OrderTemp.id, Design.combine_id, Design.item_id, Design.design_id, OptionParent.parent_id)}}
-                        </span>
-                        <button type="button" class="simu-confirm-detail-change btn btn-outline-dark" 
-                        @click="showDetail(OrderTemp.id, OrderTemp.model, Design.combine_id, Design.item_id, Design.design_id, OptionParent.parent_id)">
-                        修正</button>
-                      </li>
+                      <template v-for="OptionParent in getOptionParent(Design.design_id, OrderTemp.model)">
+                        <li class="simu-confirm-detail-item d-flex justify-content-between align-items-center"
+                        :key="OptionParent.parent_id"
+                        v-if="checkDependOnParent(OptionParent, OrderTemp.id, Design.combine_id, Design.item_id, Design.design_id)">
+                          <span class="simu-confirm-detail-label">{{OptionParent.name}}</span>
+                          <span class="simu-confirm-detail-value">
+                            {{getNameOptionItem(OrderTemp.id, Design.combine_id, Design.item_id, Design.design_id, OptionParent.parent_id)}}
+                          </span>
+                          <button type="button" class="simu-confirm-detail-change btn btn-outline-dark" 
+                          @click="showDetail(OrderTemp.id, OrderTemp.model, Design.combine_id, Design.item_id, Design.design_id, OptionParent.parent_id)">
+                          修正</button>
+                        </li>
+                      </template>
                     </ul>
                   </div>
                 </div>
@@ -89,7 +92,7 @@
               </div>
               <div class="simu-confirm-payment-right d-flex flex-column justify-content-between">
                 <span class="simu-confirm-label">商品価格(税込)</span>
-                <span class="simu-confirm-payment-price">{{moneyTypeShow02(getSumPrice())}}</span>
+                <span class="simu-confirm-payment-price">{{moneyTypeShow02(getSumPrice() * (1 + initialData.tax_rate/100))}}</span>
                 <span class="simu-confirm-label simu-confirm-payment-cost" v-if="isStaff">{{getCostTempOrder()}}</span>
               </div>
           </div>
@@ -225,7 +228,6 @@
           </div>
         </div>
       </div>
-      
     </transition>
 
   </div>
@@ -348,7 +350,8 @@ export default {
           orderitem: this.orderTempItem,
           delivery_id: this.deliActive,
           measureData: this.measureData ? this.measureData : null,
-          cartTempId: this.initialData.cartItemId
+          cartTempId: this.initialData.cartItemId,
+          tax_rate: this.initialData.tax_rate,
         }
       })
       .then(response => {
@@ -506,7 +509,6 @@ export default {
         })
       }, 300)
     },
-
     optionPrice: function(orderId){
         let optionTotalprice = 0
         if(this.initialData.shop_kind == 2){
@@ -724,8 +726,24 @@ export default {
               }
             }
         }
+    },
+    //パンツオーダーの「ダブルの場合の巾」についてですが、「裾始末」でダブルを選択した場合にのみ、
+    checkDependOnParent: function(Option, orderId, combine_id, item_id, design_id){
+      if(Option.depend_parent_id && Option.depend_option_id){
+        let option_selected_index = this.optionSelectedData.findIndex(
+          (item) => item.orderId == orderId &&
+                    item.combine_id == combine_id &&
+                    item.item_id == item_id &&
+                    item.design_id == design_id &&
+                    item.parent_id == Option.depend_parent_id &&
+                    item.option_id == Option.depend_option_id
+        )
+        if(option_selected_index == -1){
+          return false
+        }
+      }
+      return true
     }
-
   },
   props: [],
   mounted(){

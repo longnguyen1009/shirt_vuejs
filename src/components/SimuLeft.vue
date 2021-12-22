@@ -444,7 +444,7 @@ export default {
         ){
           optionSavedList.push({
             option_id : 128,
-            option_img: '1027185252_6179217476827.png',
+            option_img: 'button_default.png',
             option_shirt_svg: '',
             option_shirt_shadow: '',
             type: 'button'

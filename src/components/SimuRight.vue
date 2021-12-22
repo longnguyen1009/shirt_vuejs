@@ -37,16 +37,21 @@
             </div>
             <div class="simuright-options-rowDown">
               <ul class="simuright-optionLists">
-                <li class="optionLv2 d-flex align-items-center" @touchstart="touchStart" @touchmove="touchMove" @touchend="touchEnd" 
-                :class="{codeMode : (optionMode == 1 && Option.parent_id != optionCustomNameID), notComplete: checkOptionNotComplete(Option.parent_id)}"
-                v-for="Option in optionParentSortData[Genre.genre_id]" :key="Option.parent_id"
-                @click="openDetailOption(Option.parent_id)">
-                  <span class="simuright-options-notcomplete simu-alert" v-if="checkOptionNotComplete(Option.parent_id)">
-                    <i class="fas fa-exclamation-triangle"></i>
-                  </span>
-                  <span class="simuright-options-label">{{Option.name}}</span>
-                  <div class="simuright-options-name">{{optionSelectedValue(Option.parent_id)}}</div>
-                </li>
+                <template v-for="Option in optionParentSortData[Genre.genre_id]">
+                  <li class="optionLv2 d-flex align-items-center" 
+                  @touchstart="touchStart" @touchmove="touchMove" @touchend="touchEnd" 
+                  :key="Option.parent_id"
+                  v-if="checkDependOnParent(Option)"
+                  :class="{codeMode : (optionMode == 1 && Option.parent_id != optionCustomNameID), notComplete: checkOptionNotComplete(Option.parent_id)}"
+                  @click="openDetailOption(Option.parent_id)"
+                  >
+                    <span class="simuright-options-notcomplete simu-alert" v-if="checkOptionNotComplete(Option.parent_id)">
+                      <i class="fas fa-exclamation-triangle"></i>
+                    </span>
+                    <span class="simuright-options-label">{{Option.name}}</span>
+                    <div class="simuright-options-name">{{optionSelectedValue(Option.parent_id)}}</div>
+                  </li>
+                </template>
               </ul>
             </div>
           </div>
@@ -182,9 +187,9 @@
       </div>
       <div class="simuright-price d-flex justify-content-between">
           <div class="simuright-price-left d-flex justify-content-end flex-column">
-            <p class="simuright-prices-basic" v-if="initialData.shop_kind == 2">商品価格：<span v-if="combinePrice">{{moneyTypeShow02(combinePrice)}}</span><br>
-            <span>+ カスタマイズ価格：<span v-if="optionPrice > 0">{{moneyTypeShow02(optionPrice)}}</span></span></p>
-            <p class="simuright-prices-total">お支払い金額: <span class="totalPayment"><span v-if="sumPayment > 0">{{moneyTypeShow02(sumPayment, 'tax')}}</span></span></p>
+            <p class="simuright-prices-basic" v-if="initialData.shop_kind == 2">商品価格：<span v-if="combinePrice">{{moneyTypeShow02(combinePrice * (1 + initialData.tax_rate/100))}}</span><br>
+            <span>+ カスタマイズ価格：<span v-if="optionPrice > 0">{{moneyTypeShow02(optionPrice * (1 + initialData.tax_rate/100))}}</span></span></p>
+            <p class="simuright-prices-total">お支払い金額: <span class="totalPayment"><span v-if="sumPayment > 0">{{moneyTypeShow02(sumPayment * (1 + initialData.tax_rate/100), 'tax')}}</span></span></p>
           </div>
           <div class="simuright-price-right d-flex justify-content-between flex-column">
             <p class="delivery-date"><span v-if="deli_date">仕上がり予定日：{{deli_date}}</span></p>
@@ -513,7 +518,7 @@ export default {
         $(event.target).parents('.simuright-options-row').toggleClass('show')
       },
       optionSelectedValue(parent_id){
-        var option_selected_index = this.optionSelectedData.findIndex(
+        let option_selected_index = this.optionSelectedData.findIndex(
             (item) => item.orderId == this.orderNowId &&
                       item.combine_id == this.designActive.combine_id &&
                       item.item_id == this.designActive.item_id &&
@@ -794,6 +799,24 @@ export default {
         if(this.tempCorrectDetailId && this.tempCorrectDetailId == correct_detail_id){
           this.closeCorrectionDetail()
         }
+      },
+
+      //パンツオーダーの「ダブルの場合の巾」についてですが、「裾始末」でダブルを選択した場合にのみ、
+      checkDependOnParent: function(Option){
+        if(Option.depend_parent_id && Option.depend_option_id){
+          let option_selected_index = this.optionSelectedData.findIndex(
+            (item) => item.orderId == this.orderNowId &&
+                      item.combine_id == this.designActive.combine_id &&
+                      item.item_id == this.designActive.item_id &&
+                      item.design_id == this.designActive.design_id &&
+                      item.parent_id == Option.depend_parent_id &&
+                      item.option_id == Option.depend_option_id
+          )
+          if(option_selected_index == -1){
+            return false
+          }
+        }
+        return true
       }
     },
     mounted() {
@@ -1226,13 +1249,34 @@ export default {
           let allParents = this.optionParentData.find(item => item.design_id == design.design_id && item.model == this.modelSelected)
           if(allParents){
             allParents.parentData.forEach(parent => {
-              if(this.optionSelectedData.findIndex(
-                item2 => (item2.orderId == this.orderNowId
-                && item2.item_id == design.item_id
-                && item2.design_id == design.design_id
-                && item2.parent_id == parent.parent_id)) == -1){
+              if(!parent.depend_parent_id) {
+                let tempOptionSelectedIndex = this.optionSelectedData.findIndex(item2 => (
+                  item2.orderId == this.orderNowId
+                  && item2.item_id == design.item_id
+                  && item2.design_id == design.design_id
+                  && item2.parent_id == parent.parent_id
+                ))
+                if(tempOptionSelectedIndex == -1){
                   ret.push({design_id: design.design_id, design_name: design.design_label, item_id: design.item_id, parent_id: parent.parent_id, parent_name: parent.name})
                 }
+              } else{
+                  let tempOptionDependSelectedIndex = this.optionSelectedData.findIndex(item2 => (
+                    item2.orderId == this.orderNowId
+                    && item2.item_id == design.item_id
+                    && item2.design_id == design.design_id
+                    && item2.parent_id == parent.depend_parent_id
+                    && item2.option_id == parent.depend_option_id
+                  ))
+                  let tempOptionSelectedIndex = this.optionSelectedData.findIndex(item2 => (
+                    item2.orderId == this.orderNowId
+                    && item2.item_id == design.item_id
+                    && item2.design_id == design.design_id
+                    && item2.parent_id == parent.parent_id
+                  ))
+                  if(tempOptionDependSelectedIndex !== -1 && tempOptionSelectedIndex == -1){
+                    ret.push({design_id: design.design_id, design_name: design.design_label, item_id: design.item_id, parent_id: parent.parent_id, parent_name: parent.name})
+                  }
+              }
             })
           }
         })

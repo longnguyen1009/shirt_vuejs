@@ -51,7 +51,7 @@
         </ul>
         <span class="simu-error-message" v-if="!checkErrorSelect">アイテム組み合わせが見つかりません。</span>
         <div class="simu-model-order d-flex justify-content-between align-items-end">
-          <p class="simu-model-price"><span v-if="initialData.shop_kind == 2">参考価格 {{moneyTypeShow02(modelDetail.price, 'tax')}}～</span></p>
+          <p class="simu-model-price"><span v-if="initialData.shop_kind == 2">参考価格 {{moneyTypeShow02(modelDetail.price * (1 + initialData.tax_rate/100), 'tax')}}～</span></p>
           <div class="simu-nav-confirm d-flex justify-content-between">
             <button type="button" class="simu-common-btn btnSize01" @click="doBack">戻る</button>
             <button type="button" class="simu-common-btn btnSize01 gray" @click="doOrder" :disabled="!checkErrorSelect">決定</button>

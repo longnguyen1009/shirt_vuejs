@@ -8,7 +8,7 @@
               <img v-lazy="style_img_path + Item.image" alt="" @error="imgError">
               <div class="simu-styleItem-label">
                 <h2 class="simu-styleItem-name">{{Item.name}}</h2>
-                <h3 class="simu-styleItem-productname">{{moneyTypeShow02(Item.product_price, 'tax')}}</h3>
+                <h3 class="simu-styleItem-productname">{{moneyTypeShow02(Item.product_price * (1 + initialData.tax_rate/100), 'tax')}}</h3>
               </div>
               <!-- <button class="simu-styleItem-btn">MORE DETAILS</button> -->
             </div>

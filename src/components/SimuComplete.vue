@@ -20,7 +20,7 @@
               </div>
               <div class="simu-confirm-card-bl">
                 <span class="simu-confirm-label">単価(税込)</span>
-                <span class="simu-confirm-card-value">{{moneyTypeShow02(Item.price)}}</span>
+                <span class="simu-confirm-card-value">{{moneyTypeShow02(Item.price * (1 + initialData.tax_rate/100))}}</span>
               </div>
               <div class="simu-confirm-card-bl">
                 <span class="simu-confirm-label">数量</span>
@@ -28,7 +28,7 @@
               </div>
               <div class="simu-confirm-card-bl">
                 <span class="simu-confirm-label">小計(税込)</span>
-                <span class="simu-confirm-card-value">{{moneyTypeShow02(Item.price * Item.quantity)}}</span>
+                <span class="simu-confirm-card-value">{{moneyTypeShow02(Item.price * Item.quantity * (1 + initialData.tax_rate/100))}}</span>
               </div>
             </div>
           </div>

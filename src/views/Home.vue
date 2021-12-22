@@ -143,9 +143,9 @@ export default {
                 customer_id: response.customer_id,
                 cartItemId: response.cartItemId,
                 orderItemId: response.orderItemId,
-                orderCart: response.orderCart
+                orderCart: response.orderCart,
+                tax_rate: response.tax_rate,
               })
-            // }
           }
       })
       .catch(error => console.log(error))
