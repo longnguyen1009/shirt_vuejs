@@ -19,16 +19,16 @@
                 </div>
               </div>
               <div class="simu-confirm-card-bl">
-                <span class="simu-confirm-label">単価(税込)</span>
-                <span class="simu-confirm-card-value">{{moneyTypeShow02(Item.price * (1 + initialData.tax_rate/100))}}</span>
+                <span class="simu-confirm-label">単価</span>
+                <span class="simu-confirm-card-value">{{moneyTypeShow02(Item.price)}}</span>
               </div>
               <div class="simu-confirm-card-bl">
                 <span class="simu-confirm-label">数量</span>
                 <span class="simu-confirm-card-value">{{Item.quantity}}</span>
               </div>
               <div class="simu-confirm-card-bl">
-                <span class="simu-confirm-label">小計(税込)</span>
-                <span class="simu-confirm-card-value">{{moneyTypeShow02(Item.price * Item.quantity * (1 + initialData.tax_rate/100))}}</span>
+                <span class="simu-confirm-label">小計</span>
+                <span class="simu-confirm-card-value">{{moneyTypeShow02(Item.price * Item.quantity)}}</span>
               </div>
             </div>
           </div>
@@ -39,7 +39,9 @@
               <div class="simu-confirm-payment-right d-flex flex-column justify-content-between">
                 <span class="simu-confirm-label">商品価格(税込)</span>
                 <span class="simu-confirm-payment-price">{{moneyTypeShow02(orderData.payment)}}</span>
-                <span class="simu-confirm-label" v-if="isStaff">{{parseInt(orderData.cost)}}</span>
+                <ul class="simu-confirm-label" v-if="isStaff">
+                  <li v-for="(OrderItem, id) in orderData.orderitem" :key="id">{{parseInt(OrderItem.cost ? OrderItem.cost : 0)}}</li>
+                </ul>
               </div>
           </div>
         </div>

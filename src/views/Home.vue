@@ -471,8 +471,7 @@ export default {
       'combinePriceData',
       'optionParentData',
       'stockSelectedData',
-      'kijiData',
-      'first_show_kiji'
+      'kijiData'
     ]),
     Errors: function(){
       if(this.errorCode){

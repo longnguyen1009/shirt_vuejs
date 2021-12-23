@@ -23,25 +23,23 @@ export default new Vuex.Store({
     page: 1, //page 2 is model page
 
     //画像、URL
-    main_path: 'https://stg-personalorder.united-arrows.co.jp/',
-    simu_img_path: "/html/upload/simu_model/",
-    style_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
-    model_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
-    kiji_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
-    option_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
-    correct_detail_img_path: "/html/upload/correct_detail/",
-    option_shirt_svg_path: "/html/upload/simu_model/option_shirt/",
-
-    // main_path: 'https://ua.coremobile.win/',
+    // main_path: 'https://stg-personalorder.united-arrows.co.jp/',
     // simu_img_path: "/html/upload/simu_model/",
-    // style_img_path: "/html/upload/save_image/",
-    // model_img_path: "/html/upload/save_image/",
-    // kiji_img_path: "/html/upload/save_image/",
-    // option_img_path: "/html/upload/save_image/",
+    // style_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
+    // model_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
+    // kiji_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
+    // option_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
     // correct_detail_img_path: "/html/upload/correct_detail/",
     // option_shirt_svg_path: "/html/upload/simu_model/option_shirt/",
 
-    kiji_default: '0730151143_6103981fcfa43.jpeg',
+    main_path: 'https://ua.coremobile.win/',
+    simu_img_path: "/html/upload/simu_model/",
+    style_img_path: "/html/upload/save_image/",
+    model_img_path: "/html/upload/save_image/",
+    kiji_img_path: "/html/upload/save_image/",
+    option_img_path: "/html/upload/save_image/",
+    correct_detail_img_path: "/html/upload/correct_detail/",
+    option_shirt_svg_path: "/html/upload/simu_model/option_shirt/",
 
     // 全てスタイル情報
     styleData: [], //[{id, name, brand, detail, img, model[], product_price}]
@@ -151,8 +149,8 @@ export default new Vuex.Store({
     //前の一時保存ID
     stock_old_id: null,
 
-    //初めて生地一覧に入るとき、備蓄生地のみ表示される
-    first_show_kiji: true
+    //パンツとスペアパンツコービーする
+    
   },
   getters: {
     //step
@@ -167,7 +165,6 @@ export default new Vuex.Store({
     option_img_path: state => state.option_img_path,
     correct_detail_img_path: state => state.correct_detail_img_path,
     option_shirt_svg_path: state => state.option_shirt_svg_path,
-    kiji_default: state => state.kiji_default,
 
     //
     styleSelected: state => state.styleSelected,
@@ -220,8 +217,7 @@ export default new Vuex.Store({
 
     neckSelectedData: state => state.neckSelectedData,
     measureData: state => state.measureData,
-    stock_old_id: state => state.stock_old_id,
-    first_show_kiji: state => state.first_show_kiji
+    stock_old_id: state => state.stock_old_id
   },
   mutations: {
     changeStep(state, newStep){
@@ -255,11 +251,6 @@ export default new Vuex.Store({
         let kijiObj = state.kijiData.find(item => item.id == state.kijiActive)
         if(kijiObj && kijiObj.glr_kind){
           state.optionSelectedData = state.optionSelectedData.filter(item => (item.orderId != state.orderNowId || (item.orderId == state.orderNowId && item.glr_kind && item.glr_kind.indexOf(kijiObj.glr_kind + '') != -1)))
-          
-          //change first_show_kiji when chane kiji
-          if(state.first_show_kiji && kijiObj.fabric_kind == 2){
-            state.first_show_kiji = false
-          }
         }
       }
     },
@@ -302,10 +293,23 @@ export default new Vuex.Store({
           && item.design_id == optionData.design_id
           && item.parent_id == optionData.parent_id
         ))
+      
       if(existOptionIndex !== -1){
         state.optionSelectedData[existOptionIndex] = optionData
       } else{
         state.optionSelectedData.push(optionData)
+
+        //check is pant and copy to spare pant
+        let itemDataTemp = state.itemData.find(item => item.orderId == optionData.orderId)
+        let designDataTemp = itemDataTemp.design
+        let designNowTemp = designDataTemp.find(item => item.item_id == optionData.item_id && item.design_id == optionData.design_id)
+        if(designNowTemp && designNowTemp.is_pant == true){
+          let designSpareTemp = designDataTemp.find(item => item.design_id == optionData.design_id && item.is_spare_pant)
+          if(designSpareTemp){
+            let optionDataCopy = {...optionData, item_id: designSpareTemp.item_id}
+            state.optionSelectedData.push(optionDataCopy)
+          }
+        }
       }
       //Clone the array to trigger a UI update.
       state.optionSelectedData = [...state.optionSelectedData]
@@ -343,14 +347,6 @@ export default new Vuex.Store({
      
       //Clone the array to trigger a UI update.
       state.kijiData = [...state.kijiData]
-
-      //update first_show_kiji when change kijiActive
-      if(state.kijiData.find(item => item.id == state.kijiActive)){
-        let kijiObj = state.kijiData.find(item => item.id == state.kijiActive)
-        if(state.first_show_kiji && kijiObj.fabric_kind == 2){
-          state.first_show_kiji = false
-        }
-      }
     },
     changeOptionParentData(state, parentData){
       let existParentDataIndex = state.optionParentData.findIndex(
@@ -691,9 +687,6 @@ export default new Vuex.Store({
     },
     updateStockOldId(state, value){
       state.stock_old_id = value
-    },
-    changeFirstShowKiji(state){
-      state.first_show_kiji = false
     }
   },
   actions: {

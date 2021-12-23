@@ -122,7 +122,9 @@ export default {
       kijiSortResult: null,
       search_brand_shop: false,
       search_other_shop: false,
-      changeKijiModalShow: false
+      changeKijiModalShow: false,
+
+      first_show_kiji: true
     };
   },
   methods: {
@@ -208,9 +210,11 @@ export default {
               this.$store.dispatch('handleChangeErrorCode', 7)
               this.setKijiData()
             } else{
+              //save stock temp
               if(Number.isInteger(response)){
                 this.$store.dispatch('handleUpdateStockOldId', response)
               } else{
+                //no save stock temp because stock is unlimited
                 this.$store.dispatch('handleUpdateStockOldId', false)
               }
               this.$store.dispatch('handleChangeKiji', this.kijiSelected)
@@ -265,8 +269,8 @@ export default {
         return false
       }
 
-      // fix first time: only show binchiku kiji
-      if(Kiji.fabric_kind == 2 && this.first_show_kiji){
+      // fix first time: only show binchiku kiji or selected kiji
+      if(Kiji.fabric_kind == 2 && Kiji.id != this.kijiActive && this.first_show_kiji){
         return false
       }
 
@@ -280,6 +284,7 @@ export default {
       return true
     },
     searchKiji: function(){
+      this.first_show_kiji = false
       let ret = this.kijiData
       //kijiNo
       if(this.sortParam.kijiNo != null){
@@ -336,8 +341,7 @@ export default {
       'stock_old_id',
       'initialData',
       'optionSelectedData',
-      'orderNowId',
-      'first_show_kiji'
+      'orderNowId'
     ]),
     kijiDetailData: function(){
       if(this.kijiDetailId != 0){

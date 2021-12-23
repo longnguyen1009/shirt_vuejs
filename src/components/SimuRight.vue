@@ -5,7 +5,7 @@
           <button class="simuright-modeBtn" :class="{active: optionMode == 1}" @click="changeOptionMode(1)">コードスキャン</button>
           <button class="simuright-modeBtn" :class="{active: optionMode == 2}" @click="changeOptionMode(2)">リストから選択</button>
         </div>
-        <select aria-label="select-item" class="form-control" v-model="designActiveId" @change="changeItem($event)">
+        <select aria-label="select-item" class="form-control" v-model="designActiveId" @change="changeDesign($event)">
             <option v-for="(design, id) in designData" :key="id" :value="id">
               {{design.design_label}}
             </option>
@@ -408,8 +408,8 @@ export default {
           $('.kiji_preloader img').attr('kiji-id', this.kijiActive)
         }
       },
-      changeItem: function(){
-        // this.$store.dispatch('handleChangeDesign', this.designActiveSplit())
+      changeDesign: function(){
+
       },
       //Promise to fetch Kiji
       getKijiFromAPI: async function(){
@@ -604,7 +604,6 @@ export default {
           }
         })
       },
-
       getCorrectionDetailDataFromApi: async function(correctId){
         this.loaddingDataCorrectDetail = true
         let ret = null
@@ -629,7 +628,6 @@ export default {
         }
         return ret
       },
-
       getCorrectionDetailData: async function(correctId){
         await this.getCorrectionDetailDataFromApi(correctId).then(response => {
           if(response){
@@ -800,7 +798,6 @@ export default {
           this.closeCorrectionDetail()
         }
       },
-
       //パンツオーダーの「ダブルの場合の巾」についてですが、「裾始末」でダブルを選択した場合にのみ、
       checkDependOnParent: function(Option){
         if(Option.depend_parent_id && Option.depend_option_id){
@@ -843,6 +840,7 @@ export default {
       designActiveSplit: function(){
         this.$store.dispatch('handleChangeDesign', this.designActiveSplit)
       },
+
       designActive: function(){
         //remove option show menu
         $('.simuright-options-row').removeClass('show')
@@ -881,6 +879,11 @@ export default {
           this.neckSelectedValue = null
         }
 
+        //check designActive is spare_pant
+        if(this.designActiveObj && this.designActiveObj.is_spare_pant){
+          //check pant is complete
+          console.log("is spare_pant")
+        }
       },
       itemCombineObj: function(){
         this.$store.dispatch('handleChangeCombineActive', this.itemCombineObj.id)
@@ -1079,6 +1082,13 @@ export default {
           return null
         }
       },
+      designActiveObj: function(){
+        if(this.designData && this.designActive){
+          return this.designData.find(item => item.design_id == this.designActive.design_id && item.item_id == this.designActive.item_id)
+        } else{
+          return null
+        }
+      },
       //size
       sizeData: function(){
         if(this.itemDataActive){
@@ -1108,7 +1118,6 @@ export default {
           return {}
         }
       },
-
       //calculateIniCorrectionData
       initialCorrectionData: function(){
         let initCorrectedData = []
@@ -1170,7 +1179,6 @@ export default {
         }
         return initCorrectedData
       },
-
       correctSelectedDataActive(){
         return this.correctSelectedData.filter(item => (
           item.order_id == this.orderNowId
@@ -1199,7 +1207,6 @@ export default {
           return []
         }
       },
-
       correctFixedDataActive: function(){
         if(this.correctFixedData.findIndex(item => item.design_id == this.designActive.design_id) !== -1){
           return this.correctFixedData.find(item => item.design_id == this.designActive.design_id).fixedData
@@ -1207,7 +1214,6 @@ export default {
           return []
         }
       },
-
       //combine
       combinePrice: function(){
         let combinePriceIndex = this.combinePriceData.findIndex(item => 
@@ -1242,7 +1248,6 @@ export default {
         })
         return ret
       },
-
       allOptionSelectedCheck: function(){
         let ret = []
         this.designData.forEach(design => {
@@ -1282,7 +1287,9 @@ export default {
         })
         return ret
       },
+      pantOptionSelectedCheck: function(){
 
+      },
       allCorrectSelectedCheck: function(){
         let ret = []
         if(this.designData){
@@ -1316,7 +1323,8 @@ export default {
         } else{
           return false
         }
-      }
+      },
+
     },
 };
 </script>

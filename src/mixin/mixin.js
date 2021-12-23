@@ -38,8 +38,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'kiji_img_path',
-      'kiji_default'
+      'kiji_img_path'
     ])
   }
 }

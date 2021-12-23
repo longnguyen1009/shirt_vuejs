@@ -26,16 +26,16 @@
                 </div>
               </div>
               <div class="simu-confirm-card-bl">
-                <span class="simu-confirm-label">単価(税込)</span>
-                <span class="simu-confirm-card-value">{{moneyTypeShow02(getPriceOrder(OrderTemp.id) * (1 + initialData.tax_rate/100))}}</span>
+                <span class="simu-confirm-label">単価</span>
+                <span class="simu-confirm-card-value">{{moneyTypeShow02(getPriceOrder(OrderTemp.id))}}</span>
               </div>
               <div class="simu-confirm-card-bl">
                 <span class="simu-confirm-label">数量</span>
                 <span class="simu-confirm-card-value">{{OrderTemp.quantity}}</span>
               </div>
               <div class="simu-confirm-card-bl">
-                <span class="simu-confirm-label">小計(税込)</span>
-                <span class="simu-confirm-card-value">{{moneyTypeShow02(OrderTemp.quantity * getPriceOrder(OrderTemp.id) * (1 + initialData.tax_rate/100))}}</span>
+                <span class="simu-confirm-label">小計</span>
+                <span class="simu-confirm-card-value">{{moneyTypeShow02(OrderTemp.quantity * getPriceOrder(OrderTemp.id))}}</span>
               </div>
             </div>
             <div class="simu-confirm-detail">
@@ -93,7 +93,9 @@
               <div class="simu-confirm-payment-right d-flex flex-column justify-content-between">
                 <span class="simu-confirm-label">商品価格(税込)</span>
                 <span class="simu-confirm-payment-price">{{moneyTypeShow02(getSumPrice() * (1 + initialData.tax_rate/100))}}</span>
-                <span class="simu-confirm-label simu-confirm-payment-cost" v-if="isStaff">{{getCostTempOrder()}}</span>
+                <ul class="simu-confirm-label simu-confirm-payment-cost" v-if="isStaff">
+                  <li v-for="(OrderTemp, id) in orderTempItem" :key="id">{{parseInt(OrderTemp.cost_temp ? OrderTemp.cost_temp : 0)}}</li>
+                </ul>
               </div>
           </div>
         </div>

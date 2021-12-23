@@ -8,7 +8,7 @@
 
     <div class="simuleft-main">
       <div style="display: none" class="kiji_preloader">
-          <img v-bind:src="kiji_img_path + kiji_img" @load="kijiLoaded" @error="imgErrorBlank" alt="シミュレーター生地画像" kiji-id=""/>
+          <img v-bind:src="kiji_img_path + kiji_img" @load="kijiLoaded" @error="loadKijiDefault" alt="シミュレーター生地画像" kiji-id=""/>
       </div>
       <div class="simuleft-sample" :class="{hide: (correct_detail_id_now && hasCorrectImg)}">
             <img :src="design.sample_path" class="img_sample" @error="imgErrorBlank"/>
@@ -102,8 +102,8 @@ export default {
   },
   props: [],
   methods: {
-    defaultLoaded() {
-      $(".loadding_bl").addClass("on");
+    loadKijiDefault: function(e){
+      e.target.src = this.kiji_img_path + 'kiji_default.png'
     },
     kijiLoaded() {
       var target = document.querySelector(".svgModel").contentDocument;
@@ -257,7 +257,8 @@ export default {
           'necksize' : this.neckSelectedData.filter(item => item.orderId == this.orderNowId),
           'correct_selected' : this.correctSelectedData.filter(item => item.order_id == this.orderNowId),
           'quantity': 1,
-          'stock': stockTemp
+          'stock': stockTemp,
+          'stock_old_id' : this.stock_old_id
         }
       })
       .then(response => {
@@ -274,8 +275,6 @@ export default {
     doSaveTemp: async function(){
       if(!this.kijiActive){
         alert('生地を選択してください。')
-      } else if(!this.initialData.customer_id){
-        alert('HC番号を設定ください。')
       } else if(this.kijiActive){
         await this.addToCart().then((response) => {
         if(response !== null){
@@ -327,7 +326,6 @@ export default {
         'option_img_path',
         'option_shirt_svg_path',
         'correct_detail_img_path',
-        'kiji_default',
         'optionMode',
         'styleSelected',
         'modelSelected',
@@ -349,7 +347,8 @@ export default {
         'correctSelectedData',
         'stockSelectedData',
         'correct_detail_id_now',
-        'neckSelectedData'
+        'neckSelectedData',
+        'stock_old_id'
       ]),
     //design path
     design: function() {
@@ -375,9 +374,9 @@ export default {
     kiji_img: function(){
       if(this.kijiActive && this.kijiData.length && this.kijiData.findIndex(item => item.id == this.kijiActive) !== -1){
         let kijiTemp = this.kijiData.find(item => item.id == this.kijiActive)
-        return kijiTemp.img_simu ? kijiTemp.img_simu : this.kiji_default
+        return kijiTemp.img_simu ? kijiTemp.img_simu : 'kiji_default.png'
       } else{
-        return this.kiji_default
+        return 'kiji_default.png'
       }
     },
     designActive_path: function(){

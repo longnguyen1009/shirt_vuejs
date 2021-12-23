@@ -149,16 +149,11 @@ export default {
     if(Object.keys(this.kijiSearchData).length === 0){
       this.updateKijiSearchData()
     }
-
-    if(this.first_show_kiji){
-      this.$store.dispatch('handleChangeKijiFirstLoad')
-    }
   },
   computed: {
     ...mapGetters([
       'kijiSearchData',
-      'main_path',
-      'first_show_kiji'
+      'main_path'
     ]),
   },
   watch: {

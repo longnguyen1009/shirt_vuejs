@@ -121,9 +121,6 @@ export default {
       this.updateKijiSearchData()
     }
     this.searchKijiBrandResult = this.kijiSearchBrand
-    if(this.first_show_kiji){
-      this.$store.dispatch('handleChangeKijiFirstLoad')
-    }
   },
   watch: {
     searchKijiBrandName: _.debounce(function() {
@@ -140,8 +137,7 @@ export default {
   computed: {
     ...mapGetters([
       'main_path',
-      'kijiSearchData',
-      'first_show_kiji'
+      'kijiSearchData'
     ]),
     kijiSearchBrand : function(){
       if(Object.keys(this.kijiSearchData).length){

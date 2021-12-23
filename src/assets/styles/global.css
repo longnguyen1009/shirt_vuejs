@@ -813,7 +813,7 @@ pre{
   background-color: transparent;
 }
 .optionItem.active{
-  border: 2px solid #fff;
+  border: 2px solid #fff !important;
 }
 .optionItem.active::before{
   content: "\f058";
