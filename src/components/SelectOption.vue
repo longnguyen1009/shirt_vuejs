@@ -21,19 +21,19 @@
         </div>
         <div class="simuright-sub-result d-flex flex-wrap" v-if="optionDetailActive != optionCustomNameID">
           <template v-for="Option in optionCurrLists">
-            <div class="optionItem" :class="{active: Option.id == optionSelected}" :key="Option.id" v-if="checkOptionItemShow(Option)">
+            <div class="optionItem" :class="{active: Option.id == optionSelected}" :key="Option.id">
               <img v-lazy="option_img_path + Option.img" alt="" class="optionitem-img" @error="imgError"
                 @click="optionChange(Option.id, Option.simu_img, Option.option_shirt_svg, Option.option_shirt_shadow, optionParent.type)">
               <span class="simuright-option-icon" @click="showOptionDetail(Option.id)">
                 <img :src="main_path + 'html/user_data/assets/img/common/icon_info.png'" alt="">
               </span>
               <div class="simuright-option-text" @click="optionChange(Option.id, Option.simu_img, Option.option_shirt_svg, Option.option_shirt_shadow, optionParent.type)">
-                <div class="simuright-kiji-text-top d-flex justify-content-between align-items-center">
-                  <span class="simuright-kiji-code">{{Option.name}}</span><br>
+                <div class="simuright-kiji-text-top d-flex flex-column justify-content-between">
+                  <span class="simuright-kiji-name">{{Option.name}}</span>
+                  <span class="simuright-kiji-name">
+                    <span v-if="(optionParent.type == 'button' || optionParent.type == 'uraji') && Option.color_code">C/#{{Option.color_code}}</span>
+                  </span>
                 </div>
-                <span class="simuright-kiji-name">
-                  <span v-if="(optionParent.type == 'button' || optionParent.type == 'uraji') && Option.color_code">C/#{{Option.color_code}}</span>
-                </span>
               </div>
             </div>
           </template>
@@ -115,7 +115,7 @@ export default {
       optionDetailId: null,
       cateCurr: null,
       cateLists: [],
-      optionLists: {},
+      optionLists: [],
       loaddingOptionData: false,
 
       optionCustomNameSubLists: [],
@@ -297,24 +297,25 @@ export default {
     setOptionData: async function(){
         await this.getOptionData().then(response => {
           if(response){
-            this.optionLists = response.options
-            //only show optionCate has option 
+            //sort options, category, check cate has option
+            let tempOptionLists = this.mergeAllOption(response.options)
             let tempCateList = response.cates
-            let tempCateListHasOption = []
-            if(tempCateList.length > 0){
-              tempCateListHasOption = tempCateList.filter(item => this.optionLists.hasOwnProperty(item.cate_id))
+            if(this.initialData.shop_kind == 2 && this.kijiObj && this.kijiObj.glr_kind){
+              tempOptionLists = tempOptionLists.filter(option => (option.glr_kind && option.glr_kind.indexOf(this.kijiObj.glr_kind + '') != -1))
             }
-            this.cateLists = tempCateListHasOption
+            tempCateList = tempCateList.filter(Cate => tempOptionLists.filter(item => item.cateId == Cate.cate_id).length > 0)
+            this.cateLists = tempCateList
+            this.optionLists = tempOptionLists
 
             this.loaddingOptionData = false
             this.$store.dispatch('handleSaveOptionDataLoaded', {
               model_id: this.modelSelected,
               design_id: this.designActive.design_id,
               parent_id: this.optionDetailActive,
-              cateLists: this.cateLists,
-              optionLists: this.optionLists
+              cateLists: response.cates,
+              optionLists: response.options
             })
-            this.$store.dispatch('handleUpdateOptionDetailData', this.optionLists)
+            this.$store.dispatch('handleUpdateOptionDetailData', response.options)
             this.setOptionSelected()
           }
         })
@@ -371,6 +372,13 @@ export default {
         }
       }
       return true
+    },
+    mergeAllOption(optionList){
+      let ret = [];
+      for (const [key, value] of Object.entries(optionList)) {
+        ret.push(...value)
+      }
+      return ret;
     }
   },
   watch: {
@@ -397,14 +405,16 @@ export default {
         && item.parent_id == this.optionDetailActive
       )
       if(loadedDataIndex !== -1) {
-        this.optionLists = this.optionDataLoaded[loadedDataIndex].optionLists
-        //only show which optionCate has option 
+        let tempOptionLists = this.mergeAllOption(this.optionDataLoaded[loadedDataIndex].optionLists)
         let tempCateList = this.optionDataLoaded[loadedDataIndex].cateLists
-        let tempCateListHasOption = []
-        if(tempCateList.length > 0){
-          tempCateListHasOption = tempCateList.filter(item => this.optionLists.hasOwnProperty(item.cate_id))
+
+        if(this.initialData.shop_kind == 2 && this.kijiObj && this.kijiObj.glr_kind){
+          tempOptionLists = tempOptionLists.filter(option => (option.glr_kind && option.glr_kind.indexOf(this.kijiObj.glr_kind + '') != -1))
         }
-        this.cateLists = tempCateListHasOption
+        tempCateList = tempCateList.filter(Cate => tempOptionLists.filter(item => item.cateId == Cate.cate_id).length > 0)
+
+        this.cateLists = tempCateList
+        this.optionLists = tempOptionLists
       } else{
         this.setOptionData()
       }
@@ -446,16 +456,16 @@ export default {
     ]),
     cateCurrObj: function(){
       if(this.cateLists && this.cateCurr){
-        return this.cateLists.filter((item) => item.cate_id == this.cateCurr)[0];
+        return this.cateLists.find(item => item.cate_id == this.cateCurr);
       } else{
         return null
       }
     },
     optionCurrLists: function(){
       if(this.optionLists && this.cateCurr){
-        return this.optionLists[this.cateCurr];
+        return this.optionLists.filter(item => item.cateId == this.cateCurr);
       } else{
-        return this.optionLists[this.optionDetailActive];
+        return this.optionLists.filter(item => item.cateId == this.optionDetailActive);
       }
     },
     OptionDetailData: function(){
@@ -473,10 +483,9 @@ export default {
     cateOfSelectedOption: function(){
       let cate_id_val = null
       if(this.optionSelected){
-        for (const [key, value] of Object.entries(this.optionLists)) {
-          if(value.find(item => item.id == this.optionSelected)){
-            cate_id_val = key
-          }
+        let selectedOptionObj = this.optionLists.find(item => item.id == this.optionSelected)
+        if(selectedOptionObj){
+          cate_id_val = selectedOptionObj.cateId
         }
       }
       return cate_id_val

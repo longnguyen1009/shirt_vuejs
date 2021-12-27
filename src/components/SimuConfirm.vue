@@ -139,8 +139,8 @@
         <div class="modal-wrapper">
           <div class="modal-container white modal-container-sizeconfirm">
             <transition name="transitionRightToLeftHalfWidth">
-                <div class="measure-sub" v-if="correction_selected_id">
-                  <ul class="measure-sub-list">
+                <div class="measure-sub" v-if="correction_selected_id" ref="measure_scroll">
+                  <ul class="measure-sub-list" ref="measure_scroll_ul">
                     <li class="measure-sub-item" v-for="correctDetailItem in correctDetailActive" :key="correctDetailItem.id">
                       <span class="fancy-input black">
                         <input class="fancy-radio" hidden 
@@ -150,7 +150,7 @@
                           :value="correctDetailItem.id"
                           v-model="tempCorrectDetailId"
                         >
-                        <label class="fancy-radio-label" :for="'correctDetailItem-' + correctDetailItem.id">
+                        <label class="fancy-radio-label" :for="'correctDetailItem-' + correctDetailItem.id" @click="selectCorrectDetail(correctDetailItem.id)">
                             <span class="fancy-label--text">{{correctDetailItem.text}}</span>
                             <span class="fancy-radiobutton">
                                 <span class="radiobutton-dot"></span>
@@ -158,12 +158,12 @@
                         </label>
                       </span>
                     </li>
+                    <div class="matashita-correct-input" v-if="hasCorrectCustom && tempCorrectDetailId">
+                      <input type="text" v-model="correctCustomValue"><br>
+                      <span v-if="correctCustomError">数字で入力してください</span>
+                      <span class="simu-common-btn btnSize01" @click="correctCustomConfirm">決定</span>
+                    </div>
                   </ul>
-                  <div class="matashita-correct-input" v-if="hasCorrectCustom && tempCorrectDetailId">
-                    <input type="text" v-model="correctCustomValue"><br>
-                    <span v-if="correctCustomError">数字で入力してください</span>
-                    <span class="simu-common-btn btnSize01" @click="correctCustomConfirm">決定</span>
-                  </div>
                   <div class="loaddingDataIo" v-if="loaddingDataCorrectDetail">
                     <div class="loadingio-spinner-spinner-482naetb3m">
                       <div class="ldio-2vyxc9gibh9">
@@ -180,6 +180,10 @@
                 <div v-for="(Design, id) in designData(orderSizeActive)" :key="id" class="modal-sizeconfirm-designItem">
                   <h4 class="modal-sizeconfirm-designName">{{Design.design_label}}</h4>
                   <ul class="modal-sizeconfirm-list d-flex justify-content-between flex-wrap align-content-start">
+                    <li class="model-sizeconfirm-item d-flex justify-content-between align-items-between">
+                      <span class="modal-sizeconfirm-label">サイズ</span>
+                      <span class="modal-sizeconfirm-result flex-grow-1">{{getSizeOfDesign(Design.design_id, Design.item_id)}}</span>
+                    </li>
                     <li class="model-sizeconfirm-item d-flex justify-content-between align-items-between"
                     v-for="(CorrectDetailItem, correctID) in getSizeDataActiveByDesign(Design.design_id, Design.item_id)"
                     :key="correctID">
@@ -594,6 +598,13 @@ export default {
     getSizeDataActiveByDesign(design_id, item_id){
       return this.sizeDetailActive.filter(item => item.design_id == design_id && item.item_id == item_id)
     },
+    getSizeOfDesign(design_id, item_id){
+      if(this.sizeSelectedActive.find(item => item.design == design_id && item.item == item_id)){
+        return this.sizeSelectedActive.find(item => item.design == design_id && item.item == item_id).name
+      } else{
+        return ''
+      }
+    },
     getOrderCost: async function(){
       let ret = null
       await this.axios.request({
@@ -728,6 +739,12 @@ export default {
               }
             }
         }
+    },
+    //click to 補正 option
+    selectCorrectDetail : function(correct_detail_id){
+      if(this.tempCorrectDetailId && this.tempCorrectDetailId == correct_detail_id){
+        this.closeCorrectionDetail()
+      }
     },
     //パンツオーダーの「ダブルの場合の巾」についてですが、「裾始末」でダブルを選択した場合にのみ、
     checkDependOnParent: function(Option, orderId, combine_id, item_id, design_id){
@@ -876,6 +893,15 @@ export default {
         return []
       }
     },
+    sizeSelectedActive: function(){
+      if(this.orderSizeActive !== null){
+        return this.sizeSelectedData.filter(item => (
+          item.orderId == this.orderSizeActive
+        ))
+      } else{
+        return []
+      }
+    },
     isStaff: function(){
       if((this.initialData.customer_id + '').startsWith("000")){
         return true
@@ -903,6 +929,28 @@ export default {
         return false
       }
     }
-  }
+  },
+
+  updated: function () {
+    // 補正なしを上下センターでスクロールにできないか確認
+    this.$nextTick(function () {
+        let measure_scroll = this.$refs.measure_scroll;
+        let measure_scroll_ul = this.$refs.measure_scroll_ul;
+        if(measure_scroll && measure_scroll_ul){
+          measure_scroll_ul.style = ''
+          let scroll_height = measure_scroll.offsetHeight
+          let scroll_ul_height = measure_scroll_ul.offsetHeight
+          if(scroll_height < scroll_ul_height){
+            let noMeasureIndex = this.correctDetailActive.findIndex(item => (item.value == null || item.value == 0 || item.value == ''))
+            measure_scroll.scrollTop = (noMeasureIndex * 44 - measure_scroll.offsetHeight/2 + 22);
+          } else{
+            measure_scroll_ul.style.position = 'absolute'
+            measure_scroll_ul.style.width = "100%"
+            measure_scroll_ul.style.top = "50%"
+            measure_scroll_ul.style.transform = "translateY(-50%)"
+          }
+        }
+      })
+    }
 };
 </script>

@@ -20,16 +20,17 @@
             <div class="kijiItem" v-if="checkStyleAndStockKiji(Kiji.id)" :key="Kiji.id"
             :class="{active: (Kiji.id == kijiSelected)}">
               <span class="kijiitem-img" @click="kijiChange(Kiji.id, Kiji.img_simu)">
-                <img class="kijiitem-img" v-lazy="kiji_img_path + Kiji.img" alt="" @error="imgError">
+                <img class="kijiitem-img" v-lazy="kiji_img_path + Kiji.img" alt="">
               </span>
               <span class="simuright-kiji-icon" @click="showKijiDetail(Kiji.id)">
                 <img :src="main_path + 'html/user_data/assets/img/common/icon_info.png'" alt="">
               </span>
               <div class="simuright-kiji-text" @click="kijiChange(Kiji.id, Kiji.img_simu)">
-                <div class="simuright-kiji-text-top d-flex justify-content-between align-items-center">
-                  <span class="simuright-kiji-code">{{Kiji.code}}</span><br>
+                <div class="simuright-kiji-text-top d-flex flex-column justify-content-between">
+                  <span class="simuright-kiji-name">{{Kiji.code}}</span>
+                  <span class="simuright-kiji-name">C/#{{Kiji.fabric_color}}</span>
+                  <span class="simuright-kiji-name">{{Kiji.brand_sub_name}}</span>
                 </div>
-                <span class="simuright-kiji-name">{{Kiji.brand_name}}</span>
               </div>
             </div>
           </template>

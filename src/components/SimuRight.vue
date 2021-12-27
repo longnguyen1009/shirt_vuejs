@@ -151,8 +151,8 @@
         <div class="measure-sub-fade" v-if="correction_selected_id" @click="closeCorrectionDetail"></div>
         
         <transition name="transitionRightToLeftHalfWidth">
-          <div class="measure-sub" v-if="correction_selected_id">
-            <ul class="measure-sub-list">
+          <div class="measure-sub" v-if="correction_selected_id" ref="measure_scroll">
+            <ul class="measure-sub-list" ref="measure_scroll_ul">
               <li class="measure-sub-item hover" v-for="correctDetailItem in correctDetailActive" :key="correctDetailItem.id">
                 <input class="fancy-radio" hidden 
                   :id="'correctDetailItem-' + correctDetailItem.id" 
@@ -168,12 +168,12 @@
                     </span>
                 </label>
               </li>
+              <div class="matashita-correct-input" v-if="hasCorrectCustom">
+                <input type="number" v-model="correctCustomValue"><br>
+                <span v-if="correctCustomError">数字で入力してください</span>
+                <span class="simu-common-btn btnSize01" @click="correctCustomConfirm">決定</span>
+              </div>
             </ul>
-            <div class="matashita-correct-input" v-if="hasCorrectCustom">
-              <input type="number" v-model="correctCustomValue"><br>
-              <span v-if="correctCustomError">数字で入力してください</span>
-              <span class="simu-common-btn btnSize01" @click="correctCustomConfirm">決定</span>
-            </div>
             <div class="loaddingDataIo" v-if="loaddingDataCorrectDetail">
               <div class="loadingio-spinner-spinner-482naetb3m">
                 <div class="ldio-2vyxc9gibh9">
@@ -644,7 +644,6 @@ export default {
           && item.size_id == this.sizeItemDataActive.id
           && item.correct_id == this.correction_selected_id
         ))
-        console.log(correctDetailIndexNow)
         if(correctDetailIndexNow !== -1){
           this.tempCorrectDetailId = this.correctSelectedDataActive[correctDetailIndexNow].correct_detail_id
           if(this.hasCorrectCustom){
@@ -814,6 +813,45 @@ export default {
           }
         }
         return true
+      },
+      pantAllOptionSelectedCheck: function(){
+        if(this.hasSparePant){
+          let design = this.designData.find(item => item.is_pant && item.is_spare_pant == false)
+          let sortArr = this.allOptionSelectedCheck.filter(item => 
+            item.design_id == design.design_id
+            && item.item_id == design.item_id
+          )
+          if(sortArr.length > 0){
+            return false
+          }
+        }
+        return true
+      },
+      pantSizeSelectedCheck: function(){
+        if(this.hasSparePant){
+          let design = this.designData.find(item => item.is_pant && item.is_spare_pant == false)
+          let sortArr = this.sizeSelectedCheck.filter(item => 
+            item.design_id == design.design_id
+            && item.item_id == design.item_id
+          )
+          if(sortArr.length > 0){
+            return false
+          }
+        }
+        return true
+      },
+      pantAllCorrectCheck: function(){
+        if(this.hasSparePant){
+          let design = this.designData.find(item => item.is_pant && item.is_spare_pant == false)
+          let sortArr = this.allCorrectSelectedCheck.filter(item => 
+            item.design_id == design.design_id
+            && item.item_id == design.item_id
+          )
+          if(sortArr.length > 0){
+            return false
+          }
+        }
+        return true
       }
     },
     mounted() {
@@ -880,9 +918,10 @@ export default {
         }
 
         //check designActive is spare_pant
-        if(this.designActiveObj && this.designActiveObj.is_spare_pant){
+        if(this.designActiveObj && this.designActiveObj.is_spare_pant && (!this.pantAllOptionSelectedCheck() || !this.pantSizeSelectedCheck() || !this.pantAllCorrectCheck())){
           //check pant is complete
-          console.log("is spare_pant")
+          alert("先にパンツの指定を完了させてください")
+          this.designActiveId = this.designData.findIndex(item => item.is_pant && !item.is_spare_pant)
         }
       },
       itemCombineObj: function(){
@@ -893,7 +932,7 @@ export default {
       },
       sizeSelectedValue: function(){
         //update size selected data
-        if(this.sizeSortData.length){
+        if(this.sizeSortData.length && this.sizeSelectedValue){
           this.$store.dispatch('handleUpdateSizeSelectedData', {
             orderId: this.orderNowId,
             design: this.designActive.design_id,
@@ -918,7 +957,6 @@ export default {
           )
         }
       },
-
       correction_selected_id: function(){
         if(this.correction_selected_id && this.correctDetailData.findIndex(item => item.correct_id == this.correction_selected_id) == -1){
           this.getCorrectionDetailData(this.correction_selected_id)
@@ -1241,7 +1279,8 @@ export default {
         let ret = []
         this.designData.forEach(element => {
           let sizeDataOfDesign = this.sizeData.filter(item => item.design == element.design_id)
-          let sizeSelectedOfDesign = this.sizeSelectedData.findIndex(item => item.orderId == this.orderNowId && item.design == element.design_id)
+          let sizeSelectedOfDesign = this.sizeSelectedData.findIndex(item => item.orderId == this.orderNowId && item.design == element.design_id && item.item == element.item_id)
+          
           if(sizeDataOfDesign.length > 0 && (sizeSelectedOfDesign == -1 || !(this.sizeSelectedData[sizeSelectedOfDesign].id))){
             ret.push({design_id: element.design_id, item_id: element.item_id, design_name: element.design_label})
           }
@@ -1287,9 +1326,6 @@ export default {
         })
         return ret
       },
-      pantOptionSelectedCheck: function(){
-
-      },
       allCorrectSelectedCheck: function(){
         let ret = []
         if(this.designData){
@@ -1324,8 +1360,35 @@ export default {
           return false
         }
       },
-
+      hasSparePant: function(){
+        if(this.designData && this.designData.find(item => item.is_spare_pant)){
+          return true
+        } else{
+          return false
+        }
+      }
     },
+    updated: function () {
+      // 補正なしを上下センターでスクロールにできないか確認
+      this.$nextTick(function () {
+        let measure_scroll = this.$refs.measure_scroll;
+        let measure_scroll_ul = this.$refs.measure_scroll_ul;
+        if(measure_scroll && measure_scroll_ul){
+          measure_scroll_ul.style = ''
+          let scroll_height = measure_scroll.offsetHeight
+          let scroll_ul_height = measure_scroll_ul.offsetHeight
+          if(scroll_height < scroll_ul_height){
+            let noMeasureIndex = this.correctDetailActive.findIndex(item => (item.value == null || item.value == 0 || item.value == ''))
+            measure_scroll.scrollTop = (noMeasureIndex * 44 - measure_scroll.offsetHeight/2 + 22);
+          } else{
+            measure_scroll_ul.style.position = 'absolute'
+            measure_scroll_ul.style.width = "100%"
+            measure_scroll_ul.style.top = "50%"
+            measure_scroll_ul.style.transform = "translateY(-50%)"
+          }
+        }
+      })
+    }
 };
 </script>
 

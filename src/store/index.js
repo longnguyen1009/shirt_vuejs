@@ -301,13 +301,15 @@ export default new Vuex.Store({
 
         //check is pant and copy to spare pant
         let itemDataTemp = state.itemData.find(item => item.orderId == optionData.orderId)
-        let designDataTemp = itemDataTemp.design
-        let designNowTemp = designDataTemp.find(item => item.item_id == optionData.item_id && item.design_id == optionData.design_id)
-        if(designNowTemp && designNowTemp.is_pant == true){
-          let designSpareTemp = designDataTemp.find(item => item.design_id == optionData.design_id && item.is_spare_pant)
-          if(designSpareTemp){
-            let optionDataCopy = {...optionData, item_id: designSpareTemp.item_id}
-            state.optionSelectedData.push(optionDataCopy)
+        if(itemDataTemp){
+          let designDataTemp = itemDataTemp.design
+          let designNowTemp = designDataTemp.find(item => item.item_id == optionData.item_id && item.design_id == optionData.design_id)
+          if(designNowTemp && designNowTemp.is_pant == true){
+            let designSpareTemp = designDataTemp.find(item => item.design_id == optionData.design_id && item.is_spare_pant)
+            if(designSpareTemp){
+              let optionDataCopy = {...optionData, item_id: designSpareTemp.item_id}
+              state.optionSelectedData.push(optionDataCopy)
+            }
           }
         }
       }
@@ -554,7 +556,23 @@ export default new Vuex.Store({
         state.sizeSelectedData[sizeSelectedIndex] = sizeData
       } else{
         state.sizeSelectedData.push(sizeData)
+        
+        //check is pant and copy to spare pant
+        let itemDataTemp = state.itemData.find(item => item.orderId == sizeData.orderId)
+        if(itemDataTemp){
+          let designDataTemp = itemDataTemp.design
+          let designNowTemp = designDataTemp.find(item => item.item_id == sizeData.item && item.design_id == sizeData.design)
+          if(designNowTemp && designNowTemp.is_pant == true){
+            let designSpareTemp = designDataTemp.find(item => item.design_id == sizeData.design && item.is_spare_pant)
+            if(designSpareTemp){
+              console.log({...sizeData, item: designSpareTemp.item_id})
+              let sizeDataCopy = {...sizeData, item: designSpareTemp.item_id}
+              state.sizeSelectedData.push(sizeDataCopy)
+            }
+          }
+        }
       }
+
       state.sizeSelectedData = [...state.sizeSelectedData]
     },
     updateCorrectDetailData(state, correctData){
@@ -578,8 +596,44 @@ export default new Vuex.Store({
         ))
         if(correctedIndex !== -1){
           state.correctSelectedData[correctedIndex] = element
+
+          //check is pant and copy to spare pant
+          let itemDataTemp = state.itemData.find(item => item.orderId == element.order_id)
+          if(itemDataTemp){
+            let designDataTemp = itemDataTemp.design
+            let designNowTemp = designDataTemp.find(item => item.item_id == element.item_id && item.design_id == element.design_id)
+            if(designNowTemp && designNowTemp.is_pant == true){
+              let designSpareTemp = designDataTemp.find(item => item.design_id == element.design_id && item.is_spare_pant)
+              let correctedIndex2 = state.correctSelectedData.findIndex(item => (
+                item.order_id == element.order_id
+                && item.design_id == element.design_id
+                && item.item_id == designSpareTemp.item_id
+                && item.correct_id == element.correct_id
+              ))
+              let correctElementCopy = {...element, item_id: designSpareTemp.item_id}
+              if(designSpareTemp && correctedIndex2 == -1){
+                state.correctSelectedData.push(correctElementCopy)
+              } else if(correctedIndex2 != -1 && !state.correctSelectedData[correctedIndex2].correct_detail_id){
+                state.correctSelectedData[correctedIndex2] = correctElementCopy
+              }
+            }
+          }
         } else{
           state.correctSelectedData.push(element)
+
+          //check is pant and copy to spare pant
+          let itemDataTemp = state.itemData.find(item => item.orderId == element.order_id)
+          if(itemDataTemp){
+            let designDataTemp = itemDataTemp.design
+            let designNowTemp = designDataTemp.find(item => item.item_id == element.item_id && item.design_id == element.design_id)
+            if(designNowTemp && designNowTemp.is_pant == true){
+              let designSpareTemp = designDataTemp.find(item => item.design_id == element.design_id && item.is_spare_pant)
+              if(designSpareTemp){
+                let correctElementCopy = {...element, item_id: designSpareTemp.item_id}
+                state.correctSelectedData.push(correctElementCopy)
+              }
+            }
+          }
         }
       })
       state.correctSelectedData = [...state.correctSelectedData]
@@ -597,6 +651,20 @@ export default new Vuex.Store({
             state.correctSelectedData[correctIndex] = element
           } else{
             state.correctSelectedData.push(element)
+
+            //check is pant and copy to spare pant
+            let itemDataTemp = state.itemData.find(item => item.orderId == element.order_id)
+            if(itemDataTemp){
+              let designDataTemp = itemDataTemp.design
+              let designNowTemp = designDataTemp.find(item => item.item_id == element.item_id && item.design_id == element.design_id)
+              if(designNowTemp && designNowTemp.is_pant == true){
+                let designSpareTemp = designDataTemp.find(item => item.design_id == element.design_id && item.is_spare_pant)
+                if(designSpareTemp){
+                  let correctElementCopy = {...element, item_id: designSpareTemp.item_id}
+                  state.correctSelectedData.push(correctElementCopy)
+                }
+              }
+            }
           }
         })
 

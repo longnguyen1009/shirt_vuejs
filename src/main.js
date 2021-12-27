@@ -26,7 +26,9 @@ Vue.use(VueCarousel);
 
 //VueLazyload
 import VueLazyload from 'vue-lazyload'
-Vue.use(VueLazyload)
+Vue.use(VueLazyload, {
+  error: '/html/upload/save_image/no-image.jpg'
+})
 
 new Vue({
   router,store,

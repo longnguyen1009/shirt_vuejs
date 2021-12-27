@@ -709,6 +709,9 @@ pre{
   top: 0;
   left: 0;
 }
+.measure-sub-list .measure-sub-item:first-child{
+  border-top: 1px solid #676665;
+}
 .measure-sub-item{
   height: 45px;
   border-bottom: 1px solid #676665;
@@ -850,10 +853,11 @@ pre{
 }
 .simuright-kiji-name{
   display: block;
-  padding: 5px 15px 15px 15px;
+  padding-bottom: 7.5px;
 }
 .simuright-kiji-text-top{
   display: block;
+  height: 100%;
   padding: 15px 15px 5px 15px;
 }
 .simuright-kiji-icon{
@@ -933,6 +937,7 @@ pre{
   font-size: 11px;
   font-weight: bold;
   background-color: #444444;
+  min-height: 50px;
 }
 .simuright-option-icon{
   font-size: 15px;

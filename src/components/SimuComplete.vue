@@ -7,7 +7,7 @@
             <div class="simu-confirm-card-top d-flex justify-content-between align-items-stretch">
               <div class="simu-confirm-kiji d-flex justify-content-start flex-grow-1">
                 <span class="simu-confirm-kiji-img">
-                  <img :src="kiji_img_path + getKijiObj(Item.product_id).img" alt="">
+                  <img :src="kiji_img_path + getKijiObj(Item.product_id).img" @error="imgError" alt="">
                 </span>
                 <div class="simu-confirm-kiji-detail d-flex flex-column justify-content-between">
                   <p class="">
@@ -186,16 +186,16 @@ export default {
       })
       return ret
     },
-    //1129-273-0010 -> 112927300100000
+    //1129-273-0010 -> A112927300100000A
     fomatPoCode: function(pocode){
-      return pocode.replaceAll('-', '') + '0000';
+      return 'A' + pocode.replaceAll('-', '') + '0000' + 'A';
     },
     fomatPayment: function(payment){
       let paymentTemp = payment.toString()
       while (paymentTemp.length < 7) {
         paymentTemp = '0' + paymentTemp;
       }
-      return paymentTemp
+      return 'B' + paymentTemp + 'B'
     }
   },
   props: [],

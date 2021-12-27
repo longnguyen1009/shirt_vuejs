@@ -21,7 +21,7 @@ export default {
       return ret
     },
     imgError: function(e){
-      e.target.src = this.kiji_img_path + 'no_image_product.png'
+      e.target.src = this.kiji_img_path + 'no-image.jpg'
     },
     imgErrorBlank: function(e){
       e.target.src = this.kiji_img_path + 'notfounder.png'
