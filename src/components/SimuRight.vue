@@ -42,7 +42,7 @@
                   @touchstart="touchStart" @touchmove="touchMove" @touchend="touchEnd" 
                   :key="Option.parent_id"
                   v-if="checkDependOnParent(Option)"
-                  :class="{codeMode : (optionMode == 1 && Option.parent_id != optionCustomNameID), notComplete: checkOptionNotComplete(Option.parent_id)}"
+                  :class="{codeMode : (optionMode == 1 && optionCustomNameID.indexOf(Option.parent_id) == -1), notComplete: checkOptionNotComplete(Option.parent_id)}"
                   @click="openDetailOption(Option.parent_id)"
                   >
                     <span class="simuright-options-notcomplete simu-alert" v-if="checkOptionNotComplete(Option.parent_id)">
@@ -268,7 +268,7 @@ export default {
           genreData: {},
 
           //刺繍ネームID
-          optionCustomNameID: 35,
+          optionCustomNameID: [35, 98], //35: Jacketの刺繍ネーム, 98: Shirtの刺繍ネーム
 
           correctFixedData: [
             {
@@ -386,7 +386,7 @@ export default {
         this.$store.dispatch('handleChangeModelTemp', {styleId: this.styleSelected, modelId: this.modelSelected})
       },
       openDetailOption: function(optionid){
-        if(this.optionMode == 1 && optionid != 35){
+        if(this.optionMode == 1 && this.optionCustomNameID.indexOf(optionid) == -1){
           this.qrCodeShow = true
         } else{
           this.$store.dispatch('handleChangeOptionDetailActive', optionid)
@@ -532,7 +532,9 @@ export default {
           }
           ret += this.optionSelectedData[option_selected_index].name
 
-          if(parent_id == this.optionCustomNameID){
+          //刺繡ネームfixed
+
+          if(this.optionCustomNameID.indexOf(parent_id) != -1){
             if(this.optionSelectedData[option_selected_index].custom_name_color_id){
               ret += '/' + this.optionSelectedData[option_selected_index].custom_name_color_name
                     + '/' + this.optionSelectedData[option_selected_index].custom_name_val
@@ -1378,8 +1380,10 @@ export default {
           let scroll_height = measure_scroll.offsetHeight
           let scroll_ul_height = measure_scroll_ul.offsetHeight
           if(scroll_height < scroll_ul_height){
-            let noMeasureIndex = this.correctDetailActive.findIndex(item => (item.value == null || item.value == 0 || item.value == ''))
-            measure_scroll.scrollTop = (noMeasureIndex * 44 - measure_scroll.offsetHeight/2 + 22);
+            let noMeasureIndex = this.correctDetailActive.findIndex(item => item.sort_no == 0)
+            if(noMeasureIndex != -1){
+              measure_scroll.scrollTop = (noMeasureIndex * 44 - measure_scroll.offsetHeight/2 + 22)
+            }
           } else{
             measure_scroll_ul.style.position = 'absolute'
             measure_scroll_ul.style.width = "100%"

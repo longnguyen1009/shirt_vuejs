@@ -264,9 +264,14 @@ export default {
       loaddingDataCorrectDetail: false,
       tempCorrectDetailId: null,
       // HcErrorLogin: false
-      correctCustomValue: '',
+
+      //刺繍ネームID fixed
+      optionCustomNameID: [35, 98], //35: Jacketの刺繍ネーム, 98: Shirtの刺繍ネーム
+
+      //パンツの股下 fixed
       correctCustomArr :[25, 26],
-      correctCustomError: false
+      correctCustomError: false,
+      correctCustomValue: '',
     }
   },
   methods: {
@@ -303,7 +308,8 @@ export default {
         )
         if(optionIndex !== -1){
           let ret = this.optionSelectedData[optionIndex].name
-          if(parent_id == 35){
+          //刺繡ネーム
+          if(this.optionCustomNameID.indexOf(parent_id) != -1){
             ret += '/' +this.optionSelectedData[optionIndex].custom_name_color_name
           }
           return ret
@@ -941,8 +947,10 @@ export default {
           let scroll_height = measure_scroll.offsetHeight
           let scroll_ul_height = measure_scroll_ul.offsetHeight
           if(scroll_height < scroll_ul_height){
-            let noMeasureIndex = this.correctDetailActive.findIndex(item => (item.value == null || item.value == 0 || item.value == ''))
-            measure_scroll.scrollTop = (noMeasureIndex * 44 - measure_scroll.offsetHeight/2 + 22);
+            let noMeasureIndex = this.correctDetailActive.findIndex(item => (item.sort_no == 0))
+            if(noMeasureIndex != -1){
+              measure_scroll.scrollTop = (noMeasureIndex * 44 - measure_scroll.offsetHeight/2 + 22);
+            }
           } else{
             measure_scroll_ul.style.position = 'absolute'
             measure_scroll_ul.style.width = "100%"

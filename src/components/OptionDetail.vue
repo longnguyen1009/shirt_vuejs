@@ -14,8 +14,8 @@
       <div class="option-detail-confirm d-flex justify-content-between">
         <div class="option-detail-moreinfo d-flex justify-content-between flex-column">
           <div class="option-detail-moreinfo-top">
-            <span class="option-detail-val" v-if="OptionDetailData.color_code && (optionParent.type == 'button' || optionParent.type == 'uraji')">C/#{{OptionDetailData.color_code}}</span>
-            <span class="option-detail-val" v-if="optionParent.type == 'uraji' && OptionDetailData.composition">
+            <span class="option-detail-val" v-if="OptionDetailData.color_code && (arrOptionSpecialType.indexOf(optionParent.type) != -1)">C/#{{OptionDetailData.color_code}}</span>
+            <span class="option-detail-val" v-if="(optionParent.type == 'uraji' || optionParent.type == 'doura' || optionParent.type == 'sodeura') && OptionDetailData.composition">
               {{OptionDetailData.composition}}
             </span>
           </div>
@@ -57,7 +57,7 @@ export default {
       this.$emit("option-confirm", {"id": this.OptionDetailData.id, "img": this.OptionDetailData.img})
     }
   },
-  props: ['OptionDetailData', 'cateCurrObj', 'optionParent'],
+  props: ['OptionDetailData', 'cateCurrObj', 'optionParent', 'arrOptionSpecialType'],
   mounted() {
   },
   computed: {

@@ -31,7 +31,7 @@
                 <div class="simuright-kiji-text-top d-flex flex-column justify-content-between">
                   <span class="simuright-kiji-name">{{Option.name}}</span>
                   <span class="simuright-kiji-name">
-                    <span v-if="(optionParent.type == 'button' || optionParent.type == 'uraji') && Option.color_code">C/#{{Option.color_code}}</span>
+                    <span v-if="(arrOptionSpecialType.indexOf(optionParent.type) != -1) && Option.color_code">C/#{{Option.color_code}}</span>
                   </span>
                 </div>
               </div>
@@ -82,6 +82,7 @@
         :OptionDetailData="OptionDetailData"
         :cateCurrObj="cateCurrObj"
         :optionParent="optionParent"
+        :arrOptionSpecialType="arrOptionSpecialType"
         @close-detail="closeOptionDetail($event)"
         @option-confirm="confirmOptionDetail($event)"
         />
@@ -121,11 +122,16 @@ export default {
       optionCustomNameSubLists: [],
       optionCustomNameSelected: 0,
       optionCustomNameText: '',
-      //刺繍ネームID
+
+      //刺繍ネーム
+      arrJacketCustomNameFixed: [35, 43, 36], //35: Jacketの刺繍ネーム、43: Jacketの刺繍ネームの無し、36: Jacketの刺繍糸色ID
+      arrShirtCustomNameFixed: [98, 163, 36], //98: Shirtの刺繍ネーム、163: Shirtの刺繍ネームの無し、36: Shirtの刺繍糸色ID
       optionCustomNameID: 35,
       optionCustomNameNot: 43,
-      //刺繍糸色ID
-      optionCustomNameSubParent: 36
+      optionCustomNameSubParent: 36,
+
+      //ボータン、裏地、胴裏、袖浦のtype fixed
+      arrOptionSpecialType: ['button', 'uraji', 'doura', 'sodeura']
     };
   },
   methods: {
@@ -397,6 +403,16 @@ export default {
   },
   props: ['orderId'],
   mounted() {
+    //check is shirt and is custom name option
+
+    console.log(this.optionSelectedData)
+    //シャツの刺繍位置 fixed
+    if(this.optionDetailActive == this.arrShirtCustomNameFixed[0]){
+      this.optionCustomNameID = this.arrShirtCustomNameFixed[0],
+      this.optionCustomNameNot = this.arrShirtCustomNameFixed[1],
+      this.optionCustomNameSubParent = this.arrShirtCustomNameFixed[2]
+    }
+
     //if save loaded data then no download data from api
     if(this.optionDataLoaded){
       const loadedDataIndex = this.optionDataLoaded.findIndex(
