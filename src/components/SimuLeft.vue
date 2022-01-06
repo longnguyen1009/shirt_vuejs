@@ -1,8 +1,8 @@
 <template>
   <div class="container-simuleft">
     <div class="simuleft-top">
-      <h3 class="simuleft-top-style">{{styleDataObj.name}}</h3>
-      <h4 class="simuleft-top-model">{{modelDataObj.name}}</h4>
+      <h3 class="simuleft-top-style font-poppins">{{styleDataObj.name}}</h3>
+      <h4 class="simuleft-top-model font-poppins">{{modelDataObj.name}}</h4>
       <p class="simuleft-top-itemcombine" v-if="itemCombineActive">{{itemCombineActive.name}}</p>
     </div>
 

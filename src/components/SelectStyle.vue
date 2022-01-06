@@ -7,20 +7,20 @@
             <div class="simu-styleItem-front">
               <img v-lazy="style_img_path + Item.image" alt="" @error="imgError">
               <div class="simu-styleItem-label">
-                <h2 class="simu-styleItem-name">{{Item.name}}</h2>
-                <h3 class="simu-styleItem-productname">{{moneyTypeShow02(Item.product_price * (1 + initialData.tax_rate/100), 'tax')}}</h3>
+                <h2 class="simu-styleItem-name font-poppins">{{Item.name}}</h2>
+                <h3 class="simu-styleItem-productname font-poppins">{{moneyTypeShow02(Item.product_price * (1 + initialData.tax_rate/100), 'tax')}}</h3>
               </div>
               <!-- <button class="simu-styleItem-btn">MORE DETAILS</button> -->
             </div>
             <div class="simu-styleItem-detail" :class="{active: styleActive == Item.id}">
               <span class="closeBtn" @click="styleClose(Item.id)"><img :src="main_path + 'html/user_data/assets/img/common/header_close_white.png'" alt=""></span>
               <div class="simu-styleItem-detailTop">
-                <h2 class="simu-styleItem-name">{{Item.name}}</h2>
+                <h2 class="simu-styleItem-name font-poppins">{{Item.name}}</h2>
                 <p class="simu-styleItem-description"><pre>{{Item.detail}}</pre></p>
               </div>
               <div class="simu-styleItem-model">
                 <ul class="simu-styleItem-modelList">
-                  <li v-for="styleModel in Item.model" :key="styleModel.id" @click="modelSelect(styleModel.id)" class="hover">
+                  <li v-for="styleModel in Item.model" :key="styleModel.id" @click="modelSelect(styleModel.id)" class="hover font-poppins">
                     {{styleModel.name}}
                   </li>
                 </ul>

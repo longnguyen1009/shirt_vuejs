@@ -177,7 +177,9 @@ export default {
             name: selectedObj.name,
             type: this.optionParent.type,
             cost: selectedObj.price,
-            glr_kind: selectedObj.glr_kind
+            glr_kind: selectedObj.glr_kind,
+            genre: this.optionParent.genre_id,
+            sort_no: this.optionParent.sort_no
           })
           this.closeOption()
         } else{
@@ -207,7 +209,9 @@ export default {
                   custom_name_color_id: (this.optionSelected == this.optionCustomNameNot) ? null : (optionCustomNameObj ? optionCustomNameObj.id : null),
                   custom_name_color_name: (this.optionSelected == this.optionCustomNameNot) ? null : (optionCustomNameObj ? optionCustomNameObj.name : null),
                   custom_name_val: (this.optionSelected == this.optionCustomNameNot) ? null : this.optionCustomNameText,
-                  glr_kind: selectedObj.glr_kind
+                  glr_kind: selectedObj.glr_kind,
+                  genre: this.optionParent.genre_id,
+                  sort_no: this.optionParent.sort_no
                 })
               this.closeOption()
           }
@@ -404,8 +408,6 @@ export default {
   props: ['orderId'],
   mounted() {
     //check is shirt and is custom name option
-
-    console.log(this.optionSelectedData)
     //シャツの刺繍位置 fixed
     if(this.optionDetailActive == this.arrShirtCustomNameFixed[0]){
       this.optionCustomNameID = this.arrShirtCustomNameFixed[0],

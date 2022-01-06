@@ -182,13 +182,13 @@
                   <ul class="modal-sizeconfirm-list d-flex justify-content-between flex-wrap align-content-start">
                     <li class="model-sizeconfirm-item d-flex justify-content-between align-items-between">
                       <span class="modal-sizeconfirm-label">サイズ</span>
-                      <span class="modal-sizeconfirm-result flex-grow-1">{{getSizeOfDesign(Design.design_id, Design.item_id)}}</span>
+                      <span class="modal-sizeconfirm-result flex-grow-1 font-ua">{{getSizeOfDesign(Design.design_id, Design.item_id)}}</span>
                     </li>
                     <li class="model-sizeconfirm-item d-flex justify-content-between align-items-between"
                     v-for="(CorrectDetailItem, correctID) in getSizeDataActiveByDesign(Design.design_id, Design.item_id)"
                     :key="correctID">
                       <span class="modal-sizeconfirm-label">{{CorrectDetailItem.correct_name}}</span>
-                      <span class="modal-sizeconfirm-result flex-grow-1">
+                      <span class="modal-sizeconfirm-result flex-grow-1 font-ua">
                         <span v-if="CorrectDetailItem.correct_detail_id">補正：{{CorrectDetailItem.correct_detail_name}}</span><br>
                         <span v-if="CorrectDetailItem.correct_custom_value">({{CorrectDetailItem.correct_custom_value}}cm)</span>
                         <span v-if="CorrectDetailItem.correct_result != null">仕上：{{CorrectDetailItem.correct_result}}cm</span>
@@ -244,6 +244,7 @@ import { mapGetters } from 'vuex'
 import SelectKiji from "../components/SelectKiji.vue"
 import SelectOption from "../components/SelectOption.vue"
 import Mixins from '../mixin/mixin'
+import _ from 'lodash'
 
 export default {
   name: "SimuConfirm",
@@ -279,9 +280,16 @@ export default {
       $(event.target).parents('.simu-confirm-detail').find('.simu-confirm-detail-bottom').toggleClass('on')
       $(event.target).toggleClass('on')
     },
+
+    //sort option parent by genre_id and sort_no
     getOptionParent(design_id, model){
+      function sortByGenreAndSortNo(a, b) {
+        return (a.genre_id === b.genre_id) ? (b.sort_no - a.sort_no) : (a.genre_id - b.genre_id)
+      }
+
       if(this.optionParentData.find(item => item.design_id == design_id && item.model == model)){
-        return this.optionParentData.find(item => item.design_id == design_id && item.model == model).parentData
+        let parentTemp = this.optionParentData.find(item => item.design_id == design_id && item.model == model).parentData
+        return parentTemp.slice().sort(sortByGenreAndSortNo)
       }
     },
     getOptionItem(orderId, combine_id, item_id, design_id, parent_id){

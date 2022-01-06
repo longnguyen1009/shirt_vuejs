@@ -17,8 +17,8 @@
     </div>
     <div class="simu-model-right d-flex flex-column justify-content-between">
       <div class="simu-model-rightTop">
-        <h3 class="simu-model-styleName">{{modelDetail.style_name}}</h3>
-        <h4 class="simu-model-modelTyle">{{modelDetail.name}}</h4>
+        <h3 class="simu-model-styleName font-poppins">{{modelDetail.style_name}}</h3>
+        <h4 class="simu-model-modelTyle font-poppins">{{modelDetail.name}}</h4>
         <p class="simu-model-description"><pre>{{modelDetail.detail}}</pre></p>
       </div>
       <div class="simu-model-itemSelect d-flex flex-column justify-content-end">
@@ -51,7 +51,7 @@
         </ul>
         <span class="simu-error-message" v-if="!checkErrorSelect">アイテム組み合わせが見つかりません。</span>
         <div class="simu-model-order d-flex justify-content-between align-items-end">
-          <p class="simu-model-price"><span v-if="initialData.shop_kind == 2">参考価格 {{moneyTypeShow02(modelDetail.price * (1 + initialData.tax_rate/100), 'tax')}}～</span></p>
+          <p class="simu-model-price font-poppins"><span v-if="initialData.shop_kind == 2">参考価格 {{moneyTypeShow02(modelDetail.price * (1 + initialData.tax_rate/100), 'tax')}}～</span></p>
           <div class="simu-nav-confirm d-flex justify-content-between">
             <button type="button" class="simu-common-btn btnSize01" @click="doBack">戻る</button>
             <button type="button" class="simu-common-btn btnSize01 gray" @click="doOrder" :disabled="!checkErrorSelect">決定</button>
