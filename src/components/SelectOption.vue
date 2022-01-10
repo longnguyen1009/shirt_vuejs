@@ -50,6 +50,17 @@
                 </li>
               </ul>
           </div>
+          <div class="option-customname-row option-customname-color" v-if="optionSelected != optionCustomNameNot && optionCustomNameSubParent02">
+            <p class="option-customname-title">刺繍位置</p>
+              <ul class="option-customname-itemList d-flex justify-content-start align-items-center simu-custom-scroll">
+                <li v-for="Option in optionCustomNameSubLists02" :key="Option.id"
+                class="optionItem d-flex justify-content-center align-items-center"
+                  :class="{active: (Option.id == optionCustomNameSelected02)}"
+                  @click="optionChangeCustomNameSub02(Option.id)">
+                    <span class="option-code">{{Option.name}}</span>
+                </li>
+              </ul>
+          </div>
           <div class="option-customname-row option-customname-color" v-if="optionSelected != optionCustomNameNot">
             <p class="option-customname-title">刺繍糸色</p>
               <ul class="option-customname-itemList d-flex justify-content-start align-items-center simu-custom-scroll">
@@ -119,16 +130,19 @@ export default {
       optionLists: [],
       loaddingOptionData: false,
 
+      //刺繍ネーム Customize 
       optionCustomNameSubLists: [],
+      optionCustomNameSubLists02: [],
       optionCustomNameSelected: 0,
+      optionCustomNameSelected02: 0,
       optionCustomNameText: '',
 
-      //刺繍ネーム
       arrJacketCustomNameFixed: [35, 43, 36], //35: Jacketの刺繍ネーム、43: Jacketの刺繍ネームの無し、36: Jacketの刺繍糸色ID
-      arrShirtCustomNameFixed: [98, 163, 36], //98: Shirtの刺繍ネーム、163: Shirtの刺繍ネームの無し、36: Shirtの刺繍糸色ID
-      optionCustomNameID: 35,
-      optionCustomNameNot: 43,
-      optionCustomNameSubParent: 36,
+      arrShirtCustomNameFixed: [98, 163, 36, 99], //98: Shirtの刺繍ネーム、163: Shirtの刺繍ネームの無し、36: Shirtの刺繍糸色ID, 99: Shirtの刺繍位置
+      optionCustomNameID: 35, //刺繍ネームID
+      optionCustomNameNot: 43, //刺繍ネームの無
+      optionCustomNameSubParent: 36, //刺繍糸色ID
+      optionCustomNameSubParent02: null, //Shirtの刺繍位置ID
 
       //ボータン、裏地、胴裏、袖浦のtype fixed
       arrOptionSpecialType: ['button', 'uraji', 'doura', 'sodeura']
@@ -181,6 +195,15 @@ export default {
             genre: this.optionParent.genre_id,
             sort_no: this.optionParent.sort_no
           })
+
+          //check is depend on Option and remove if depend_option_id is not selected
+          let parentLists = this.optionParentData.find(item => item.design_id == this.designActive.design_id && item.model == this.modelSelected)
+          let parentCurr = parentLists.parentData
+          let dependOptionParent = parentCurr.find(item => item.depend_parent_id == this.optionDetailActive)
+          if(dependOptionParent && dependOptionParent.depend_option_id != this.optionSelected){
+            this.$store.dispatch('handleRemoveOptionData', {orderId: this.orderId, combine_id: this.designActive.combine_id, item_id: this.designActive.item_id, design_id: this.designActive.design_id, parent_id: dependOptionParent.parent_id})
+          }
+          
           this.closeOption()
         } else{
           alert('オプションを選択してください')
@@ -190,37 +213,52 @@ export default {
         //刺繍ネーム
         if(this.optionSelected && this.optionDetailData.find(item => item.id == this.optionSelected)){
           let selectedObj = this.optionDetailData.find(item => item.id == this.optionSelected)
-          let optionCustomNameObj = this.optionCustomNameSubLists.find(item => item.id == this.optionCustomNameSelected)
           let reg = new RegExp('^[0-9a-zA-Z.\\s]+$');
-          if(this.optionSelected == this.optionCustomNameNot || (this.optionSelected != this.optionCustomNameNot && this.optionCustomNameSelected && this.optionCustomNameText != '' && reg.test(this.optionCustomNameText))){
-              this.$store.dispatch('handleChangeOption', {
-                  orderId: this.orderId,
-                  combine_id: this.designActive.combine_id,
-                  item_id: this.designActive.item_id,
-                  design_id: this.designActive.design_id,
-                  parent_id: this.optionDetailActive,
-                  option_id: this.optionSelected,
-                  cate_id: null,
-                  cate_name: null,
-                  option_img: selectedObj.simu_img,
-                  name: selectedObj.name,
-                  type: this.optionParent.type,
-                  cost: selectedObj.price,
-                  custom_name_color_id: (this.optionSelected == this.optionCustomNameNot) ? null : (optionCustomNameObj ? optionCustomNameObj.id : null),
-                  custom_name_color_name: (this.optionSelected == this.optionCustomNameNot) ? null : (optionCustomNameObj ? optionCustomNameObj.name : null),
-                  custom_name_val: (this.optionSelected == this.optionCustomNameNot) ? null : this.optionCustomNameText,
-                  glr_kind: selectedObj.glr_kind,
-                  genre: this.optionParent.genre_id,
-                  sort_no: this.optionParent.sort_no
-                })
-              this.closeOption()
+          if(this.optionSelected == this.optionCustomNameNot 
+            || (this.optionSelected != this.optionCustomNameNot && !this.optionCustomNameSubParent02 && this.optionCustomNameSelected && this.optionCustomNameText != '' && reg.test(this.optionCustomNameText))
+            || (this.optionSelected != this.optionCustomNameNot && this.optionCustomNameSubParent02 && this.optionCustomNameSelected02 && this.optionCustomNameSelected && this.optionCustomNameText != '' && reg.test(this.optionCustomNameText))
+          ){
+
+            //刺繡糸色
+            let optionCustomNameObj = this.optionCustomNameSubLists.length ? this.optionCustomNameSubLists.find(item => item.id == this.optionCustomNameSelected) : null
+            //刺繡位置
+            let optionCustomNameObj02 = this.optionCustomNameSubLists02 ? this.optionCustomNameSubLists02.find(item => item.id == this.optionCustomNameSelected02) : null
+
+            this.$store.dispatch('handleChangeOption', {
+                orderId: this.orderId,
+                combine_id: this.designActive.combine_id,
+                item_id: this.designActive.item_id,
+                design_id: this.designActive.design_id,
+                parent_id: this.optionDetailActive,
+                option_id: this.optionSelected,
+                cate_id: null,
+                cate_name: null,
+                option_img: selectedObj.simu_img,
+                name: selectedObj.name,
+                type: this.optionParent.type,
+                cost: selectedObj.price,
+                custom_name_color_id: (this.optionSelected == this.optionCustomNameNot) ? null : (optionCustomNameObj ? optionCustomNameObj.id : null),
+                custom_name_color_name: (this.optionSelected == this.optionCustomNameNot) ? null : (optionCustomNameObj ? optionCustomNameObj.name : null),
+                custom_name_position_id: (this.optionSelected == this.optionCustomNameNot) ? null : (optionCustomNameObj02 ? optionCustomNameObj02.id : null),
+                custom_name_potition_name: (this.optionSelected == this.optionCustomNameNot) ? null : (optionCustomNameObj02 ? optionCustomNameObj02.name : null),
+                custom_name_val: (this.optionSelected == this.optionCustomNameNot) ? null : this.optionCustomNameText,
+                glr_kind: selectedObj.glr_kind,
+                genre: this.optionParent.genre_id,
+                sort_no: this.optionParent.sort_no
+              })
+            this.closeOption()
           }
           else{
-            if(!this.optionCustomNameSelected){
+            if(this.optionCustomNameSubParent02 && !this.optionCustomNameSelected02){
               alert('刺繍糸色を選択してください。')
-            } else if(this.optionCustomNameText == ''){
+            } 
+            else if(!this.optionCustomNameSelected){
+              alert('刺繍糸色を選択してください。')
+            } 
+            else if(this.optionCustomNameText == ''){
               alert('ネームを入力してください。')
-            } else if(!reg.test(this.optionCustomNameText)){
+            } 
+            else if(!reg.test(this.optionCustomNameText)){
               alert('ネームは英数字で入力してください。')
             }
             return false
@@ -304,6 +342,21 @@ export default {
         }
       })
     },
+    setOptionCustomNameColor02: async function(customname_id){
+      await this.getOptionCustomNameColor(customname_id).then(response => {
+        if(response){
+            this.optionCustomNameSubLists02 = response.options[customname_id]
+            this.$store.dispatch('handleSaveOptionDataLoaded', {
+              model_id: this.modelSelected,
+              design_id: this.designActive.design_id,
+              parent_id: customname_id,
+              cateLists: response.cates,
+              optionLists: response.options
+            })
+            this.$store.dispatch('handleUpdateOptionDetailData', response.options)
+        }
+      })
+    },
     setOptionData: async function(){
         await this.getOptionData().then(response => {
           if(response){
@@ -346,6 +399,9 @@ export default {
         if(this.optionDetailActive == this.optionCustomNameID){
           this.optionCustomNameSelected = this.optionSelectedData[optionSelectedIndex].custom_name_color_id
           this.optionCustomNameText = this.optionSelectedData[optionSelectedIndex].custom_name_val
+          if(this.optionCustomNameSubParent02){
+            this.optionCustomNameSelected02 = this.optionSelectedData[optionSelectedIndex].custom_name_position_id
+          }
         }
       }
 
@@ -358,6 +414,9 @@ export default {
     },
     optionChangeCustomNameSub(sub_id){
       this.optionCustomNameSelected = sub_id
+    },
+    optionChangeCustomNameSub02(sub_id){
+      this.optionCustomNameSelected02 = sub_id
     },
     getMaxLengthCustomName: function(facatory_id){
       //ヤンアルタ
@@ -413,6 +472,7 @@ export default {
       this.optionCustomNameID = this.arrShirtCustomNameFixed[0],
       this.optionCustomNameNot = this.arrShirtCustomNameFixed[1],
       this.optionCustomNameSubParent = this.arrShirtCustomNameFixed[2]
+      this.optionCustomNameSubParent02 = this.arrShirtCustomNameFixed[3]
     }
 
     //if save loaded data then no download data from api
@@ -451,6 +511,21 @@ export default {
         this.optionCustomNameSubLists = this.optionDataLoaded[loadedCustomNameDataIndex].optionLists[this.optionCustomNameSubParent]
       } else{
         this.setOptionCustomNameColor(this.optionCustomNameSubParent)
+      }
+
+      // Shirtの刺繡位置
+      if(this.optionCustomNameSubParent02){
+        //load 刺繍糸色Data ID = 36
+        const loadedCustomNameDataIndex02 = this.optionDataLoaded.findIndex(
+          (item) => item.model_id == this.modelSelected
+          && item.design_id == this.designActive.design_id
+          && item.parent_id == this.optionCustomNameSubParent02
+        )
+        if(loadedCustomNameDataIndex02 !== -1) {
+          this.optionCustomNameSubLists02 = this.optionDataLoaded[loadedCustomNameDataIndex02].optionLists[this.optionCustomNameSubParent02]
+        } else{
+          this.setOptionCustomNameColor02(this.optionCustomNameSubParent02)
+        }
       }
     }
     this.setOptionSelected()

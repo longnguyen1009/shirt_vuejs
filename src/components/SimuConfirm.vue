@@ -10,7 +10,7 @@
                   <img :src="kiji_img_path + kijiObj(OrderTemp.product_id).img" alt="" @error="imgError">
                 </span>
                 <div class="simu-confirm-kiji-detail d-flex flex-column justify-content-between">
-                  <p class="">
+                  <p class="font-poppins font-medium">
                     <span class="simu-confirm-kiji-code">{{kijiObj(OrderTemp.product_id).code}}</span><br>
                     <span class="simu-confirm-kiji-name" v-if="kijiObj(OrderTemp.product_id).name">
                       {{kijiObj(OrderTemp.product_id).name}}
@@ -27,15 +27,15 @@
               </div>
               <div class="simu-confirm-card-bl">
                 <span class="simu-confirm-label">単価</span>
-                <span class="simu-confirm-card-value">{{moneyTypeShow02(getPriceOrder(OrderTemp.id))}}</span>
+                <span class="simu-confirm-card-value font-poppins font-medium">{{moneyTypeShow02(getPriceOrder(OrderTemp.id))}}</span>
               </div>
               <div class="simu-confirm-card-bl">
                 <span class="simu-confirm-label">数量</span>
-                <span class="simu-confirm-card-value">{{OrderTemp.quantity}}</span>
+                <span class="simu-confirm-card-value font-poppins font-medium">{{OrderTemp.quantity}}</span>
               </div>
               <div class="simu-confirm-card-bl">
                 <span class="simu-confirm-label">小計</span>
-                <span class="simu-confirm-card-value">{{moneyTypeShow02(OrderTemp.quantity * getPriceOrder(OrderTemp.id))}}</span>
+                <span class="simu-confirm-card-value font-poppins font-medium">{{moneyTypeShow02(OrderTemp.quantity * getPriceOrder(OrderTemp.id))}}</span>
               </div>
             </div>
             <div class="simu-confirm-detail">
@@ -55,6 +55,9 @@
                           <span class="simu-confirm-detail-label">{{OptionParent.name}}</span>
                           <span class="simu-confirm-detail-value">
                             {{getNameOptionItem(OrderTemp.id, Design.combine_id, Design.item_id, Design.design_id, OptionParent.parent_id)}}
+                            <span class="simu-alert" v-if="checkAction && !getNameOptionItem(OrderTemp.id, Design.combine_id, Design.item_id, Design.design_id, OptionParent.parent_id)">
+                              <i class="fas fa-exclamation-triangle"></i>&nbsp;選択してください。
+                            </span>
                           </span>
                           <button type="button" class="simu-confirm-detail-change btn btn-outline-dark" 
                           @click="showDetail(OrderTemp.id, OrderTemp.model, Design.combine_id, Design.item_id, Design.design_id, OptionParent.parent_id)">
@@ -92,8 +95,8 @@
               </div>
               <div class="simu-confirm-payment-right d-flex flex-column justify-content-between">
                 <span class="simu-confirm-label">商品価格(税込)</span>
-                <span class="simu-confirm-payment-price">{{moneyTypeShow02(getSumPrice() * (1 + initialData.tax_rate/100))}}</span>
-                <ul class="simu-confirm-label simu-confirm-payment-cost" v-if="isStaff">
+                <span class="simu-confirm-payment-price font-poppins font-medium">{{moneyTypeShow02(getSumPrice() * (1 + initialData.tax_rate/100))}}</span>
+                <ul class="simu-confirm-label simu-confirm-payment-cost font-poppins" v-if="isStaff">
                   <li v-for="(OrderTemp, id) in orderTempItem" :key="id">{{parseInt(OrderTemp.cost_temp ? OrderTemp.cost_temp : 0)}}</li>
                 </ul>
               </div>
@@ -182,13 +185,13 @@
                   <ul class="modal-sizeconfirm-list d-flex justify-content-between flex-wrap align-content-start">
                     <li class="model-sizeconfirm-item d-flex justify-content-between align-items-between">
                       <span class="modal-sizeconfirm-label">サイズ</span>
-                      <span class="modal-sizeconfirm-result flex-grow-1 font-ua">{{getSizeOfDesign(Design.design_id, Design.item_id)}}</span>
+                      <span class="modal-sizeconfirm-result flex-grow-1 font-ua font-medium">{{getSizeOfDesign(Design.design_id, Design.item_id)}}</span>
                     </li>
                     <li class="model-sizeconfirm-item d-flex justify-content-between align-items-between"
                     v-for="(CorrectDetailItem, correctID) in getSizeDataActiveByDesign(Design.design_id, Design.item_id)"
                     :key="correctID">
                       <span class="modal-sizeconfirm-label">{{CorrectDetailItem.correct_name}}</span>
-                      <span class="modal-sizeconfirm-result flex-grow-1 font-ua">
+                      <span class="modal-sizeconfirm-result flex-grow-1 font-ua font-medium">
                         <span v-if="CorrectDetailItem.correct_detail_id">補正：{{CorrectDetailItem.correct_detail_name}}</span><br>
                         <span v-if="CorrectDetailItem.correct_custom_value">({{CorrectDetailItem.correct_custom_value}}cm)</span>
                         <span v-if="CorrectDetailItem.correct_result != null">仕上：{{CorrectDetailItem.correct_result}}cm</span>
@@ -244,7 +247,6 @@ import { mapGetters } from 'vuex'
 import SelectKiji from "../components/SelectKiji.vue"
 import SelectOption from "../components/SelectOption.vue"
 import Mixins from '../mixin/mixin'
-import _ from 'lodash'
 
 export default {
   name: "SimuConfirm",
@@ -273,6 +275,8 @@ export default {
       correctCustomArr :[25, 26],
       correctCustomError: false,
       correctCustomValue: '',
+      // checkStatus
+      checkAction: false
     }
   },
   methods: {
@@ -317,8 +321,8 @@ export default {
         if(optionIndex !== -1){
           let ret = this.optionSelectedData[optionIndex].name
           //刺繡ネーム
-          if(this.optionCustomNameID.indexOf(parent_id) != -1){
-            ret += '/' +this.optionSelectedData[optionIndex].custom_name_color_name
+          if(this.optionCustomNameID.indexOf(parent_id) != -1 && this.optionSelectedData[optionIndex].custom_name_color_name){
+            ret += '/' + this.optionSelectedData[optionIndex].custom_name_color_name + '/' + this.optionSelectedData[optionIndex].custom_name_val
           }
           return ret
         } else{
@@ -350,7 +354,14 @@ export default {
       this.$store.dispatch('handleUpdateStockSelectedData', null)
     },
     confirmModalShow(){
-      this.orderConfirmCheck = 1
+      //check all option selected again
+      if(this.allOptionSelectedCheck.length > 0){
+        this.checkAction = true
+        alert("選択されていない項目があります。ご確認ください。")
+      } else{
+        this.checkAction = false
+        this.orderConfirmCheck = 1
+      }
     },
     confirmModalClose(){
       this.orderConfirmCheck = null
@@ -781,8 +792,8 @@ export default {
   props: [],
   mounted(){
     this.deli_id = this.deliActive
-    //save orderItemNow to arrOrderItem
 
+    //save orderItemNow to arrOrderItem
     if(!this.initialData.orderCart){
       this.$store.dispatch('handleUpdateOrderTemp',{
         id: this.orderNowId,
@@ -801,6 +812,7 @@ export default {
         stock: this.stockSelectedData.find(item => item.orderId == this.orderNowId).stockVal
       })
     } else{
+      //remove orderCart flag
       this.$store.dispatch('handleChangeIniData', {...this.initialData, orderCart: null})
     }
 
@@ -942,6 +954,49 @@ export default {
       } else{
         return false
       }
+    },
+    allOptionSelectedCheck: function(){
+      let ret = []
+      this.orderTempItem.forEach(OrderItem => {
+        let designData = this.designData(OrderItem.id)
+
+        designData.forEach(design => {
+          let allParents = this.optionParentData.find(item => item.design_id == design.design_id && item.model == OrderItem.model)
+          if(allParents){
+            allParents.parentData.forEach(parent => {
+              if(!parent.depend_parent_id) {
+                let tempOptionSelectedIndex = this.optionSelectedData.findIndex(item2 => (
+                  item2.orderId == OrderItem.id
+                  && item2.item_id == design.item_id
+                  && item2.design_id == design.design_id
+                  && item2.parent_id == parent.parent_id
+                ))
+                if(tempOptionSelectedIndex == -1){
+                  ret.push({design_id: design.design_id, design_name: design.design_label, item_id: design.item_id, parent_id: parent.parent_id, parent_name: parent.name})
+                }
+              } else{
+                  let tempOptionDependSelectedIndex = this.optionSelectedData.findIndex(item2 => (
+                    item2.orderId == OrderItem.id
+                    && item2.item_id == design.item_id
+                    && item2.design_id == design.design_id
+                    && item2.parent_id == parent.depend_parent_id
+                    && item2.option_id == parent.depend_option_id
+                  ))
+                  let tempOptionSelectedIndex = this.optionSelectedData.findIndex(item2 => (
+                    item2.orderId == OrderItem.id
+                    && item2.item_id == design.item_id
+                    && item2.design_id == design.design_id
+                    && item2.parent_id == parent.parent_id
+                  ))
+                  if(tempOptionDependSelectedIndex !== -1 && tempOptionSelectedIndex == -1){
+                    ret.push({design_id: design.design_id, design_name: design.design_label, item_id: design.item_id, parent_id: parent.parent_id, parent_name: parent.name})
+                  }
+              }
+            })
+          }
+        })
+      })
+      return ret
     }
   },
 

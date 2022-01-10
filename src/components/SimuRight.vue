@@ -139,7 +139,7 @@
                     <div class="simuright-options-measureValue">
                       <span v-if="correctSelectedItem.base_val != null">スペック：{{ correctSelectedItem.base_val ? correctSelectedItem.base_val : 0 }}cm</span>
                       <span v-if="correctSelectedItem.correct_detail_id">補正：{{correctSelectedItem.correct_detail_name}}</span>
-                      <span v-if="correctSelectedItem.correct_custom_value">({{correctSelectedItem.correct_custom_value}}cm)</span>
+                      <span v-if="correctSelectedItem.correct_custom_value">({{round(correctSelectedItem.correct_custom_value, 1).toFixed(1)}}cm)</span>
                       <span v-if="correctSelectedItem.correct_result != null && correctSelectedItem.correct_detail_id">仕上：{{correctSelectedItem.correct_result}}cm</span>
                     </div>
                   </li>
@@ -187,9 +187,9 @@
       </div>
       <div class="simuright-price d-flex justify-content-between">
           <div class="simuright-price-left d-flex justify-content-end flex-column">
-            <p class="simuright-prices-basic" v-if="initialData.shop_kind == 2">商品価格：<span v-if="combinePrice">{{moneyTypeShow02(combinePrice * (1 + initialData.tax_rate/100))}}</span><br>
-            <span>+ カスタマイズ価格：<span v-if="optionPrice > 0">{{moneyTypeShow02(optionPrice * (1 + initialData.tax_rate/100))}}</span></span></p>
-            <p class="simuright-prices-total">お支払い金額: <span class="totalPayment"><span v-if="sumPayment > 0">{{moneyTypeShow02(sumPayment * (1 + initialData.tax_rate/100), 'tax')}}</span></span></p>
+            <p class="simuright-prices-basic" v-if="initialData.shop_kind == 2">商品価格：<span v-if="combinePrice" class="font-poppins font-light">{{moneyTypeShow02(combinePrice * (1 + initialData.tax_rate/100))}}</span><br>
+            <span>+ カスタマイズ価格：<span v-if="optionPrice > 0" class="font-poppins font-light">{{moneyTypeShow02(optionPrice * (1 + initialData.tax_rate/100))}}</span></span></p>
+            <p class="simuright-prices-total">お支払い金額: <span class="totalPayment font-poppins font-normal"><span v-if="sumPayment > 0">{{moneyTypeShow02(sumPayment * (1 + initialData.tax_rate/100), 'tax')}}</span></span></p>
           </div>
           <div class="simuright-price-right d-flex justify-content-between flex-column">
             <p class="delivery-date"><span v-if="deli_date">仕上がり予定日：{{deli_date}}</span></p>
@@ -544,32 +544,55 @@ export default {
         }
         return ''
       },
+      //Next button click, check kiji, hc, all option, all size, all correct is selected
       doOrderComfirm(){
-        console.log(this.orderTempItem)
         if(!this.kijiActive){
           alert('生地を選択してください。')
+          return
         }
-        else if(!this.initialData.customer_id){
+        if(!this.initialData.customer_id){
           alert('HC番号をを設定ください。')
-        } 
+          return
+        }
+        let designNow = this.designDataSelectedStatus.find(item => item.design_id == this.designActiveObj.design_id && item.item_id == this.designActiveObj.item_id)
+        if(!designNow.status){
+          this.checkAction = true
+          $('.simuright-options-row.show').removeClass('show')
+          alert('選択されていない項目があります。ご確認ください。')
+          return
+        }
+        let designNext = this.designDataSelectedStatus.find(item => item.status == 0)
+        if(designNext){
+          this.checkAction = true
+          $('.simuright-options-row.show').removeClass('show')
+          alert(designNext.design_label + 'は選択されていない項目があります。ご確認ください。')
+          return
+        }
+        if(this.designDataSelectedStatus.find(item => item.design_id == this.designActiveObj.design_id && item.item_id == this.designActiveObj.item_id && !item.status)){
+          this.checkAction = true
+          $('.simuright-options-row.show').removeClass('show')
+          alert('選択されていない項目があります。ご確認ください。')
+          return
+        }
         else if(this.sizeSelectedCheck.length){
           this.checkAction = true
-          console.log(this.sizeSelectedCheck)
           alert('選択されていない項目があります。ご確認ください。')
+          return
         } 
         else if(this.allOptionSelectedCheck.length){
           this.checkAction = true
-          console.log(this.allOptionSelectedCheck)
           alert('選択されていない項目があります。ご確認ください。')
+          return
         } 
         else if(this.allCorrectSelectedCheck.length){
           this.checkAction = true
-          console.log(this.allCorrectSelectedCheck)
           alert('選択されていない項目があります。ご確認ください。')
+          return
         } 
         else if(this.category_select == this.shirt_cate && !this.neckSelectedValue){
           this.checkAction = true
           alert('選選択されていない項目があります。ご確認ください。')
+          return
         } 
         else{
           this.checkAction = false
@@ -815,45 +838,6 @@ export default {
           }
         }
         return true
-      },
-      pantAllOptionSelectedCheck: function(){
-        if(this.hasSparePant){
-          let design = this.designData.find(item => item.is_pant && item.is_spare_pant == false)
-          let sortArr = this.allOptionSelectedCheck.filter(item => 
-            item.design_id == design.design_id
-            && item.item_id == design.item_id
-          )
-          if(sortArr.length > 0){
-            return false
-          }
-        }
-        return true
-      },
-      pantSizeSelectedCheck: function(){
-        if(this.hasSparePant){
-          let design = this.designData.find(item => item.is_pant && item.is_spare_pant == false)
-          let sortArr = this.sizeSelectedCheck.filter(item => 
-            item.design_id == design.design_id
-            && item.item_id == design.item_id
-          )
-          if(sortArr.length > 0){
-            return false
-          }
-        }
-        return true
-      },
-      pantAllCorrectCheck: function(){
-        if(this.hasSparePant){
-          let design = this.designData.find(item => item.is_pant && item.is_spare_pant == false)
-          let sortArr = this.allCorrectSelectedCheck.filter(item => 
-            item.design_id == design.design_id
-            && item.item_id == design.item_id
-          )
-          if(sortArr.length > 0){
-            return false
-          }
-        }
-        return true
       }
     },
     mounted() {
@@ -874,6 +858,8 @@ export default {
       if(this.kijiActive && this.kijiData.length && !(this.kijiData.find(item => item.id == this.kijiActive))){
         this.$store.dispatch('handleChangeKiji', null)
       }
+
+      this.$store.dispatch('handleChangeSpareComplete', 0)
       
     },
     watch: {
@@ -920,7 +906,11 @@ export default {
         }
 
         //check designActive is spare_pant
-        if(this.designActiveObj && this.designActiveObj.is_spare_pant && (!this.pantAllOptionSelectedCheck() || !this.pantSizeSelectedCheck() || !this.pantAllCorrectCheck())){
+        if(this.designActiveObj && this.designActiveObj.is_spare_pant 
+          && this.designDataSelectedStatus.find(item => item.is_pant && !item.is_spare_pant && !item.status) 
+          && this.designDataSelectedStatus.find(item => item.is_pant && item.is_spare_pant && !item.status)
+          && !this.spare_complete
+        ){
           //check pant is complete
           alert("先にパンツの指定を完了させてください")
           this.designActiveId = this.designData.findIndex(item => item.is_pant && !item.is_spare_pant)
@@ -1019,6 +1009,11 @@ export default {
       },
       kijiActive: function(){
         this.updateDeliverySchedule()
+      },
+      designDataSelectedStatus: function(){
+        if(!this.spare_complete && this.designDataSelectedStatus.find(item => item.is_pant && item.is_spare_pant && item.status == 1)){
+          this.$store.dispatch('handleChangeSpareComplete', 1)
+        }
       }
     },
     computed: {
@@ -1049,7 +1044,8 @@ export default {
         'stockSelectedData',
         'category_select',
         'orderTempItem',
-        'neckSelectedData'
+        'neckSelectedData',
+        'spare_complete'
       ]),
       kijiObjectActive: function(){
         if(this.kijiData.length && this.kijiData.findIndex((item) => item.id === this.kijiActive) !== -1){
@@ -1368,6 +1364,33 @@ export default {
         } else{
           return false
         }
+      },
+      // check design selected all
+      designDataSelectedStatus: function(){
+        let ret = []
+        if(this.designData){
+          ret = this.designData.map(Design => {
+            let sortOption = this.allOptionSelectedCheck.filter(item => 
+              item.design_id == Design.design_id
+              && item.item_id == Design.item_id
+            )
+            let sortSize = this.sizeSelectedCheck.filter(item => 
+              item.design_id == Design.design_id
+              && item.item_id == Design.item_id
+            )
+            let sortCorrect = this.allCorrectSelectedCheck.filter(item => 
+              item.design_id == Design.design_id
+              && item.item_id == Design.item_id
+            )
+            if(sortOption.length == 0 && sortSize.length == 0 && sortCorrect.length == 0){
+              Design.status = 1
+            } else{
+              Design.status = 0
+            }
+            return Design
+          })
+        }
+        return ret
       }
     },
     updated: function () {

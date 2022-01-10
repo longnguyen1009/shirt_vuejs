@@ -10,7 +10,7 @@
                   <img :src="kiji_img_path + getKijiObj(Item.product_id).img" @error="imgError" alt="">
                 </span>
                 <div class="simu-confirm-kiji-detail d-flex flex-column justify-content-between">
-                  <p class="">
+                  <p class="font-poppins font-medium">
                     <span class="simu-confirm-kiji-code">{{getKijiObj(Item.product_id).code}}</span><br>
                     <span class="simu-confirm-kiji-name" v-if="getKijiObj(Item.product_id).name">{{getKijiObj(Item.product_id).name}}<br></span>
                     <span class="simu-confirm-kiji-name" v-if="!getKijiObj(Item.product_id).name">{{getKijiObj(Item.product_id).sub_name}}<br></span>
@@ -20,15 +20,15 @@
               </div>
               <div class="simu-confirm-card-bl">
                 <span class="simu-confirm-label">単価</span>
-                <span class="simu-confirm-card-value">{{moneyTypeShow02(Item.price)}}</span>
+                <span class="simu-confirm-card-value font-poppins font-medium">{{moneyTypeShow02(Item.price)}}</span>
               </div>
               <div class="simu-confirm-card-bl">
                 <span class="simu-confirm-label">数量</span>
-                <span class="simu-confirm-card-value">{{Item.quantity}}</span>
+                <span class="simu-confirm-card-value font-poppins font-medium">{{Item.quantity}}</span>
               </div>
               <div class="simu-confirm-card-bl">
                 <span class="simu-confirm-label">小計</span>
-                <span class="simu-confirm-card-value">{{moneyTypeShow02(Item.price * Item.quantity)}}</span>
+                <span class="simu-confirm-card-value font-poppins font-medium">{{moneyTypeShow02(Item.price * Item.quantity)}}</span>
               </div>
             </div>
           </div>
@@ -38,8 +38,8 @@
               </div>
               <div class="simu-confirm-payment-right d-flex flex-column justify-content-between">
                 <span class="simu-confirm-label">商品価格(税込)</span>
-                <span class="simu-confirm-payment-price">{{moneyTypeShow02(orderData.payment)}}</span>
-                <ul class="simu-confirm-label" v-if="isStaff">
+                <span class="simu-confirm-payment-price font-poppins font-medium">{{moneyTypeShow02(orderData.payment)}}</span>
+                <ul class="simu-confirm-label font-poppins" v-if="isStaff">
                   <li v-for="(OrderItem, id) in orderData.orderitem" :key="id">{{parseInt(OrderItem.cost ? OrderItem.cost : 0)}}</li>
                 </ul>
               </div>
@@ -51,7 +51,7 @@
       </div>
     </div>
     <div class="simu-comfirm-nav d-flex align-items-center justify-content-center">
-      <button class="simu-common-btn btnSize02" @click="goToTop">TOP</button>
+      <button class="simu-common-btn btnSize02 font-poppins" @click="goToTop">TOP</button>
     </div>
 
     <!-- Modal -->
@@ -188,7 +188,7 @@ export default {
     },
     //1129-273-0010 -> A112927300100000A
     fomatPoCode: function(pocode){
-      return 'A' + pocode.replaceAll('-', '') + '0000' + 'A';
+      return 'A' + pocode.replaceAll('-', '') + '9100' + 'A';
     },
     fomatPayment: function(payment){
       let paymentTemp = payment.toString()

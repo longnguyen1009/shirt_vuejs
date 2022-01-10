@@ -54,7 +54,10 @@
                       <video id="tozCameraVideo" playsinline="" autoplay width="100%" height="100%"></video>
                       <div class="tozCameraView_button">
                           <!-- <button  id="closeCamera" style="height: 50px;width: 30%;max-width: 100px" @click="OnePrevStep">キャンセル</button> -->
-                          <button id="captureImage"><img :src="main_path + '/html/user_data/assets/img/common/take_camera_btn.png'" alt=""></button>
+                          <button id="captureImage">
+                            <span class="circle"></span>
+                            <span class="ring"></span>
+                          </button>
                           <span class="hidden_button" id="nexttostep2" @click="OneNextStep(2)">Next to step 2</span>
                           <span class="hidden_button" id="nexttostep3" @click="OneNextStep(3)">Next to step 3</span>
                           <span class="hidden_button" id="nexttostep4" @click="OneNextStep(4)">Next to step 4</span>

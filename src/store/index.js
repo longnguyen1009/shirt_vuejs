@@ -23,23 +23,23 @@ export default new Vuex.Store({
     page: 1, //page 2 is model page
 
     //画像、URL
-    // main_path: 'https://stg-personalorder.united-arrows.co.jp/',
-    // simu_img_path: "/html/upload/simu_model/",
-    // style_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
-    // model_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
-    // kiji_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
-    // option_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
-    // correct_detail_img_path: "/html/upload/correct_detail/",
-    // option_shirt_svg_path: "/html/upload/simu_model/option_shirt/",
-
-    main_path: 'https://ua.coremobile.win/',
+    main_path: 'https://stg-personalorder.united-arrows.co.jp/',
     simu_img_path: "/html/upload/simu_model/",
-    style_img_path: "/html/upload/save_image/",
-    model_img_path: "/html/upload/save_image/",
-    kiji_img_path: "/html/upload/save_image/",
-    option_img_path: "/html/upload/save_image/",
+    style_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
+    model_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
+    kiji_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
+    option_img_path: "https://ua-images.s3.ap-northeast-1.amazonaws.com/upload/save_image/",
     correct_detail_img_path: "/html/upload/correct_detail/",
     option_shirt_svg_path: "/html/upload/simu_model/option_shirt/",
+
+    // main_path: 'https://ua.coremobile.win/',
+    // simu_img_path: "/html/upload/simu_model/",
+    // style_img_path: "/html/upload/save_image/",
+    // model_img_path: "/html/upload/save_image/",
+    // kiji_img_path: "/html/upload/save_image/",
+    // option_img_path: "/html/upload/save_image/",
+    // correct_detail_img_path: "/html/upload/correct_detail/",
+    // option_shirt_svg_path: "/html/upload/simu_model/option_shirt/",
 
     // 全てスタイル情報
     styleData: [], //[{id, name, brand, detail, img, model[], product_price}]
@@ -150,7 +150,8 @@ export default new Vuex.Store({
     stock_old_id: null,
 
     //パンツとスペアパンツコービーする
-    
+    spare_complete: 0
+
   },
   getters: {
     //step
@@ -217,7 +218,9 @@ export default new Vuex.Store({
 
     neckSelectedData: state => state.neckSelectedData,
     measureData: state => state.measureData,
-    stock_old_id: state => state.stock_old_id
+    stock_old_id: state => state.stock_old_id,
+
+    spare_complete: state => state.spare_complete
   },
   mutations: {
     changeStep(state, newStep){
@@ -301,10 +304,10 @@ export default new Vuex.Store({
 
         //check is pant and copy to spare pant
         let itemDataTemp = state.itemData.find(item => item.orderId == optionData.orderId)
-        if(itemDataTemp){
+        if(state.step == 2 && itemDataTemp){
           let designDataTemp = itemDataTemp.design
           let designNowTemp = designDataTemp.find(item => item.item_id == optionData.item_id && item.design_id == optionData.design_id)
-          if(designNowTemp && designNowTemp.is_pant == true){
+          if(designNowTemp && designNowTemp.is_pant == true && !designNowTemp.is_spare_pant && !state.spare_complete){
             let designSpareTemp = designDataTemp.find(item => item.design_id == optionData.design_id && item.is_spare_pant)
             if(designSpareTemp){
               let optionDataCopy = {...optionData, item_id: designSpareTemp.item_id}
@@ -312,6 +315,23 @@ export default new Vuex.Store({
             }
           }
         }
+      }
+      //Clone the array to trigger a UI update.
+      state.optionSelectedData = [...state.optionSelectedData]
+    },
+
+    //remove 1 option selected data
+    removeOptionData(state, optionData){
+      const existOptionIndex = state.optionSelectedData.findIndex(
+        (item) => (
+          item.orderId == optionData.orderId
+          && item.combine_id == optionData.combine_id
+          && item.item_id == optionData.item_id
+          && item.design_id == optionData.design_id
+          && item.parent_id == optionData.parent_id
+        ))
+      if(existOptionIndex !== -1){
+        state.optionSelectedData.splice(existOptionIndex, 1)
       }
       //Clone the array to trigger a UI update.
       state.optionSelectedData = [...state.optionSelectedData]
@@ -457,10 +477,14 @@ export default new Vuex.Store({
 
       state.orderTempItem = [...state.orderTempItem]
     },
+    //after get ordertemp, update ordertemp data
     changeOrderTempItem(state, arrOrderTemp){
+      //remove order temp id = 0
       state.orderTempItem = state.orderTempItem.filter(item => item.id != 0)
+      //update all ordertemp
       arrOrderTemp.forEach(element => {
         const existOrderTemp = state.orderTempItem.findIndex(item => item.id == element.id)
+        //if ordertempItem is new, add new ordertempItem to arr ordertemp 
         if(existOrderTemp == -1){
           element.category_select = Number(element.category_select)
           element.style = Number(element.style)
@@ -755,6 +779,9 @@ export default new Vuex.Store({
     },
     updateStockOldId(state, value){
       state.stock_old_id = value
+    },
+    changeSpareComplete(state, value){
+        state.spare_complete = value
     }
   },
   actions: {
@@ -919,6 +946,12 @@ export default new Vuex.Store({
     },
     handleChangeKijiFirstLoad(context){
       context.commit('changeFirstShowKiji')
+    },
+    handleRemoveOptionData(context, optionData){
+      context.commit('removeOptionData', optionData)
+    },
+    handleChangeSpareComplete(context, value){
+      context.commit('changeSpareComplete', value)
     }
   }
 })

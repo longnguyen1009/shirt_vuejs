@@ -35,6 +35,12 @@ export default {
     touchEnd: function(e){
       $(e.target).removeClass('touch')
     },
+    //round(12345.6789, 2) = 12345.68
+    //round(12345.6789, 1) = 12345.7
+    round(value, precision) {
+      var multiplier = Math.pow(10, precision || 0);
+      return Math.round(value * multiplier) / multiplier;
+    }
   },
   computed: {
     ...mapGetters([
