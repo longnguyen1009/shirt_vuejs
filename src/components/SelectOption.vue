@@ -138,7 +138,10 @@ export default {
       optionCustomNameText: '',
 
       arrJacketCustomNameFixed: [35, 43, 36], //35: Jacketの刺繍ネーム、43: Jacketの刺繍ネームの無し、36: Jacketの刺繍糸色ID
-      arrShirtCustomNameFixed: [98, 163, 36, 99], //98: Shirtの刺繍ネーム、163: Shirtの刺繍ネームの無し、36: Shirtの刺繍糸色ID, 99: Shirtの刺繍位置
+      //Demo 
+      //arrShirtCustomNameFixed: [98, 163, 36, 99], //98: Shirtの刺繍ネーム、163: Shirtの刺繍ネームの無し、36: Shirtの刺繍糸色ID, 99: Shirtの刺繍位置
+      //Staging
+      arrShirtCustomNameFixed: [98, 184, 100, 99],
       optionCustomNameID: 35, //刺繍ネームID
       optionCustomNameNot: 43, //刺繍ネームの無
       optionCustomNameSubParent: 36, //刺繍糸色ID
